@@ -7,7 +7,7 @@ def main():
     # Create publisher
     pub = rospy.Publisher('localization', Map, queue_size=10)
 
-    # Initialize publisher node
+    # Initialize node
     rospy.init_node('localization_node', anonymous=True)
 
 if __name__ == '__main__':

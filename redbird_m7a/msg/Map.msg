@@ -1,2 +1,2 @@
-GroundRobotPosition[] target_robots
-GroundRobotPosition[] obstacle_robots
+GroundRobotPosition[10] target_robots
+GroundRobotPosition[4] obstacle_robots
