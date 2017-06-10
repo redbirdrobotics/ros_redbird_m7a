@@ -3,7 +3,7 @@
   <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" />
 
   <!-- Ground Machine -->
-  <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="true" />
+  <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="false" env-loader="~/catkin_ws/devel/env.sh" />
 
   <!-- Hande MAVROS launch -->
   <arg name="fcu_url" default="/dev/ttyUSB0:921600" />
@@ -23,11 +23,11 @@
   </include>
 
   <!-- Control Panel -->
-  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a" type="rcp_node.py" />
+  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a" type="rcp_node.py" output="screen" />
 
   <!-- Localization -->
-  <node machine="redbird-vehicle" name="localization" pkg="redbird_m7a" type="localization_node.py" />
+  <node name="localization" pkg="redbird_m7a" type="localization_node.py" output="screen" />
 
   <!-- Simulation -->
-  <node machine="redbird-vehicle" name="Simulation" pkg="redbird_m7a" type="simulation_node.py" />
+  <node name="simulation" pkg="redbird_m7a" type="simulation_node.py" output="screen" />
 </launch>

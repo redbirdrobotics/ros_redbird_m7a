@@ -10,6 +10,9 @@ def main():
     # Initialize node
     rospy.init_node('localization_node', anonymous=True)
 
+    # Test log
+    rospy.loginfo("Localization started!")
+
 if __name__ == '__main__':
     try:
         main()
