@@ -1,9 +1,9 @@
 <launch>
   <!-- Master Machine -->
-  <machine name="robot" address="192.168.0.101" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" user="redbird" default="true" />
+  <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" />
 
   <!-- Ground Machine -->
-  <machine name="ground" address="192.168.0.102" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" user="redbird" default="true" />
+  <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="true" />
 
   <!-- Hande MAVROS launch -->
   <arg name="fcu_url" default="/dev/ttyUSB0:921600" />
@@ -23,11 +23,11 @@
   </include>
 
   <!-- Control Panel -->
-  <node machine="ground" name="rcp" pkg="redbird_m7a" type="rcp_node" />
+  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a" type="rcp_node.py" />
 
   <!-- Localization -->
-  <node machine="robot" name="localization" pkg="redbird_m7a" type="localization_node" />
+  <node machine="redbird-vehicle" name="localization" pkg="redbird_m7a" type="localization_node.py" />
 
   <!-- Simulation -->
-  <node machine="robot" name="Simulation" pkg="redbird_m7a" type="simulation_node" />
+  <node machine="redbird-vehicle" name="Simulation" pkg="redbird_m7a" type="simulation_node.py" />
 </launch>
