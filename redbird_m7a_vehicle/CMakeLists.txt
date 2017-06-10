@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(redbird_m7a)
+project(redbird_m7a_vehicle)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -107,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES redbird_m7a
+#  LIBRARIES redbird_m7a_vehicle
    CATKIN_DEPENDS mavros mavros_extras roscpp rospy std_msgs redbird_m7a_msgs
 #  DEPENDS system_lib
 )
@@ -125,7 +125,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/redbird_m7a.cpp
+#   src/${PROJECT_NAME}/redbird_m7a_vehicle.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -193,7 +193,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_redbird_m7a.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_redbird_m7a_vehicle.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

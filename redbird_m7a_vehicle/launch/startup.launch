@@ -23,11 +23,11 @@
   </include>
 
   <!-- Control Panel -->
-  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a" type="rcp_node.py" output="screen" />
+  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a_vehicle" type="rcp_node.py" output="screen" />
 
   <!-- Localization -->
-  <node name="localization" pkg="redbird_m7a" type="localization_node.py" output="screen" />
+  <node name="localization" pkg="redbird_m7a_vehicle" type="localization_node.py" output="screen" />
 
   <!-- Simulation -->
-  <node name="simulation" pkg="redbird_m7a" type="simulation_node.py" output="screen" />
+  <node name="simulation" pkg="redbird_m7a_vehicle" type="simulation_node.py" output="screen" />
 </launch>
