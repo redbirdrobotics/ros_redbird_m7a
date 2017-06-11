@@ -11,7 +11,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped
 class Vehicle(object):
     def __init__(self):
         # Set rate
-        self._rate = rospy.rate(10)
+        self._rate = rospy.Rate(10)
 
         # Initialize variables
         self._state_topic = State()

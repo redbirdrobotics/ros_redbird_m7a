@@ -30,4 +30,7 @@
 
   <!-- Simulation -->
   <node name="simulation" pkg="redbird_m7a_vehicle" type="simulation_node.py" output="screen" />
+
+  <!-- Flight -->
+  <node name="flight" pkg="redbird_m7a_vehicle" type="flight_node.py" output="screen" />
 </launch>

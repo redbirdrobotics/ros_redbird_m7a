@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import rospy
-from redbird_m7a.msg
-from utils import Vehicle
+import tim
+eubfrom utils import Vehicle
 
 class Flight(object):
     def __init__(self):
@@ -15,7 +15,6 @@ class Flight(object):
     def start(self):
         while not rospy.is_shutdown():
             print self._vehicle.get_velocity()
-
             time.sleep(1)
 
 if __name__ == '__main__':
