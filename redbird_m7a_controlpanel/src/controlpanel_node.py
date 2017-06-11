@@ -5,7 +5,8 @@ import wx
 import random
 import rospy
 import time
-from geometry_msgs.msg import PoseStamped
+import math
+from geometry_msgs.msg import PoseStamped, TwistStamped
 
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
@@ -166,7 +167,8 @@ class FlightInfoPanel(wx.Panel):
         print "init FlightInfoPanel"
 
 	rospy.init_node("rcp", anonymous=True)
-	subscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped, self.updateVelocity)
+        velocitySubscriber = rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, self.updateVelocity)
+	altitudeSubscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped, self.updateAltitude)
 
 
         self.SetBackgroundColour('white')
@@ -231,11 +233,14 @@ class FlightInfoPanel(wx.Panel):
         self.SetSizerAndFit(box)
 
     def updateVelocity(self, msg):
-        wx.CallAfter(self.liveVelocity.SetLabel, (str(msg.pose.position.x) + ""))
-	print "Inside updateVelocity"
+        xVelocity = msg.twist.linear.x
+        yVelocity = msg.twist.linear.y
+        zVelocity = msg.twist.linear.z
+        velocity = math.sqrt(math.pow(xVelocity, 2) + math.pow(yVelocity, 2) + math.pow(zVelocity, 2))
+        wx.CallAfter(self.liveVelocity.SetLabel, (str(velocity) + ""))
 
-    def updateAltitude(self, event):
-        self.liveAltitude.SetLabel(str(random.randint(1, 40)) + " meters")
+    def updateAltitude(self, msg):
+        wx.CallAfter(self.liveAltitude.SetLabel, (str(msg.pose.position.z) + ""))
 
     def updateYaw(self, event):
         self.liveYaw.SetLabel(str(random.randint(1, 40)) + " deg/sec")
