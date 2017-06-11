@@ -82,6 +82,7 @@ class RedbirdPanel(wx.Panel):
         self.bmp = wx.Bitmap("redbirdlogo.png")
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.onEraseBackground)
 
+    # This properly updates the background when the size of the window changes
     def onEraseBackground(self, evt):
         dc = evt.GetDC()
 
@@ -232,6 +233,7 @@ class FlightInfoPanel(wx.Panel):
         box.AddGrowableRow(box.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(box)
 
+    # Referece http://wiki.ros.org/mavros for what each msg object is returning
     def updateVelocity(self, msg):
         xVelocity = msg.twist.linear.x
         yVelocity = msg.twist.linear.y
