@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import rospy
-import tim
-eubfrom utils import Vehicle
+import time
+from utils import Vehicle
 
 class Flight(object):
     def __init__(self):
