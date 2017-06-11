@@ -23,7 +23,7 @@
   </include>
 
   <!-- Control Panel -->
-  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a_vehicle" type="rcp_node.py" output="screen" />
+  <node machine="redbird-pi" name="rcp" pkg="redbird_m7a_controlpanel" type="controlpanel_node.py" />
 
   <!-- Localization -->
   <node name="localization" pkg="redbird_m7a_vehicle" type="localization_node.py" output="screen" />
