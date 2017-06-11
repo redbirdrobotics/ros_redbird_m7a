@@ -4,6 +4,8 @@
 import wx
 import random
 import rospy
+import time
+from geometry_msgs.msg import PoseStamped
 
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
@@ -163,28 +165,15 @@ class FlightInfoPanel(wx.Panel):
         super(FlightInfoPanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init FlightInfoPanel"
 
+	rospy.init_node("rcp", anonymous=True)
+	subscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped, self.updateVelocity)
+
+
         self.SetBackgroundColour('white')
         self.SetFont(wx.Font(pointSize=14, family=wx.ROMAN, style=wx.NORMAL, weight=wx.FONTWEIGHT_NORMAL, underline=False))
         # Box Sizer to store Flight Info in the Flight Info Panel
         box = wx.GridBagSizer(5, 5)
-
-        # Set timers on each so they update continuously
-        self.velocityTimer = wx.Timer(self)
-        self.altitudeTimer = wx.Timer(self)
-        self.yawTimer = wx.Timer(self)
-        self.pitchTimer = wx.Timer(self)
-        self.rollTimer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.updateVelocity, self.velocityTimer)
-        self.Bind(wx.EVT_TIMER, self.updateAltitude, self.altitudeTimer)
-        self.Bind(wx.EVT_TIMER, self.updateYaw, self.yawTimer)
-        self.Bind(wx.EVT_TIMER, self.updatePitch, self.pitchTimer)
-        self.Bind(wx.EVT_TIMER, self.updateRoll, self.rollTimer)
-        self.velocityTimer.Start(1000)
-        self.altitudeTimer.Start(1000)
-        self.yawTimer.Start(1000)
-        self.pitchTimer.Start(1000)
-        self.rollTimer.Start(1000)
-
+        
         # Dividing lines to make the Flight Info Panel prettier
         line = wx.StaticLine(self)
         line2 = wx.StaticLine(self)
@@ -241,8 +230,10 @@ class FlightInfoPanel(wx.Panel):
         box.AddGrowableRow(box.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(box)
 
-    def updateVelocity(self, event):
-        self.liveVelocity.SetLabel(str(random.randint(1, 40)) + " m/s")
+    def updateVelocity(self, msg):
+        self.liveVelocity.SetLabel(str(msg.pose.position.x) + "")
+	print "Inside updateVelocity"
+	time.sleep(1)
 
     def updateAltitude(self, event):
         self.liveAltitude.SetLabel(str(random.randint(1, 40)) + " meters")
@@ -265,8 +256,6 @@ class App(wx.App):
         self.frame = RedbirdFrame(None)  # pass parent=None into Frame
         self.SetTopWindow(self.frame)
         self.frame.Show(True)
-
-        # publisher = rospy.Publisher('mavros/local_position/velocity', String, updateVelocity)
 
         return True  # True indicates that processing should continue after initialization
 
