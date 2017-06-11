@@ -228,6 +228,7 @@ class FlightInfoPanel(wx.Panel):
 
         box.Add(line5, pos=(9, 0), span=(1, 2), flag=wx.EXPAND)
 
+        # Ensures proper sizing
         box.AddGrowableCol(box.GetEffectiveColsCount() - 1)
         box.AddGrowableRow(box.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(box)
@@ -239,19 +240,19 @@ class FlightInfoPanel(wx.Panel):
         yVelocity = msg.twist.linear.y
         zVelocity = msg.twist.linear.z
         velocity = math.sqrt(math.pow(xVelocity, 2) + math.pow(yVelocity, 2) + math.pow(zVelocity, 2))
-        wx.CallAfter(self.liveVelocity.SetLabel, str(velocity))
+        wx.CallAfter(self.liveVelocity.SetLabel, str("%.3f" % velocity) + " m/s")
 
     def updateAltitudeAndAttitude(self, msg):
         # Updates altitude
-        wx.CallAfter(self.liveAltitude.SetLabel, str(msg.pose.position.z))
+        wx.CallAfter(self.liveAltitude.SetLabel, str("%.3f" % msg.pose.position.z) + " m")
 
         # Updates attitude (yaw, pitch, and roll(
-        wx.CallAfter(self.liveYaw.SetLabel, str(msg.pose.orientation.z))  # Yaw
-        wx.CallAfter(self.livePitch.SetLabel, str(msg.pose.orientation.y))  # Pitch
-        wx.CallAfter(self.liveRoll.SetLabel, str(msg.pose.orientation.x))  # Roll
+        wx.CallAfter(self.liveYaw.SetLabel, str("%.3f" % msg.pose.orientation.z) + " deg")  # Yaw
+        wx.CallAfter(self.livePitch.SetLabel, str("%.3f" % msg.pose.orientation.y) + " deg")  # Pitch
+        wx.CallAfter(self.liveRoll.SetLabel, str("%.3f" % msg.pose.orientation.x) + " deg")  # Roll
 
 #    def updateYaw(self, event):
-#        self.liveYaw.SetLabel(str(random.randint(1, 40)) + " deg/sec")
+#        self.liveYaw.SetLabel(str(random.randint(1, 40)) + " degrees")
 #
 #    def updatePitch(self, event):
 #        self.livePitch.SetLabel(str(random.randint(1, 40)) + " degrees")
