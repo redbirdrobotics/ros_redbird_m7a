@@ -4,7 +4,6 @@
 import wx
 import random
 
-
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
 
