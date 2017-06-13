@@ -17,7 +17,7 @@ class Flight(object):
 		firstTime = True
 		numRobots = 14
 		priority = None
-		attempts = 
+		attempts = 0
 		successful = False
 
         # Initialize vehicle for tracking
