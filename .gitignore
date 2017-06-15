@@ -1,4 +1,9 @@
 *.json
 mavlink/
 mavros/
-.ros*
+.ros
+.suo
+.sln
+/__pycache__
+/.vs
+.pyproj*
