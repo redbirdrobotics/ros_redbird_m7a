@@ -93,7 +93,7 @@ if __name__ == '__main__':
         # Initialize node
         node = Flight()
 
-        # Start node
+        # Start node,
         node.start()
     except rospy.ROSInterruptException:
         pass
