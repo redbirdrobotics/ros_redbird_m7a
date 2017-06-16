@@ -26,7 +26,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
                self.deltaX = self.deltaX * -1
 
-               self.deltay = self.deltay * -1
+               self.deltay = self.deltay * -1 
 
                sleep(1)
 

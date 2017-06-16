@@ -1,5 +1,6 @@
 from Sim_Timer import Sim_Timer
 from Target_Robot import Target_Robot
+from Obstacle_Robot import Obstacle_Robots
 
 class Simulation(object):
     """description of class"""
