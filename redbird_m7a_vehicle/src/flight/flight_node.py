@@ -15,12 +15,14 @@ class Flight(object):
         self._loc_map = Map()
         self._sim_map = Map()
         self._firstTime = True
-        self._numRobots = 14
+        self._numGroundRobots = 10
         self._priorityRobot = None
         self._attempts = 0
         self._successful = False
         self._centerX = 0
         self._centerY = 0
+        self._landX = 0
+        self._landY = 0
         self._startTime = time.time()
 
         # Initialize vehicle for tracking
@@ -41,9 +43,9 @@ class Flight(object):
         
     def getPriorityRobotByConfidence(self):
         tempConfidence = -1.0
-        tempPriority = self._sim_map.target_robots[0]
+        tempPriority = None
         for robot in self._sim_map.target_robots:
-            if (robot.confidence > tempConfidence):
+            if (robot.confidence > tempConfidence and self._groundRobotArray.__contains__(robot)):
                 tempPriority = robot
                 tempConfidence = robot.confidence
         return tempPriority    
@@ -56,12 +58,13 @@ class Flight(object):
         return z   
         
     def robotOrientedCorrectly(self):
-        #
-        return True
+        print("placeholder")
         
     def flyTo(self, x, y, z):
-        #fly to a location
-        return
+        print("placeholder")
+        
+    def orientGroundRobot(self, robot):
+        print("placeholder")
     
     def start(self):
         while not rospy.is_shutdown():
@@ -71,41 +74,41 @@ class Flight(object):
                 #initialize system
                 self._groundRobotArray = self._sim_map.target_robots
                 self.flyTo(self._centerX, self._centerY, 2.5)
-                rospy.loginfo(self.getFlightTag() + "Drone has reached the center.")
+                rospy.loginfo(self.getFlightTag(self) + "Drone has reached the center.")
                 self._firstTime = False
             
-            if (self._numRobots > 0):
-                self._priorityRobot = self._getPriorityRobotByConfidence()
-                self._attempts = 0
+            if (self._numGroundRobots > 0):
+                self._priorityRobot = self.getPriorityRobotByConfidence(self)
                 if (self._priorityRobot.out_of_bounds == True):
-                        self._numRobots-=1
+                        self._numGroundRobots-=1
                         self._groundRobotArray.remove(self._priorityRobot)
                 else:
                     while (self._priorityRobot.out_of_bounds == False):
-                        while (self.distanceToGroundRobot(self._priorityRobot) >= 0.5):
-                            self.flyTo(self._priorityRobot.x, self._priorityRobot.y, 2.5)
+                        while (self.distanceToGroundRobot(self, self._priorityRobot) >= 0.5):
+                            self.flyTo(self, self._priorityRobot.x, self._priorityRobot.y, 2.5)
                         if (self._priorityRobot.out_of_bounds == True):
-                            self._numRobots-=1
+                            self._numGroundRobots-=1
                             self._groundRobotArray.remove(self._priorityRobot)
                             break
                         else:
-                            if (self.robotOrientedCorrectly(self._priorityRobot) == True):
-                                # do nothing
-                                print("placeholder")
+                            if (self.robotOrientedCorrectly(self, self._priorityRobot) == True):
+                                pass
                             else:
-                                #
-                                print("placeholder")
+                                self.orientGroundRobot(self, self._priorityRobot)
                                 
-                if (self.successful == True):
-                    self._numRobots-=1
-                    self._groundRobotArray.remove(self._priorityRobot)
+                    if (self.successful == True):
+                        self._numGroundRobots-=1
+                        self._groundRobotArray.remove(self._priorityRobot)
+            else:
+                rospy.loginfo(self.getFlightTag() + "There are no more ground robots left.")
+                return
 
 if __name__ == '__main__':
     try:
         # Initialize node
         node = Flight()
 
-        # Start node,
+        # Start node
         node.start()
     except rospy.ROSInterruptException:
         pass
