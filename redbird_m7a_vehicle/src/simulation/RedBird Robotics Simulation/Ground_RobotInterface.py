@@ -26,6 +26,7 @@ class Ground_Robot_Interface(Thread, object):
         self.collision = False
 
         self.pError = 0.0 
+        self.pErrorV = 0.0
         
     def get_coordinates(self):
         return (self.x, self.y)

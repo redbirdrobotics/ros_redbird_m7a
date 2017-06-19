@@ -105,11 +105,36 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         meanX = sumX/counter
         meanY = sumY/counter"""
+    
+    def change_X_data(self, x):
+        self.x = x
 
-    def check_error(self, x, y, vecocity):
-        pErrorX = ((self.x - x) /  x) * 100
-        pErrorX = ((self.x - y) /  y) * 100 
+    def change_Y_data(self, y):
+        self.y = y
 
-        self.pError = 1 - ((pErrorX + pErrorY) / 2)
+    def change_VX_data(self, velocityX, velocityY):
+        self.deltaX = velocityX
 
-        return self.pError
+    def change_VY_data(self, velocityY):
+        self.deltaY = velocityY
+
+    def check_error(self, x, y, velocityX, velocityY):
+        pErrorX = ((self.x - x) /  x)
+        
+        if not (pErrorX <= 0.001):
+            self.change_X_data(x)
+
+        pErrorY = ((self.y - y) /  y) 
+
+        if not (pErrorY <= 0.001):
+            self.change_Y_data(y)
+
+        pErrorVX = ((self.deltaX - velocityX) / velocityX)
+
+        if not (pErrorVX<= 0.001):
+            self.change_VX_data(velocityX)
+
+        pErrorVY = ((self.deltaY - velocityY) / velocityY)
+
+        if not (pErrorVY<= 0.001):
+            self.change_VY_data(velocityY)
