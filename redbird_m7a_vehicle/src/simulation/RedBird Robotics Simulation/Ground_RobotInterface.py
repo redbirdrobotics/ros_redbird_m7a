@@ -1,4 +1,3 @@
-from Sim_Timer import Sim_Timer
 from threading import Thread
 from random import randint
 from math import tan, pow, sqrt
@@ -6,7 +5,7 @@ from math import tan, pow, sqrt
 class Ground_Robot_Interface(Thread, object):
     """description of class"""
     global iterations
-    iterations = 60
+    iterations = 1 / 60
 
     def __init__(self, x, y, ID, color):
         self.x = x
@@ -14,9 +13,14 @@ class Ground_Robot_Interface(Thread, object):
         self.ID = ID
         self.color = color
 
-        self.deltaX = randint(-33, 33) / 100
-        self.deltay = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
-        self.angle = tan((self.deltay / self.deltaX))
+        self.deltaX = ((randint(-33, 33)) / 100 )
+
+        self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
+        
+        if(self.deltaX == 0):
+            self.angle = tan((self.deltaY / self.deltaX))
+        else:
+            self.angle = 90
 
         self.thread_cancelled = False
         self.collision = False
@@ -27,7 +31,7 @@ class Ground_Robot_Interface(Thread, object):
         return (self.x, self.y)
 
     def get_id(self):
-        return self.ID
+        return self.ID 
 
     def set_coordinates(self, x, y):
         self.x = x

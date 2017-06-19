@@ -19,7 +19,7 @@ def main():
 
     while not rospy.is_shutdown():
         rospy.loginfo(Simulation.target_robot)
-        rospy.loginfo()
+        rospy.loginfo(Simulation.obstacle_robot)
         time.sleep(1)
 
 if __name__ == '__main__':

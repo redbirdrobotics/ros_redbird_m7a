@@ -22,4 +22,4 @@ def listener():
     rospy.spin()
 
 if __name__ == '__main__':
-    listener()
+    listener() 

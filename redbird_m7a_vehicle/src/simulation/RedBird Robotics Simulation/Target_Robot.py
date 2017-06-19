@@ -1,11 +1,14 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
-from Sim_Timer import Sim_Timer
+from Sim_Timer import Sim_Timer, PAUSED
 from time import sleep
 
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
+
     def __init__(self, x, y, id, color, timer):
-        self.timer = timer = Sim_Timer() 
+        timer = Sim_Timer()  
+
+        self.Timer = timer
 
         return super().__init__(x, y, id, color)
 
@@ -20,25 +23,21 @@ class Target_Robot(Ground_Robot_Interface, object):
         return self.y
      
     def update_movement(self):
-        while not self.timer.PAUSED:
+        self.current_pos = (self.x, self.y , self.ID)
+        print(self.current_pos)
 
-            if(self.collision == True):
+        if(self.collision == True):
+            self.deltaX = self.deltaX * -1
 
-               self.deltaX = self.deltaX * -1
+            self.deltaY = self.deltay * -1 
 
-               self.deltay = self.deltay * -1 
+            sleep(1)
 
-               sleep(1)
-
-               break
-
+        else:
             self.update_posX()
             self.update_posY()
 
-            self.current_pos = (self.x, self.y , self.ID)
-            print(self.current_pos)
-
-            super().set_coordinates(self.x, self.y) 
+        #super().set_coordinates(self.x, self.y) 
 
     def check_collisions(self, target_robot):
         min_num = 0
@@ -74,14 +73,14 @@ class Target_Robot(Ground_Robot_Interface, object):
              self.button_pushed = True
 
     def run(self):
-        current_time = self.timer.get_current_timer()
+        global PAUSED
+        start_time = self.Timer.get_current_timer()
+        current_time = 0
 
-        while not self.timer.PAUSED and current_time < 20:
+        while not PAUSED == True and current_time < 20:
             self.update_movement()
 
-            self.check_collision()
-
-            current_time = self.timer.get_current_timer() - current_time
+            current_time = self.Timer.get_current_timer() - start_time
 
             sleep(1)
 
@@ -95,7 +94,7 @@ class Target_Robot(Ground_Robot_Interface, object):
                 self.deltaY = velocity_vector[1]
                 
 
-    def confidenceInterval(self, XY):
+    """def confidenceInterval(self, XY):
         counter = 0
         sum = 0
 
@@ -105,7 +104,7 @@ class Target_Robot(Ground_Robot_Interface, object):
             counter += 1
 
         meanX = sumX/counter
-        meanY = sumY/counter
+        meanY = sumY/counter"""
 
     def check_error(self, x, y, vecocity):
         pErrorX = ((self.x - x) /  x) * 100
