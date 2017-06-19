@@ -3,6 +3,7 @@
 """Redbird Robotics GUI"""
 import wx
 import random
+import rospy
 
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
@@ -12,7 +13,7 @@ class RedbirdFrame(wx.Frame):
         # This properly "destroys" the GUI when closed
         self.Bind(wx.EVT_CLOSE, self.destroyWindow)
 
-        # Redbird icone for title bar
+        # Redbird icon for title bar
         ico = wx.Icon('redbird.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(ico)
 
@@ -264,6 +265,8 @@ class App(wx.App):
         self.frame = RedbirdFrame(None)  # pass parent=None into Frame
         self.SetTopWindow(self.frame)
         self.frame.Show(True)
+
+        # publisher = rospy.Publisher('mavros/local_position/velocity', String, updateVelocity)
 
         return True  # True indicates that processing should continue after initialization
 
