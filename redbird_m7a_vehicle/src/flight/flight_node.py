@@ -9,91 +9,184 @@ class Flight(object):
     def __init__(self):
         # Initialize node
         rospy.init_node('flight_node', anonymous=True)
-		
-		# Initialize variables
-		robotArray = list()
-		self._loc_map = Map()
-		self._sim_map = Map()
-		firstTime = True
-		numRobots = 14
-		priority = None
-		attempts = 0
-		successful = False
+        
+        # Initialize variables
+        self._groundRobotArray = list()
+        self._loc_map = Map()
+        self._sim_map = Map()
+        self._firstTime = True
+        self._numGroundRobots = 10
+        self._priorityRobot = None
+        self._attempts = 0
+        self._successful = False
+        self._centerX = 0
+        self._centerY = 0
+        self._landX = 0
+        self._landY = 0
+<<<<<<< HEAD
+        self._robotFacingGoalAtStart = 5
+        self._minDroneToRobotDistance = 0.5
+        self._lastLandSuccesful = False
+=======
+>>>>>>> 9db3415025ec504296ef392b528368a4e7635588
+        self._startTime = time.time()
 
         # Initialize vehicle for tracking
         self._vehicle = Vehicle()
-		
-		# Create subscribers
-		self._loc_sub = rospy.Subscriber("localization", Map, self.update_loc_map)
-		self._loc_sub = rospy.Subscriber("simulation", Map, self.update_sim_map)
+        
+        # Create subscribers
+        self._loc_sub = rospy.Subscriber("localization", Map, self.update_loc_map)
+        self._sim_sub = rospy.Subscriber("simulation", Map, self.update_sim_map)
 
-	def update_loc_map(self, data):
-		self._loc_map = data
-		
-	def update_sim_map(self, data):
-		self._sim_map = data
-		
-	def getPriorityByConfidence():
-		tempConfidence = -1.0
-		tempPriority = self._sim_map.target_robots[0]
-		for robot in self._sim_map.target_robots:
-			if (robot.confidence > tempConfidence):
-				tempPriority = robot
-				tempConfidence = robot.confidence
-		return tempPriority	
+    def getFlightTag(self):
+        return "[flight_node] "
+    
+    def update_loc_map(self, data):
+        self._loc_map = data
+        
+    def update_sim_map(self, data):
+        self._sim_map = data
+        
+    def getPriorityRobotByConfidence(self):
+        tempConfidence = -1.0
+        tempPriority = None
+        for robot in self._sim_map.target_robots:
+            if (robot.confidence > tempConfidence and self._groundRobotArray.__contains__(robot)):
+                tempPriority = robot
+                tempConfidence = robot.confidence
+        return tempPriority    
 
-	def distanceToRobot(robot):
-		x = robot.x - self._vehicle.x
-		y = robot.y - self._vehicle.y
-		z = x**2 + y**2
-		z = z**(1/2.0)	
-		
-	def robotOrientedCorrectly():
-		#
-		return True
-		
-	def flyTo(x, y, z):
-		#fly to a location
-	
+    def getDistanceToGroundRobot(self, robot):
+        x = robot.x - self._vehicle.x
+        y = robot.y - self._vehicle.y
+        z = x**2 + y**2
+        z = z**(1/2.0) 
+        return z   
+        
+<<<<<<< HEAD
+    def priorityRobotOrientedCorrectly(self):
+        print("placeholder")
+    
+    def getDroneNearPriorityRobot(self, x):
+        while (self.distanceToGroundRobot(self._priorityRobot) >= x):
+            self.flyTo(self._priorityRobot.x, self._priorityRobot.y, 2.5)
+=======
+    def robotOrientedCorrectly(self):
+        print("placeholder")
+>>>>>>> 9db3415025ec504296ef392b528368a4e7635588
+        
+    def flyTo(self, x, y, z):
+        print("placeholder")
+        
+<<<<<<< HEAD
+    def flyToGround(self, x, y):
+        print("placeholder")
+        
+    def orientGroundRobot(self, robot):
+        print("placeholder")
+    
+    def landOnGroundRobot(self, x, y):
+        print("placeholder")
+        self._lastLandSuccesful = True
+        
+    #Make a function that constantly updates the ground robot array because robots leave bounds
+    
+    def start(self):
+        if not rospy.is_shutdown():
+            
+            #Initialize robot if first run
+            if (self._firstTime == True):
+=======
+    def orientGroundRobot(self, robot):
+        print("placeholder")
+    
     def start(self):
         while not rospy.is_shutdown():
-			# rospy.loginfo(self._loc_map.target_robots[0].color)
-			
-			if (firstTime == True):
-				#initialize system
-				robotArray = self._sim_map.target_robots
-				flyTo(0, 0, 2.5)
-				firstTime = False
-			
-			if (numRobots > 0):
-				priority = getPriorityByConfidence()
-				attempts = 0
-				if (priority.out_of_bounds == True):
-						numRobots=numRobots-1
-						robotArray.remove(priority)
-				else:
-					while (priority.out_of_bounds == False):
-						while (distanceToRobot(priority) >= 0.5):
-							flyTo(priority.x, priority.y, 2.5)
-						if (priority.out_of_bounds == True):
-							numRobots=numRobots-1
-							robotArray.remove(priority)
-							break
-						else:
-							if (robotOrientedCorrectly(priority) == True):
-								# do nothing
-							else:
-								#
-				if (successful == True):
-					numRobots=numRobots-1
-					robotArray.remove(priority)
+            # rospy.loginfo(self._loc_map.target_robots[0].color)
+            
+            if (self._firstTime == True):
+                #initialize system
+>>>>>>> 9db3415025ec504296ef392b528368a4e7635588
+                self._groundRobotArray = self._sim_map.target_robots
+                self.flyTo(self._centerX, self._centerY, 2.5)
+                rospy.loginfo(self.getFlightTag(self) + "Drone has reached the center.")
+                self._firstTime = False
+            
+<<<<<<< HEAD
+            #Complete Loop
+            while (self._numGroundRobots > 0):
+                #Allocate the next priority ground robot
+                if (self._numGroundRobots == 10):
+                    self._priorityRobot = self._robotFacingGoalAtStart
+                else:
+                    #Currently finding priority by simulation confidence
+                    self._priorityRobot = self.getPriorityRobotByConfidence()
+                    
+                #Fly drone near robot for the first time
+                self.getDroneNearPriorityRobot(self._minDroneToRobotDistance)
+                
+                #Check to see if ground robot has crossed the goal line or gone out of bounds
+                while (self._priorityRobot.out_of_bounds == False):
+                    #Check to see if ground robot is oriented towards goal line
+                    if (self.priorityRobotOrientedCorrectly() == False):
+                        self.landOnGroundRobot(self._priorityRobot.x, self._priorityRobot.y)
+                        self.flyTo(self._vehicle.x, self._vehicle.y, 2.5)
+                        self._attempts+=1
+                        if (self._attempts >= 5):
+                            self._attempts = 0
+                            self._priorityRobot = self.getPriorityRobotByConfidence()
+                            
+                    #Fly drone near robot again
+                    self.getDroneNearPriorityRobot(self._minDroneToRobotDistance)
+                 
+                #End of while loop, a robot has crossed goal line or gone out of bounds
+                
+                #Just in case the robot isn't in the array by the time it checks for it
+                try:
+                    self._groundRobotArray.remove(self._priorityRobot)
+                except:
+                    print("placeholder")
+                self._attempts = 0   
+                
+            #Done!
+            rospy.loginfo(self.getFlightTag() + "There are no more ground robots left.")
+            self.flyToGround(self._landX, self._landY)
+            rospy.loginfo(self.getFlightTag() + "Successfully Landed.")
+            return
+=======
+            if (self._numGroundRobots > 0):
+                self._priorityRobot = self.getPriorityRobotByConfidence(self)
+                if (self._priorityRobot.out_of_bounds == True):
+                        self._numGroundRobots-=1
+                        self._groundRobotArray.remove(self._priorityRobot)
+                else:
+                    while (self._priorityRobot.out_of_bounds == False):
+                        while (self.distanceToGroundRobot(self, self._priorityRobot) >= 0.5):
+                            self.flyTo(self, self._priorityRobot.x, self._priorityRobot.y, 2.5)
+                        if (self._priorityRobot.out_of_bounds == True):
+                            self._numGroundRobots-=1
+                            self._groundRobotArray.remove(self._priorityRobot)
+                            break
+                        else:
+                            if (self.robotOrientedCorrectly(self, self._priorityRobot) == True):
+                                pass
+                            else:
+                                self.orientGroundRobot(self, self._priorityRobot)
+                                
+                    if (self.successful == True):
+                        self._numGroundRobots-=1
+                        self._groundRobotArray.remove(self._priorityRobot)
+            else:
+                rospy.loginfo(self.getFlightTag() + "There are no more ground robots left.")
+                return
+>>>>>>> 9db3415025ec504296ef392b528368a4e7635588
 
 if __name__ == '__main__':
     try:
         # Initialize node
         node = Flight()
 
-        # Start node,
+        # Start node
         node.start()
     except rospy.ROSInterruptException:
         pass
