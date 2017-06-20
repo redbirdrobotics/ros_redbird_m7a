@@ -231,9 +231,8 @@ class FlightInfoPanel(wx.Panel):
         self.SetSizerAndFit(box)
 
     def updateVelocity(self, msg):
-        self.liveVelocity.SetLabel(str(msg.pose.position.x) + "")
+        wx.CallAfter(self.liveVelocity.SetLabel, (str(msg.pose.position.x) + ""))
 	print "Inside updateVelocity"
-	time.sleep(1)
 
     def updateAltitude(self, event):
         self.liveAltitude.SetLabel(str(random.randint(1, 40)) + " meters")
