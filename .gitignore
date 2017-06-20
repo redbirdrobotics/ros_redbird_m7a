@@ -2,3 +2,4 @@
 mavlink/
 mavros/
 .ros*
+.idea/*
