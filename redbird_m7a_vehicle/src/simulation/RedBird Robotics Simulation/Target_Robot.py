@@ -1,9 +1,11 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer, PAUSED
 from time import sleep
+from threading import Thread
 
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
+    
 
     def __init__(self, x, y, id, color, timer):
         timer = Sim_Timer()  
@@ -82,7 +84,8 @@ class Target_Robot(Ground_Robot_Interface, object):
 
             current_time = self.Timer.get_current_timer() - start_time
 
-            sleep(1)
+            sleep(1.0)
+
 
     def error(self, current_position, velocity_vector, angle):
         errorVX = self.deltaX - velocity_vector[0]

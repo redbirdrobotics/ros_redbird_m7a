@@ -1,6 +1,8 @@
 from threading import Thread
 from random import randint
 from math import tan, pow, sqrt
+from Sim_Timer import Sim_Timer, PAUSED
+from time import sleep
 
 class Ground_Robot_Interface(Thread, object):
     """description of class"""
@@ -44,11 +46,35 @@ class Ground_Robot_Interface(Thread, object):
     def run(self):
         pass
 
+
     def cancel(self):
         pass
 
+    def update_posX(self):
+        changeX = self.deltaX * iterations
+        self.x = changeX + self.x
+        return self.x
+
+    def update_posY(self):
+        changeY = self.deltaY * iterations
+        self.y = changeY + self.y
+        return self.y
+
+
     def update_movement(self):
-        pass
+        self.current_pos = (self.x, self.y , self.ID)
+        print(self.current_pos)
+
+        if(self.collision == True):
+            self.deltaX = self.deltaX * -1
+
+            self.deltaY = self.deltay * -1 
+
+            sleep(1)
+
+        else:
+            self.update_posX()
+            self.update_posY()
 
     def check_collisions(self, ):
         pass

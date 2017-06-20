@@ -7,13 +7,13 @@ class Sim_Timer(Thread, object):
     PAUSED = False
 
     def __init__(self):
-
         self.counter = 0
         
     def run(self):
         global PAUSED
 
         while not PAUSED == True:
+
             sleep(1.0)
 
             self.update_time()
