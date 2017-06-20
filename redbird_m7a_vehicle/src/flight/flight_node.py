@@ -11,7 +11,6 @@ class Flight(object):
         rospy.init_node('flight_node', anonymous=True)
         
         # Initialize variables
-        self._groundRobotArray = list()
         self._loc_map = Map()
         self._sim_map = Map()
         self._firstTime = True
@@ -48,10 +47,18 @@ class Flight(object):
         tempConfidence = -1.0
         tempPriority = None
         for robot in self._sim_map.target_robots:
-            if (robot.confidence > tempConfidence and self._groundRobotArray.__contains__(robot)):
+            if (robot.confidence > tempConfidence and robot.out_of_bounds == False):
                 tempPriority = robot
                 tempConfidence = robot.confidence
-        return tempPriority    
+        return tempPriority
+    
+    def getNumRobotsInBounds(self):
+        count = 0
+        for robot in self._sim_map.target_robots:
+            if (robot.out_of_bounds == False):
+                count+=1
+        return count
+            
 
     def getDistanceToGroundRobot(self, robot):
         x = robot.x - self._vehicle.x
@@ -87,15 +94,14 @@ class Flight(object):
             
             #Initialize robot if first run
             if (self._firstTime == True):
-                self._groundRobotArray = self._sim_map.target_robots
                 self.flyTo(self._centerX, self._centerY, 2.5)
                 rospy.loginfo(self.getFlightTag(self) + "Drone has reached the center.")
                 self._firstTime = False
             
             #Complete Loop
-            while (self._numGroundRobots > 0):
+            while (self.getNumRobotsInBounds() > 0):
                 #Allocate the next priority ground robot
-                if (self._numGroundRobots == 10):
+                if (self.getNumRobotsInBounds() == 10):
                     self._priorityRobot = self._robotFacingGoalAtStart
                 else:
                     #Currently finding priority by simulation confidence
@@ -120,11 +126,6 @@ class Flight(object):
                  
                 #End of while loop, a robot has crossed goal line or gone out of bounds
                 
-                #Just in case the robot isn't in the array by the time it checks for it
-                try:
-                    self._groundRobotArray.remove(self._priorityRobot)
-                except:
-                    print("placeholder")
                 self._attempts = 0   
                 
             #Done!
