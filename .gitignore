@@ -3,3 +3,4 @@ mavlink/
 mavros/
 .ros*
 .idea/*
+vimFiles/
