@@ -10,10 +10,10 @@ class Simulation(object):
 
     def __init__(self):
         global Timer
-        self.TIMER = Sim_Timer()
+        self.Timer= Sim_Timer()
 
-        robot = Target_Robot(0.5, 0.7, 1, 2, self.TIMER)
-        robot1 = Target_Robot(1.0, 6.7, 2, 1, Timer)
+        robot = Target_Robot(0.5, 0.7, 1, 2, self.Timer)
+        robot1 = Target_Robot(1.0, 6.7, 2, 1, self.Timer)
         #oRobot = Obstacle_Robots(TIMER)
 
         self.target_robot = []
@@ -24,12 +24,13 @@ class Simulation(object):
         #self.obstacle_robot.append(oRobot)
 
     def run(self):
+        global Timer
+        self.Timer.run()
+
         for arduino in self.target_robot:
             arduino.run()
 
-        self.TIMER.run()
+        time.sleep(5)
+        print(self.Timer.get_current_timer())
 
-        time.sleep(5.5)
-        print(self.TIMER.get_current_timer())
-
-        self.TIMER.pause() 
+        self.Timer.pause() 

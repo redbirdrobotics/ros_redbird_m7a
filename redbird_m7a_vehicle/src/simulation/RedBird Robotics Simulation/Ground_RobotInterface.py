@@ -19,7 +19,7 @@ class Ground_Robot_Interface(Thread, object):
 
         self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
         
-        if(self.deltaX == 0):
+        if(self.deltaX != 0):
             self.angle = tan((self.deltaY / self.deltaX))
         else:
             self.angle = 90

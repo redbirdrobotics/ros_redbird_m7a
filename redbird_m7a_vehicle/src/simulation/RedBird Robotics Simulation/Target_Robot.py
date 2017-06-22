@@ -5,7 +5,6 @@ from threading import Thread
 
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
-    
 
     def __init__(self, x, y, id, color, timer):
         timer = Sim_Timer()  
@@ -28,16 +27,17 @@ class Target_Robot(Ground_Robot_Interface, object):
         self.current_pos = (self.x, self.y , self.ID)
         print(self.current_pos)
 
-        if(self.collision == True):
-            self.deltaX = self.deltaX * -1
+        while(PAUSED == False):
+            if(self.collision == True):
+                self.deltaX = self.deltaX * -1
 
-            self.deltaY = self.deltay * -1 
+                self.deltaY = self.deltay * -1 
 
-            sleep(1)
+                sleep(1)
 
-        else:
-            self.update_posX()
-            self.update_posY()
+            else:
+                self.update_posX()
+                self.update_posY()
 
         #super().set_coordinates(self.x, self.y) 
 
@@ -75,16 +75,23 @@ class Target_Robot(Ground_Robot_Interface, object):
              self.button_pushed = True
 
     def run(self):
-        global PAUSED
+        distanceThread = Thread(target = self.update_movement)
+
         start_time = self.Timer.get_current_timer()
         current_time = 0
 
-        while not PAUSED == True and current_time < 20:
-            self.update_movement()
+        try:
+            distanceThread.start()
+            print("Thread has started!")
+        except:
+            print("Thread failed")
 
-            current_time = self.Timer.get_current_timer() - start_time
+        #while not PAUSED == True and current_time < 20:
+        #    self.update_movement()
 
-            sleep(1.0)
+        #    current_time = self.Timer.get_current_timer() - start_time
+
+        #    sleep(1.0)
 
 
     def error(self, current_position, velocity_vector, angle):
