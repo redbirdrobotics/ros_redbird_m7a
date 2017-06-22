@@ -15,7 +15,7 @@ def main():
     rospy.loginfo("Simulation started!")
 
     while not rospy.is_shutdown():
-        rospy.loginfo("Simulation says hi!")
+        rospy.loginfo()
         time.sleep(1)
 
 if __name__ == '__main__':
