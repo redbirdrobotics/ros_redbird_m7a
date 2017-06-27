@@ -8,7 +8,8 @@ from redbird import Camera
 #INITIALIZERS
 
 #CAMERAS
-cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 45))
+#temp Height = 1.07
+cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 0))
 cam0.create_angleAxis()
 ##cam1 = Camera(1, (1280, 720), 60, (130, 90), (120, 45))
 ##cam1.create_angleAxis()

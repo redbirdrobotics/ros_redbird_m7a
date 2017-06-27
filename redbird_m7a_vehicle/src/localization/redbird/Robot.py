@@ -98,6 +98,7 @@ class Robot():
         detect = False
         xyArray = np.transpose(np.nonzero(img))
         shape = xyArray.shape
+        print shape
         if shape[0] >= minPix:
             detect = True
             bBox = cv2.boundingRect(xyArray)
@@ -258,11 +259,12 @@ class Robot():
             scalar = self.lostNumAsScalar()
             scvX = vX * scalar
             scvY = vY * scalar
-            newYa = oldYa + scvY
-            newYb = oldYb + scvY
-            newXa = oldXa + scvX
-            newXb = oldXb + scvX
-            pointList = np.array([[oldXa, oldYa],[oldXb, oldYb],[newXa,newYa],[newXb,newYb]])
+            newYa = int(oldYa + scvY)
+            newYb = int(oldYb + scvY)
+            newXa = int(oldXa + scvX)
+            newXb = int(oldXb + scvX)
+            pointList = np.array([[oldXa, oldYa],[oldXb, oldYb],[newXa, newYa],[newXb, newYb]])
+            print pointList
             bx, by, bw, bh = cv2.boundingRect(pointList)
             self.ROI = np.array([by, by+bh, bx, bx+bw])
 

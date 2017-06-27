@@ -83,6 +83,8 @@ while True:
     clnMask = cleanMask(mask, 1000)
 
     c, detect, dataArray = contourSearch(clnMask, 4)
+    bbox = cv2.boundingRect(c)
+    print c, bbox
     
     if not c == None:
         #avg, avgList = dispAvg(detect, avgList)
