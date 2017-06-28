@@ -104,6 +104,12 @@ class Robot():
 #---------------------------------------------------#
     
     def createROI(self, x, y, r):
+        if y-r == 0:
+            y = 0
+            
+        if x-r == 0:
+            x = 0
+
         self.ROI = np.array([y-r, y+r, x-r, x+r])
         return
 
@@ -293,15 +299,23 @@ class Robot():
     def listUpdate(mode, objList, dataList, colList, maskList, blobList):
         dataArray = np.array(dataList)
         shape = dataArray.shape
+        print 'dataArray', shape
         dr = 0
 
         if dataList == []:
             return
+
+        
         
         if mode == 0:        
             unfound, ret = Robot.listUnfound(objList)
             lgth = len(unfound)
-
+            
+#WORK ON THIS
+            #If more blobs found than Robots made
+            if shape[0] > (len(objList) - lgth):
+                #Some Function that gets rid of extra
+            
             #All Robots are unfound
             if ret == True:
                 print "ret pass"

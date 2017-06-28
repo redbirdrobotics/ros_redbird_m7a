@@ -18,6 +18,7 @@ class Utilities():
         count = cv2.countNonZero(mask)
         return count, mask
 
+    @staticmethod
     def createGreyMask(img, minThresh, maxThresh):
         grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         mask = cv2.inRange(grey, minThresh, maxThresh)
@@ -34,7 +35,7 @@ class Utilities():
             if (np.sum(array[:,i]) < minSum):
                 array[:,i] = 0
         return array
-
+ 
     @staticmethod
     def getMaskList(frameList, maskValsList, greyVals, alpha):
         beta = 1 - float(alpha)
@@ -48,13 +49,13 @@ class Utilities():
             for maskVal in maskValsList:
                 mask += 1
 
-                hsvMask = Utilities.createHsvMask(frame, maskVal[0], maskVal[1], minPix)
+                count, hsvMask = Utilities.createHsvMask(frame, maskVal[0], maskVal[1])
                 clnHsvMask = Utilities.cleanMask(hsvMask, 1000)
-                greyMask = Utilities.createGreyMask(frame, greyVals[0], greyVals[1])
+                count, greyMask = Utilities.createGreyMask(frame, greyVals[0], greyVals[1])
                 clnGreyMask = Utilities.cleanMask(greyMask, 1000)
-                cv2.addWeighted(clnHsvMask, alpha, clnGreyMask, beta, 0.0)
+                weightedMask = cv2.addWeighted(clnHsvMask, alpha, clnGreyMask, beta, 0.0)
                 maskList.append((cam, mask))
-                maskList.append(cleanMask)
+                maskList.append(weightedMask)
 
         return maskList
 
