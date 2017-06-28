@@ -38,6 +38,21 @@ class Robot():
         self.mcoords = (0,0)
         return
 
+    @staticmethod
+    def listUnfound(objList):
+        ret = False
+        listUnfound = []
+        lgthList = len(objList)
+        
+        for r in range(lgthList):
+            if all(v == 0 for v in objList[r].coords):
+                listUnfound.append(r)
+
+        lgthUnfound = len(listUnfound)
+        if lgthUnfound == lgthList:
+            ret = True
+            
+        return listUnfound, ret
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
@@ -104,7 +119,12 @@ class Robot():
             bBox = cv2.boundingRect(xyArray)
         return bBox, detect
 
-
+    #ROI SEARCH
+    #-------------#
+    
+    #Decision Tree:
+    #Case 0: If Robot has an ROI assigned to it.  
+    
     @staticmethod
     def ROIsearch(objList, maskList):
         
@@ -186,11 +206,9 @@ class Robot():
     def createVectROI(self):
         values = [1, 1.5, 3.0, 4.5, 6.0]
         (x,y) = self.coords
-        print "coords", (x,y)
         (vx, vy) = self.vector
         n = self.lostNum
         roiArray = self.ROI
-        print "roi", roiArray
         r = self.radius
         
         scalar = values[n]
@@ -199,8 +217,6 @@ class Robot():
         newx = x + svx
         newy = y + svy
         points = np.array([[roiArray[3], roiArray[1]],[roiArray[2],roiArray[0]],[newx - r, newy - r],[newx + r, newy + r]])
-        print points
-        #Work on this
         bBox = cv2.boundingRect(points)
         roiYA = bBox[1]
         roiXB = bBox[2] + roiXA
@@ -212,25 +228,9 @@ class Robot():
     #UPDATE
 #---------------------------------------------------#
 
-    @staticmethod
-    def listUnfound(objList):
-        ret = False
-        listUnfound = []
-        lgthList = len(objList)
-        
-        for r in range(lgthList):
-            if all(v == 0 for v in objList[r].coords):
-                listUnfound.append(r)
-
-        lgthUnfound = len(listUnfound)
-        if lgthUnfound == lgthList:
-            ret = True
-            
-        return listUnfound, ret
-
     #SELF UPDATE
     #--------------#
-    #Logic Tree:
+    #Decision Tree:
     
     #Case 0: If robot was not missing from previous frames:
     #   Create a new Vector and ROI from new coordinates and radius
@@ -356,7 +356,7 @@ class Robot():
             r = robot.radius
             
             if not r == 0:
-                image = cv2.circle(image, (x,y), r, (0,0,0), -1)
+                image = cv2.circle(image, (x,y), r, (0,0,0), 1)
                 image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
         return image
 

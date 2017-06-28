@@ -43,6 +43,7 @@ cascadeList = [grndLBP1]
 #BLOB
 greenMaskVals = np.array([[55,45,60],[85,230,230]])
 redMaskVals = np.array([[163,182,136],[180,255,255]])
+greyMaskVals = (145,175)
 maskValsList = [greenMaskVals]
 
 robotParams = cv2.SimpleBlobDetector_Params()
@@ -57,8 +58,8 @@ while True:
     #Get New Frames
     showingFrameList = Camera.getFrameList(camList)
     workingFrameList = Utilities.copyFrameList(showingFrameList)
-    maskList = Utilities.getMaskList(workingFrameList, maskValsList, 80)
-
+    maskList = Utilities.getMaskList(workingFrameList, maskValsList, greyMaskVals, 0.75)
+    
     #Search ROIs
     newmaskList = Robot.ROIsearch(roboList, maskList)
         
