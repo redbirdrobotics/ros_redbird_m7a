@@ -18,20 +18,20 @@ cam0.create_angleAxis()
 camList = [cam0]
 
 #ROBOTS
-Marky = Robot(1)
-Ricky = Robot(2)
-Danny = Robot(3)
-Terry = Robot(4)
-Mikey = Robot(5)
-Davey = Robot(6)
-Timmy = Robot(7)
-Tommy = Robot(8)
-Joey = Robot(9)
-Robby = Robot(10)
-Johnny = Robot(11)
-Brian = Robot(12)
-Willy = Robot(13)
-Benny = Robot(14)
+Marky = Robot(0)
+Ricky = Robot(1)
+Danny = Robot(2)
+Terry = Robot(3)
+Mikey = Robot(4)
+Davey = Robot(5)
+Timmy = Robot(6)
+Tommy = Robot(7)
+Joey = Robot(8)
+Robby = Robot(9)
+Johnny = Robot(10)
+Brian = Robot(11)
+Willy = Robot(12)
+Benny = Robot(13)
 roboList = [Marky, Ricky, Danny, Terry, Mikey, Davey, Timmy, Tommy, Joey, Robby, Johnny, Brian, Willy, Benny]
 
 #DETECTORS
@@ -65,7 +65,7 @@ while True:
         
     #Search Whole Frame
     xyrcList, colList = Utilities.blobSearch(newmaskList, groundRobot)
-    Robot.listUpdate(0, roboList, xyrcList, colList, maskValsList, blobList)
+    Robot.listUpdate(roboList, xyrcList, colList, maskValsList, blobList)
     
     #For Testing
     showingFrame = Robot.circleFound(showingFrameList[0], roboList)

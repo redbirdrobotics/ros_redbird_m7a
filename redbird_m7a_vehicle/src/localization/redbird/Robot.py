@@ -20,6 +20,7 @@ class Robot():
         self.blob = None
         self.lostNum = 0
         self.mcoords = (0,0)
+        self.allData = [self.ident, self.cam, self.coords, self.radius, self.ROI, self.vector, self.color, self.blob, self.lostNum, self.mcoords]
         return
 
 #_______________________________________________________#
@@ -44,15 +45,15 @@ class Robot():
         listUnfound = []
         lgthList = len(objList)
         
-        for r in range(lgthList):
-            if all(v == 0 for v in objList[r].coords):
-                listUnfound.append(r)
+        for robot in objList:
+            if all(c == 0 for c in robot.coords):
+                listUnfound.append(robot.ident)            
+        return listUnfound
 
-        lgthUnfound = len(listUnfound)
-        if lgthUnfound == lgthList:
-            ret = True
-            
-        return listUnfound, ret
+    @staticmethod
+    def printAllData(objList):
+        for robot in objList:
+            print robot.allData
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
@@ -119,7 +120,6 @@ class Robot():
         detect = False
         xyArray = np.transpose(np.nonzero(img))
         shape = xyArray.shape
-        print shape
         if shape[0] >= minPix:
             detect = True
             bBox = cv2.boundingRect(xyArray)
@@ -137,8 +137,7 @@ class Robot():
         address = 0       
         for robot in objList:
             
-            if not robot.ROI == None:
-                print "ROI", robot.ROI 
+            if not robot.ROI == None: 
                 cam = robot.cam
                 color = robot.color
                 roiVals = robot.ROI
@@ -153,7 +152,7 @@ class Robot():
 
                      if not obj == []:
                          robot.correctLostNum()
-                         print 'found in ROI'
+                         print 'robot', robot.ident, 'found in ROI'
                                                  
                          x = int(obj[0].pt[0] + roiVals[2])
                          y = int(obj[0].pt[1] + roiVals[0])
@@ -166,7 +165,7 @@ class Robot():
                          maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                          
                      else:
-                         print 'not in ROI'
+                         print 'robot', robot.ident, 'not in ROI'
                          lost = robot.incLostNum(5)
                          
                          if lost == True:
@@ -270,21 +269,23 @@ class Robot():
             newXa = int(oldXa + scvX)
             newXb = int(oldXb + scvX)
             pointList = np.array([[oldXa, oldYa],[oldXb, oldYb],[newXa, newYa],[newXb, newYb]])
-            print pointList
             bx, by, bw, bh = cv2.boundingRect(pointList)
             self.ROI = np.array([by, by+bh, bx, bx+bw])
 
         else:
             self.wipeRobot()
+            print "robot", self.ident, "unestablished vector, cleared"
         return
 
         
         
     #UPDATE ROBOT DATA
     #--------------#
-    #mode:
-    #Case 0: Update only Robots that are unfound
-    #Case 1: Array is Formatted to Update Specific Robots, ie. row 0 = robot 0
+    #Logic Tree
+    #Determine unfound robots create list
+    #Compare list to list of found blobs
+    #Concatenate found blobs to match number of unfound robots.
+    #Pass information in to those robot instances
 
     #objList:
     #list of robots
@@ -296,63 +297,52 @@ class Robot():
     #list of bools representing columns to be updated
       
     @staticmethod
-    def listUpdate(mode, objList, dataList, colList, maskList, blobList):
-        dataArray = np.array(dataList)
-        shape = dataArray.shape
-        print 'dataArray', shape
+    def listUpdate(objList, blobDataList, colList, maskList, blobList):
+
+        blobDataArray = np.array(blobDataList)
+        blobDataShape = blobDataArray.shape
+        unfoundList = Robot.listUnfound(objList)
+        maxLen = len(unfoundList)
         dr = 0
 
-        if dataList == []:
+        #Empty Condition
+        if blobDataList == []:
             return
 
-        
-        
-        if mode == 0:        
-            unfound, ret = Robot.listUnfound(objList)
-            lgth = len(unfound)
-            
-#WORK ON THIS
-            #If more blobs found than Robots made
-            if shape[0] > (len(objList) - lgth):
-                #Some Function that gets rid of extra
-            
-            #All Robots are unfound
-            if ret == True:
-                print "ret pass"
-                rows = range(shape[0])
+        #Trim False Positives
+        if blobDataShape[0] > maxLen:
+            trimList = range(maxLen, blobDataShape[0])
+            print "Num Unfound", maxLen, "Trimming", trimList, "of", blobDataShape[0]
+            blobDataArray = np.delete(blobDataArray, trimList, 0)
+            blobDataShape = blobDataArray.shape
 
-            #Fill in gaps
-            else:
-                print "else pass", unfound
-                rows = []
-                for r in range(shape[0]):
-                    rows.append(unfound[r])
-
-        elif mode == 1:
-            rows = range(shape[0])
+        rows = []
+        for r in range(blobDataShape[0]):
+            rows.append(unfoundList[r])
+            print "Appending to robot" ,unfoundList[r]
 
         for r in rows:
 
             #Assign Cam
             if colList[0] == True:
-                objList[r].cam = dataArray[dr,0]
+                objList[r].cam = blobDataArray[dr,0]
             
             #Assign Coords
             if colList[1] == True:
-                objList[r].coords = (dataArray[dr,1], dataArray[dr,2])
+                objList[r].coords = (blobDataArray[dr,1], blobDataArray[dr,2])
 
             #Assign Radius
             if colList[2] == True:
-                objList[r].radius = dataArray[dr,3]
-                objList[r].createROI(dataArray[dr,1], dataArray[dr,2], dataArray[dr,3])
+                objList[r].radius = blobDataArray[dr,3]
+                objList[r].createROI(blobDataArray[dr,1], blobDataArray[dr,2], blobDataArray[dr,3])
 
             #Assign Vector
             if colList[3] == True:
-                objList[r].vector = (dataArray[dr,4],dataArray[dr,5])
+                objList[r].vector = (blobDataArray[dr,4],blobDataArray[dr,5])
 
             #Assign Color
             if colList[4] == True:
-                objList[r].color = dataArray[dr,6]
+                objList[r].color = blobDataArray[dr,6]
                 objList[r].updateColorProps(maskList, blobList)
                 
             dr += 1
@@ -373,49 +363,5 @@ class Robot():
                 image = cv2.circle(image, (x,y), r, (0,0,0), 1)
                 image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
         return image
-
-#_______________________________________________________#
-    #Testing
-#---------------------------------------------------#
-
-##someList = [True, True, False, True]
-##for val in someList:
-##    print val
-
-##endList = []
-##newList = [[1,2,3,4,5]]
-##endList.extend(newList)
-##newerList = [[2,3,4,5,6]]
-##endList.extend(newerList)
-##print endList
-##endArray = np.asarray(endList)
-##print endArray
-##
-##bill = Robot()
-##murray = Robot()
-##isvery = Robot()
-##awesome = Robot()
-
-##whoyagunnacall = [bill, murray, isvery, awesome]
-##
-##for robot in whoyagunnacall:
-##    print robot.coords
-
-##bill.coords = (9,2)
-##
-###stayPuft = np.array([[1,23,4,5,6,1],[2,45,67,2,4,1],[0,0,0,0,0,0],[1,1,1,1,1,1]])
-##stayPuft = [[1,1,23,4,6,6,0], [1,2,45,676,6,0,1], [0,0,0,0,0,0,0], [0,1,1,1,1,1,1]]
-##
-##Robot.update(1, whoyagunnacall, stayPuft, [True, True, True, False, True])
-##
-##print bill.cam, bill.coords, bill.radius, bill.vector, bill.color
-##print murray.cam, murray.coords, murray.radius, murray.vector, murray.color
-##print isvery.cam, isvery.coords, isvery.radius, isvery.vector, isvery.color
-##print awesome.cam, awesome.coords, awesome.vector, awesome.color
-##
-##print Robot.listUnfound(whoyagunnacall)
-##print Robot.frameList2ROIList(whoyagunnacall, frameList)
-
-
 
 
