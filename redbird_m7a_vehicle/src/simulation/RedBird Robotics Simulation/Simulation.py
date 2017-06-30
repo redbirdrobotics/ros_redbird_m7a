@@ -5,11 +5,8 @@ import time
 
 class Simulation(object):
     """description of class"""
-    global Timer
-    Timer = Sim_Timer()
 
     def __init__(self):
-        global Timer
         self.Timer= Sim_Timer()
 
         robot = Target_Robot(0.5, 0.7, 1, 2, self.Timer)
@@ -24,7 +21,6 @@ class Simulation(object):
         #self.obstacle_robot.append(oRobot)
 
     def run(self):
-        global Timer
         self.Timer.run()
 
         for arduino in self.target_robot:

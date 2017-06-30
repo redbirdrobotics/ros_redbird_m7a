@@ -1,7 +1,6 @@
 from threading import Thread
 from random import randint
 from math import tan, pow, sqrt
-from Sim_Timer import Sim_Timer, PAUSED
 from time import sleep
 
 class Ground_Robot_Interface(Thread, object):
