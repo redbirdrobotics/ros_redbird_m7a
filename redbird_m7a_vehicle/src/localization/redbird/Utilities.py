@@ -20,6 +20,7 @@ class Utilities():
 
     @staticmethod
     def createGreyMask(img, minThresh, maxThresh):
+        BGR = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
         grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         mask = cv2.inRange(grey, minThresh, maxThresh)
         count = cv2.countNonZero(mask)
@@ -37,11 +38,10 @@ class Utilities():
         return array
  
     @staticmethod
-    def getMaskList(frameList, maskValsList, greyVals, alpha):
-        beta = 1 - float(alpha)
+    def getMaskList(frameList, maskValsList, greyVals, beta):
         maskList = []
         cam = -1
-        
+        print greyVals[0], greyVals[1]
         for frame in frameList:
             mask = 0
             cam +=1
@@ -53,11 +53,24 @@ class Utilities():
                 clnHsvMask = Utilities.cleanMask(hsvMask, 1000)
                 count, greyMask = Utilities.createGreyMask(frame, greyVals[0], greyVals[1])
                 clnGreyMask = Utilities.cleanMask(greyMask, 1000)
-                weightedMask = cv2.addWeighted(clnHsvMask, alpha, clnGreyMask, beta, 0.0)
+                #weightedMask = cv2.addWeighted(clnHsvMask, 1, clnGreyMask, beta, 0.0)
                 maskList.append((cam, mask))
-                maskList.append(weightedMask)
+                maskList.append(clnHsvMask)
 
         return maskList
+
+    @staticmethod
+    def showFramePause(imgList):
+        for item in imgList:
+            if (type(item) == tuple):
+                print "next frame"
+            else:
+                esc = False
+                while esc == False:
+                    cv2.imshow("frame", item)
+                    k = cv2.waitKey(30) & 0xff
+                    if k == 27:
+                        esc = True
 
 #_______________________________________________________#
     #Array Manipulation & Math
@@ -96,6 +109,14 @@ class Utilities():
 #_______________________________________________________#
     #Detector
 #---------------------------------------------------#
+
+    @staticmethod
+    def centerPixelCondition(img, x, y):
+        detect = False
+        if img[1,y,x] == 1:
+            detect = True
+        return detect
+
     @staticmethod
     def getParams(object, detectorType):
 
@@ -113,6 +134,7 @@ class Utilities():
             #Filter by Area
             object.filterByArea = True
             object.minArea = 100
+            object.maxArea = 250
 
             #Filter by Circularity
             object.filterByCircularity = False

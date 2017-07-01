@@ -29,8 +29,10 @@ def cleanMask(array, minSum):
 while True:
    frame = cam0.getFrame()
    ret, newMask = createMask(frame, mask[0], mask[1], 100)
-   cleanMask = cleanMask(newMask, 1000)
-   esc = Camera.showFrame(cleanMask, "mask1")
+   #cleanMask = cleanMask(newMask, 1000)
+   grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+   greymask = cv2.inRange(grey, 230 , 255)
+   esc = Camera.showFrame(greymask, "mask1")
    if esc == True:
        break
 cam0.detach()
