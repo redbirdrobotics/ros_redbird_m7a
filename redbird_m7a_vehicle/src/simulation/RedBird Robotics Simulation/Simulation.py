@@ -2,6 +2,7 @@ from Sim_Timer import Sim_Timer
 from Target_Robot import Target_Robot
 from Obstacle_Robot import Obstacle_Robots
 import time
+import threading
 
 class Simulation(object):
     """description of class"""
@@ -26,7 +27,23 @@ class Simulation(object):
         for arduino in self.target_robot:
             arduino.run()
 
+        self.collision_thread()
+
         time.sleep(5)
         print(self.Timer.get_current_timer())
 
         self.Timer.pause() 
+
+    def check_collision(self, robot_array):
+        robot_array = [Target_Robot]
+        while not (self.Timer.PAUSED.is_set()):
+            Target_Robot.check_collisions(robot_array)
+
+    def collision_thread(self):
+        col_thread = threading.Thread(target = check_collision)
+
+        try:
+            col_thread.start()
+            print("Collision thread has started")
+        except:
+            print("Could not start thread")

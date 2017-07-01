@@ -2,6 +2,7 @@ from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer, PAUSED
 from time import sleep
 from threading import Thread
+from Obstacle_Robot import Obstacle_Robots
 
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
@@ -52,7 +53,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         #super().set_coordinates(self.x, self.y) 
 
-    def check_collisions(self, target_robot):
+    def check_collisions(self, target_robot, obstacle_robot):
         min_num = 0
         max_num = len(target_robot)
 
@@ -67,7 +68,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
                 dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                if dCC <= 2*radius :
+                if dCC <= 2*pow(radius, 2):
                     target_robot[min_num].button_pushed(target_robot[robot])
                     self.collision = True
 
@@ -101,18 +102,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         #    current_time = self.Timer.get_current_timer() - start_time
 
-        #    sleep(1.0)
-
-
-    def error(self, current_position, velocity_vector, angle):
-        errorVX = self.deltaX - velocity_vector[0]
-        errorVY = self.detlaY - velocity_vector[1]
-
-        if(errorVX >= 0.01):
-            self.deltaX = velocity_vector[0]
-            if(errorVY >= 0.01):
-                self.deltaY = velocity_vector[1]
-                
+        #    sleep(1.0)                
 
     """def confidenceInterval(self, XY):
         counter = 0
@@ -139,23 +129,19 @@ class Target_Robot(Ground_Robot_Interface, object):
         self.deltaY = velocityY
 
     def check_error(self, x, y, velocityX, velocityY):
-
-        pErrorX = (self.x - x)
+        pErrorVX = abs(self.deltaX - velocityX)
+        pErrorVY = abs(self.deltaY - velocityY)
         
-        if not (pErrorX <= 0.001):
-            self.change_X_data(x)
-
-        pErrorY = (self.y - y)
-
-        if not (pErrorY <= 0.001):
-            self.change_Y_data(y)
-
-        pErrorVX = (self.deltaX - velocityX)
-        
-        if not (pErrorVX<= 0.001):
+        if not (pErrorVX <= 0.01 and pErrorVY <= 0.01):
             self.change_VX_data(velocityX)
-
-        pErrorVY = (self.deltaY - velocityY)
-
-        if not (pErrorVY<= 0.001):
             self.change_VY_data(velocityY)
+
+            pErrorX = abs(self.x - x)
+        
+            if not (pErrorX <= 0.01):
+                self.change_X_data(X)
+
+            pErrorY = abs(self.y - y)
+
+            if not (pErrorY<= 0.01):
+                self.change_Y_data(Y)
