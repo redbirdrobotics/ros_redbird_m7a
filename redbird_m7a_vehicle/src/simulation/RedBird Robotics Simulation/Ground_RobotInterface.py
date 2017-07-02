@@ -6,17 +6,22 @@ from time import sleep
 class Ground_Robot_Interface(Thread, object):
     """description of class"""
     global iterations
-    iterations = 1 / 60
+    iterations = 1 
 
-    def __init__(self, x, y, ID, color):
+    def __init__(self, x, y, deltaX, deltaY, ID, color):
         self.x = x
         self.y = y
         self.ID = ID
         self.color = color
+        self.radius = 1.0
 
-        self.deltaX = ((randint(-33, 33)) / 100 )
+        self.deltaX = deltaX
 
-        self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
+        self.deltaY = deltaY
+
+        #self.deltaX = ((randint(-33, 33)) / 100 )
+
+        #self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
         
         if(self.deltaX != 0):
             self.angle = tan((self.deltaY / self.deltaX))
@@ -75,5 +80,5 @@ class Ground_Robot_Interface(Thread, object):
             self.update_posX()
             self.update_posY()
 
-    def check_collisions(self, ):
+    def check_collisions(self):
         pass

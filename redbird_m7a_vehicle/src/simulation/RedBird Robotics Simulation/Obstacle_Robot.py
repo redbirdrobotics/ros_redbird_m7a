@@ -1,28 +1,37 @@
-from Ground_RobotInterface import Ground_Robot_Interface
+from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer
 from math import pow, sqrt, cos, sin
 import threading
 
 class Obstacle_Robots(Ground_Robot_Interface, object):
-    radius = 1.0 #m
 
-    def __init__(self, timer):
+    def __init__(self, x, y, id, color, timer):
         self.timer = timer = Sim_Timer()
-        return super.__init__(self)
 
-        velocity = sqrt((pow(self.deltaX,2 ) + pow(self.deltay, 2)))
+        self.radius = 2
 
-        omega = velocity / radius
+        return super.__init__(x, y, id, color)
 
-        deltaO = omega * radius
+        deltaOmega = (sqrt(pow(self.deltaX, 2) + pow(self.deltaY, 2))) / radius
 
-        self.deltaOX = cos(omega)
-        self.deltaOY = sin(omega)
+        omega = deltaOmega * iterations
 
-        orID = 11
+        self.deltaX = cos(omega)
+        self.detlaY = sin(omega)
 
     def update_movement(self):
-        self.x = self.x + self.deltaOX
-        self.y = self.y + self.deltaOY
+        while not (self.timer.PAUSED.is_set()):
+            self.x = self.x + self.deltaX
+            self.y = self.y + self.deltaY
 
-        self.current_pos = (orID, self.x, self.y) 
+            self.current_pos = (orID, self.x, self.y)
+
+    def run(self):
+        oRobotThread = threading.Thread(target = update_movement)
+
+        try:
+            oRobotThread.start()
+            print("Obstacle Robots started")
+
+        except:
+            print("Could not start thread")

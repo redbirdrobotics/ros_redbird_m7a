@@ -7,12 +7,12 @@ from Obstacle_Robot import Obstacle_Robots
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
 
-    def __init__(self, x, y, id, color, timer):
+    def __init__(self, x, y, deltaX, deltaY, id, color, timer):
         timer = Sim_Timer()  
 
         self.Timer = timer
 
-        return super().__init__(x, y, id, color)
+        return super().__init__(x, y, deltaX, deltaY, id, color)
 
     def update_posX(self):
         changeX = self.deltaX * iterations
@@ -29,7 +29,7 @@ class Target_Robot(Ground_Robot_Interface, object):
         print(self.current_pos)
 
         print(self.Timer.get_pause())
-
+        global PAUSED
         while not (PAUSED.is_set()):
 
             self.current_pos = (self.x, self.y , self.ID)
@@ -39,12 +39,12 @@ class Target_Robot(Ground_Robot_Interface, object):
 
                 self.deltaY = self.deltay * -1 
 
-                sleep(iterations)
+                sleep(1)
 
                 print(self.current_pos)
 
             else:
-                sleep(iterations)
+                sleep(1)
 
                 self.update_posX()
                 self.update_posY()
@@ -53,13 +53,13 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         #super().set_coordinates(self.x, self.y) 
 
-    def check_collisions(self, target_robot, obstacle_robot):
+    def check_collision_for_robots(self, target_robot):
+        target_robot = [Target_Robot]
+
         min_num = 0
         max_num = len(target_robot)
 
-        target_robot = [Target_Robot]
-
-        while min_num < len(target_robot):
+        while min_num < max_num:
 
             for robot in range(1, len(target_robot)):
 
@@ -68,7 +68,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
                 dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                if dCC <= 2*pow(radius, 2):
+                if dCC <= 2*pow(self.radius, 2):
                     target_robot[min_num].button_pushed(target_robot[robot])
                     self.collision = True
 
