@@ -1,6 +1,5 @@
 Header header # ROS header
 uint8 id # Robot id
-uint8 type # Robot type
 float64 x # Robot x position
 float64 y # Robot y position
 float64 vec_x # Robot vector x-component
