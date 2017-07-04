@@ -74,7 +74,7 @@ class Robot():
         self.lostNum = 0
 
     def lostNumAsScalar(self):
-        scalarVals = [1, 1.5, 2, 3.5, 4, 4.5]
+        scalarVals = [1, 2, 2.5, 3.5, 4.5, 5.5]
         scalar = scalarVals[self.lostNum]
         return scalar
     
@@ -152,7 +152,7 @@ class Robot():
 
                      if not obj == []:
                          robot.correctLostNum()
-                         print 'robot', robot.ident, 'found in ROI'
+                         #print 'robot', robot.ident, 'found in ROI'
                                                  
                          x = int(obj[0].pt[0] + roiVals[2])
                          y = int(obj[0].pt[1] + roiVals[0])
@@ -165,14 +165,14 @@ class Robot():
                          maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                          
                      else:
-                         print 'robot', robot.ident, 'not in ROI'
+                         #print 'robot', robot.ident, 'not in ROI'
                          lost = robot.incLostNum(5)
                          
                          if lost == True:
-                             print 'lost'
+                             #print 'lost'
                              robot.wipeRobot()
                          else:
-                             print 'missing for', robot.lostNum, 'frames'
+                             #print 'missing for', robot.lostNum, 'frames'
                              robot.selfUpdate(0,0,0)
         
         return maskList
@@ -274,7 +274,7 @@ class Robot():
 
         else:
             self.wipeRobot()
-            print "robot", self.ident, "unestablished vector, cleared"
+            #print "robot", self.ident, "unestablished vector, cleared"
         return
 
         
@@ -312,14 +312,14 @@ class Robot():
         #Trim False Positives
         if blobDataShape[0] > maxLen:
             trimList = range(maxLen, blobDataShape[0])
-            print "Num Unfound", maxLen, "Trimming", trimList, "of", blobDataShape[0]
+            #print "Num Unfound", maxLen, "Trimming", trimList, "of", blobDataShape[0]
             blobDataArray = np.delete(blobDataArray, trimList, 0)
             blobDataShape = blobDataArray.shape
 
         rows = []
         for r in range(blobDataShape[0]):
             rows.append(unfoundList[r])
-            print "Appending to robot" ,unfoundList[r]
+            #print "Appending to robot" ,unfoundList[r]
 
         for r in rows:
 

@@ -1,0 +1,22 @@
+Green Robot
+hmin = 75
+hmax = 92
+smin = 38
+smax = 206
+vmin = 75
+vmax = 150
+greymin 145
+greymax = 175
+beta 15
+
+Green Line
+rho 1
+theta 180
+minLength
+hmin 91
+hmax 108
+smin 51
+smax 84
+vmin 82
+vmax 115
+

@@ -41,7 +41,7 @@ class Utilities():
     def getMaskList(frameList, maskValsList, greyVals, beta):
         maskList = []
         cam = -1
-        print greyVals[0], greyVals[1]
+        #print greyVals[0], greyVals[1]
         for frame in frameList:
             mask = 0
             cam +=1
@@ -109,13 +109,6 @@ class Utilities():
 #_______________________________________________________#
     #Detector
 #---------------------------------------------------#
-
-    @staticmethod
-    def centerPixelCondition(img, x, y):
-        detect = False
-        if img[1,y,x] == 1:
-            detect = True
-        return detect
 
     @staticmethod
     def getParams(object, detectorType):

@@ -41,7 +41,7 @@ grndLBP1 = cv2.CascadeClassifier('address')
 cascadeList = [grndLBP1]
 
 #BLOB
-greenMaskVals = np.array([[75,38,75],[92,206,150]])
+greenMaskVals = np.array([[75,56,61],[86,178,114]])
 redMaskVals = np.array([[163,182,136],[180,255,255]])
 greyMaskVals = (230,255)
 maskValsList = [greenMaskVals]
