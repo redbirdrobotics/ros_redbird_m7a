@@ -3,3 +3,7 @@ mavlink/
 mavros/
 .ros*
 .idea/*
+vimFiles/
+.vs/
+*.sqlite
+*.pyc

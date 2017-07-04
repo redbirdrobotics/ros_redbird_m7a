@@ -143,6 +143,6 @@ if __name__ == '__main__':
         node = Flight()
 
         # Start node
-        node.start()
+        # node.start()
     except rospy.ROSInterruptException:
         pass
