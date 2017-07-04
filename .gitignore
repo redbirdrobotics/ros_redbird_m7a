@@ -6,3 +6,4 @@ mavros/
 vimFiles/
 .vs/
 *.sqlite
+*.pyc
