@@ -1,18 +1,17 @@
-import threading
+from threading import Thread
 from time import sleep
 
 class Sim_Timer(object):
     """description of class"""
     global PAUSED
-    PAUSED = threading.Event()
+    PAUSED = False
 
     def __init__(self):
         self.counter = 0
         
     def run(self):
-        Sim_timerthread = threading.Thread(target = self.update_time)
-        global PAUSED
-        PAUSED.clear()
+
+        Sim_timerthread = Thread(target = self.update_time)
 
         try:
             Sim_timerthread.start()
@@ -24,9 +23,8 @@ class Sim_Timer(object):
 
     def update_time(self):
         global PAUSED
-        
-        while not PAUSED.is_set():
-            print(PAUSED._flag)
+
+        while not PAUSED == True:
             sleep(1)
             self.counter += 1
             print(self.get_current_timer())
@@ -36,11 +34,11 @@ class Sim_Timer(object):
 
     def pause(self):
         global PAUSED
-        PAUSED.set()
+        PAUSED = True
 
     def reset(self):
         self.counter = 0
 
     def get_pause(self):
         global PAUSED
-        return PAUSED._flag
+        return PAUSED
