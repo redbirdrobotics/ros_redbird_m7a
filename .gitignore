@@ -1,6 +1,0 @@
-*.json
-mavlink/
-mavros/
-.ros*
-.idea/*
-vimFiles/
