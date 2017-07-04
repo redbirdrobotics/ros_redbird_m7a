@@ -2,7 +2,7 @@
 
 import rospy
 import time
-from utils import Vehicle
+from utils import Vehicle, Flight_Controller, Flight_Node
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
 class Flight(object):
@@ -29,6 +29,9 @@ class Flight(object):
 
         # Initialize vehicle for tracking
         self._vehicle = Vehicle()
+
+        # Initialize flight controller
+        self._flight_controller = Flight_Controller()
 
         # Create subscribers
         self._loc_sub = rospy.Subscriber("localization", Map, self.update_loc_map)
