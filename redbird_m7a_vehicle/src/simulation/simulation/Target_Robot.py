@@ -6,30 +6,28 @@ from threading import Thread
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
 
-    def __init__(self, x, y, id, color, timer):
-        timer = Sim_Timer()  
-
-        self.Timer = timer
+    def __init__(self, x, y, id, color, timer): 
+        self._timer = timer
 
         return super().__init__(x, y, id, color)
 
     def update_posX(self):
-        changeX = self.deltaX * iterations
-        self.x = changeX + self.x
-        return self.x
+        changeX = self._deltaX * iterations
+        self._x = changeX + self._x
+        return self._x
 
     def update_posY(self):
         changeY = self.deltaY * iterations
-        self.y = changeY + self.y
-        return self.y
+        self._y = changeY + self._y
+        return self._y
      
     def update_movement(self):
-        self.current_pos = (self.x, self.y , self.ID)
+        self.current_pos = (self._x, self._y , self._id)
         print(self.current_pos)
 
         while(PAUSED == False):
             if(self.collision == True):
-                self.deltaX = self.deltaX * -1
+                self._deltaX = self._deltaX * -1
 
                 self.deltaY = self.deltay * -1 
 
@@ -49,8 +47,8 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         while min_num < len(target_robot):
             for robot in range(1, len(target_robot)):
-                dXX = target_robot[min_num].x - target_robot[robot].x
-                dYY = target_robot[min_num].y - target_robot[robot].y
+                dXX = target_robot[min_num]._x - target_robot[robot]._x
+                dYY = target_robot[min_num]._y - target_robot[robot]._y
 
                 dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
@@ -63,8 +61,8 @@ class Target_Robot(Ground_Robot_Interface, object):
     def button_pushed(self, robot):
          robot = Target_Robot
          
-         vector_i = self.x - robot.x
-         vector_j = self.y - robot.y
+         vector_i = self._x - robot._x
+         vector_j = self._y - robot._y
 
          theta = tan(vector_j / vector_i)
 
@@ -77,7 +75,7 @@ class Target_Robot(Ground_Robot_Interface, object):
     def run(self):
         distanceThread = Thread(target = self.update_movement)
 
-        start_time = self.Timer.get_current_timer()
+        start_time = self._timer.get_current_timer()
         current_time = 0
 
         try:
@@ -92,16 +90,6 @@ class Target_Robot(Ground_Robot_Interface, object):
         #    current_time = self.Timer.get_current_timer() - start_time
 
         #    sleep(1.0)
-
-
-    def error(self, current_position, velocity_vector, angle):
-        errorVX = self.deltaX - velocity_vector[0]
-        errorVY = self.detlaY - velocity_vector[1]
-
-        if(errorVX >= 0.01):
-            self.deltaX = velocity_vector[0]
-            if(errorVY >= 0.01):
-                self.deltaY = velocity_vector[1]
                 
 
     """def confidenceInterval(self, XY):
@@ -117,29 +105,29 @@ class Target_Robot(Ground_Robot_Interface, object):
         meanY = sumY/counter"""
     
     def change_X_data(self, x):
-        self.x = x
+        self._x = x
 
     def change_Y_data(self, y):
-        self.y = y
+        self._y = y
 
     def change_VX_data(self, velocityX, velocityY):
-        self.deltaX = velocityX
+        self._deltaX = velocityX
 
     def change_VY_data(self, velocityY):
         self.deltaY = velocityY
 
     def check_error(self, x, y, velocityX, velocityY):
-        pErrorX = ((self.x - x) /  x)
+        pErrorX = ((self._x - x) /  x)
         
         if not (pErrorX <= 0.001):
             self.change_X_data(x)
 
-        pErrorY = ((self.y - y) /  y) 
+        pErrorY = ((self._y - y) /  y) 
 
         if not (pErrorY <= 0.001):
             self.change_Y_data(y)
 
-        pErrorVX = ((self.deltaX - velocityX) / velocityX)
+        pErrorVX = ((self._deltaX - velocityX) / velocityX)
 
         if not (pErrorVX <= 0.001):
             self.change_VX_data(velocityX)

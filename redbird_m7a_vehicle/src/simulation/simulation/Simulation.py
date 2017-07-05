@@ -5,15 +5,15 @@ import time
 
 class Simulation(object):
     """description of class"""
-    global Timer
-    Timer = Sim_Timer()
+    global _timer
+    _timer = Sim_Timer()
 
     def __init__(self):
-        global Timer
+        global _timer
         self.Timer= Sim_Timer()
 
-        robot = Target_Robot(0.5, 0.7, 1, 2, self.Timer)
-        robot1 = Target_Robot(1.0, 6.7, 2, 1, self.Timer)
+        robot = Target_Robot(0.5, 0.7, 1, 2, self._timer)
+        robot1 = Target_Robot(1.0, 6.7, 2, 1, self._timer)
         #oRobot = Obstacle_Robots(TIMER)
 
         self.target_robot = []
@@ -24,13 +24,13 @@ class Simulation(object):
         #self.obstacle_robot.append(oRobot)
 
     def run(self):
-        global Timer
-        self.Timer.run()
+        global _timer
+        self._timer.run()
 
         for arduino in self.target_robot:
             arduino.run()
 
         time.sleep(5)
-        print(self.Timer.get_current_timer())
+        print(self._timer.get_current_timer())
 
-        self.Timer.pause() 
+        self._timer.pause() 

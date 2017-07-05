@@ -72,14 +72,11 @@ class Simulation_Node:
                 if sRobot.id == lRobot.id:
                     sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
-<<<<<<< HEAD
         # Data has been updated, set ready flag
         self._ready = True
-=======
-    while not rospy.is_shutdown():
-        rospy.loginfo("Simulation says hi!")
-        time.sleep(10)
->>>>>>> master
+        while not rospy.is_shutdown():
+            rospy.loginfo("Simulation says hi!")
+            time.sleep(10)
 
 if __name__ == '__main__':
     try:

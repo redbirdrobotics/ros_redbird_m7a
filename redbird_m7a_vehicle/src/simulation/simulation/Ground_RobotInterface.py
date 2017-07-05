@@ -9,18 +9,18 @@ class Ground_Robot_Interface(Thread, object):
     global iterations
     iterations = 1 / 60
 
-    def __init__(self, x, y, ID, color):
-        self.x = x
-        self.y = y
-        self.ID = ID
+    def __init__(self, x, y, id, color):
+        self._x = x
+        self._y = y
+        self._id = id
         self.color = color
 
-        self.deltaX = ((randint(-33, 33)) / 100 )
+        self._deltaX = ((randint(-33, 33)) / 100 )
 
-        self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self.deltaX, 2))))
+        self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
         
-        if(self.deltaX != 0):
-            self.angle = tan((self.deltaY / self.deltaX))
+        if(self._deltaX != 0):
+            self.angle = tan((self.deltaY / self._deltaX))
         else:
             self.angle = 90
 
@@ -51,22 +51,22 @@ class Ground_Robot_Interface(Thread, object):
         pass
 
     def update_posX(self):
-        changeX = self.deltaX * iterations
-        self.x = changeX + self.x
-        return self.x
+        changeX = self._deltaX * iterations
+        self.x = changeX + self._x
+        return self._x
 
     def update_posY(self):
         changeY = self.deltaY * iterations
-        self.y = changeY + self.y
-        return self.y
+        self.y = changeY + self._y
+        return self._y
 
 
     def update_movement(self):
-        self.current_pos = (self.x, self.y , self.ID)
+        self.current_pos = (self._x, self._y , self._id)
         print(self.current_pos)
 
         if(self.collision == True):
-            self.deltaX = self.deltaX * -1
+            self.deltaX = self._deltaX * -1
 
             self.deltaY = self.deltay * -1 
 
