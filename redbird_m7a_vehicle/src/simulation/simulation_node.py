@@ -48,7 +48,7 @@ class Simulation_Node:
             # Loop through all simulated robots
             for sim_robot in sim.get_robots():
                 # Loop through all robot messages that need to be populated
-                for robot_msg in robot_msgs:
+                for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
                     if robot_msg.id == sim_robot.get_id():
                         robot_msg.x = sim_robot.x

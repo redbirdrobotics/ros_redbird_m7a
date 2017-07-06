@@ -7,25 +7,27 @@ from time import sleep
 class Ground_Robot_Interface(Thread, object):
     """description of class"""
     global iterations
-    iterations = 1 / 60
+    iterations = 1
 
     def __init__(self, x, y, id, color):
         self._x = x
         self._y = y
         self._id = id
         self.color = color
+        self._radius = 1.0 #m
 
         self._deltaX = ((randint(-33, 33)) / 100 )
 
-        self.deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
+        self._deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
         
         if(self._deltaX != 0):
-            self.angle = tan((self.deltaY / self._deltaX))
+            self.angle = tan((self._deltaY / self._deltaX))
         else:
             self.angle = 90
 
         self.thread_cancelled = False
         self.collision = False
+        self._boundary = False
 
         self.pError = 0.0 
         self.pErrorV = 0.0
@@ -37,8 +39,8 @@ class Ground_Robot_Interface(Thread, object):
         return self.ID 
 
     def set_coordinates(self, x, y):
-        self.x = x
-        self.y = y
+        self._x = x
+        self._y = y
 
     def get_angle(self):
         pass
@@ -52,14 +54,13 @@ class Ground_Robot_Interface(Thread, object):
 
     def update_posX(self):
         changeX = self._deltaX * iterations
-        self.x = changeX + self._x
+        self._x = changeX + self._x
         return self._x
 
     def update_posY(self):
-        changeY = self.deltaY * iterations
-        self.y = changeY + self._y
+        changeY = self._deltaY * iterations
+        self._y = changeY + self._y
         return self._y
-
 
     def update_movement(self):
         self.current_pos = (self._x, self._y , self._id)
@@ -68,7 +69,7 @@ class Ground_Robot_Interface(Thread, object):
         if(self.collision == True):
             self.deltaX = self._deltaX * -1
 
-            self.deltaY = self.deltay * -1 
+            self._deltaY = self.deltay * -1 
 
             sleep(1)
 

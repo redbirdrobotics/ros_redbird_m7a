@@ -28,9 +28,12 @@ class Simulation(object):
         self._timer.run()
 
         for arduino in self.target_robot:
-            arduino.run()
+            arduino.run(self.target_robot)
 
         time.sleep(5)
         print(self._timer.get_current_timer())
 
-        self._timer.pause() 
+        self._timer.pause()
+
+    def get_robots(self):
+        return self.target_robot

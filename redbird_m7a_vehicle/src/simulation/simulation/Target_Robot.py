@@ -17,26 +17,27 @@ class Target_Robot(Ground_Robot_Interface, object):
         return self._x
 
     def update_posY(self):
-        changeY = self.deltaY * iterations
+        changeY = self._deltaY * iterations
         self._y = changeY + self._y
         return self._y
      
     def update_movement(self):
-        self.current_pos = (self._x, self._y , self._id)
-        print(self.current_pos)
-
         while(PAUSED == False):
+            self.current_pos = (self._x, self._y , self._id)
+            print(self.current_pos)
+
             if(self.collision == True):
                 self._deltaX = self._deltaX * -1
 
                 self.deltaY = self.deltay * -1 
 
-                sleep(1)
+                sleep(iterations)
 
             else:
                 self.update_posX()
                 self.update_posY()
 
+                sleep(iterations)
         #super().set_coordinates(self.x, self.y) 
 
     def check_collisions(self, target_robot):
@@ -45,16 +46,27 @@ class Target_Robot(Ground_Robot_Interface, object):
 
         target_robot = [Target_Robot]
 
-        while min_num < len(target_robot):
+        while min_num < max_num:
             for robot in range(1, len(target_robot)):
-                dXX = target_robot[min_num]._x - target_robot[robot]._x
-                dYY = target_robot[min_num]._y - target_robot[robot]._y
 
-                dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
+                if(target_robot[robot].boundary):
+                    del target_robot[robot]
 
-                if dCC <= 2*radius :
-                    target_robot[min_num].button_pushed(target_robot[robot])
-                    self.collision = True
+                    break
+
+                if (target_robot[robot]._x >= 10 and target_robot[robot]._y >= 10):
+                    target_robot[robot].boundary = True
+
+                else:
+                    dXX = target_robot[min_num]._x - target_robot[robot]._x
+                    dYY = target_robot[min_num]._y - target_robot[robot]._y
+
+                    dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
+
+                    if dCC <= 2*radius :
+                        target_robot[min_num].button_pushed(target_robot[robot])
+
+                        self.collision = True
 
             min_num = min_num + 1
 
@@ -72,14 +84,18 @@ class Target_Robot(Ground_Robot_Interface, object):
          if(theta >= min_theta and theta <= max_theta):
              self.button_pushed = True
 
-    def run(self):
-        distanceThread = Thread(target = self.update_movement)
+    def run(self, target_robots):
+        self._distanceThread = Thread(target = self.update_movement)
+
+        self._collision_thread = Thread(target = self.check_collisions, args = (target_robots,))
 
         start_time = self._timer.get_current_timer()
         current_time = 0
 
         try:
-            distanceThread.start()
+            self._distanceThread.start()
+            self._collision_thread.start()
+
             print("Thread has started!")
         except:
             print("Thread failed")
@@ -90,19 +106,6 @@ class Target_Robot(Ground_Robot_Interface, object):
         #    current_time = self.Timer.get_current_timer() - start_time
 
         #    sleep(1.0)
-                
-
-    """def confidenceInterval(self, XY):
-        counter = 0
-        sum = 0
-
-        for robot in self.XYID:
-            sumX = sumX + robot[0]
-            sumY = sumY + robot[1]
-            counter += 1
-
-        meanX = sumX/counter
-        meanY = sumY/counter"""
     
     def change_X_data(self, x):
         self._x = x
@@ -114,7 +117,7 @@ class Target_Robot(Ground_Robot_Interface, object):
         self._deltaX = velocityX
 
     def change_VY_data(self, velocityY):
-        self.deltaY = velocityY
+        self._deltaY = velocityY
 
     def check_error(self, x, y, velocityX, velocityY):
         pErrorX = ((self._x - x) /  x)
@@ -132,7 +135,7 @@ class Target_Robot(Ground_Robot_Interface, object):
         if not (pErrorVX <= 0.001):
             self.change_VX_data(velocityX)
 
-        pErrorVY = ((self.deltaY - velocityY) / velocityY)
+        pErrorVY = ((self._deltaY - velocityY) / velocityY)
 
         if not (pErrorVY<= 0.001):
             self.change_VY_data(velocityY)
