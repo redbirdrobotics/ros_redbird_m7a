@@ -22,8 +22,8 @@ class Camera():
         self.hRes = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
         self.vRes = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
         self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
-        self.lensRange = hRange, vRange
-        self.orientation = azimuth, altitude
+        self.lensRange = np.radians(hRange), np.radians(vRange)
+        self.orientation = np.radians(azimuth), np.radians(altitude)
         self.xAxis = np.zeros((1, hRes))
         self.yAxis = np.zeros((1, vRes))
         return 
@@ -73,23 +73,13 @@ class Camera():
         vRange_Mid = vRange/2
         az, al = self.orientation
 
-        #Create X & Y Axis of Angle Map       
-        #X AXIS
-        hVals = np.linspace((hRange_Mid + az), (0 + az), hRes_Mid)
-        rightAxis = np.flip(hVals, 0)
-        self.xAxis = np.append(hVals, rightAxis, 0)
-        #Y AXIS
-        vVals = np.linspace((vRange_Mid + al), (0 + al), vRes_Mid)
-        bottomAxis = np.flip(vVals, 0)
-        self.yAxis = np.append(vVals, bottomAxis, 0)
-                             
-##        #FILL IN THE ARRAY WITH VALUES
+        #Create X & Y Axis of Angle Map
         
-##        for y in range(vRes):
-##            for x in range(hRes):
-##                self.angleMap[y,x] = math.sqrt(pow(yAxis[y],2) + pow(xAxis[x],2))
-                
-##        #Write array to txt file fo sho
-##        np.savetxt('full_array', map_angles, '%2.2f')        
-##        return
+        #X AXIS
+        self.xAxis = np.linspace((-hRange_Mid + az), (hRange_Mid + az), hRes)
+        
+        #Y AXIS
+        self.yAxis = np.linspace((vRange_Mid + al), (-vRange_Mid + al), vRes)
+        #print "Cam yAxis from" ,(vRange_Mid + al) ,"to", (-vRange_Mid + al), "with" ,hRes ,"Values"
+        return
 

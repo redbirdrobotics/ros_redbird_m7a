@@ -38,10 +38,9 @@ class Utilities():
         return array
  
     @staticmethod
-    def getMaskList(frameList, maskValsList, greyVals, beta):
+    def getMaskList(frameList, maskValsList, greyValsList, clean = True):
         maskList = []
         cam = -1
-        #print greyVals[0], greyVals[1]
         for frame in frameList:
             mask = 0
             cam +=1
@@ -50,13 +49,19 @@ class Utilities():
                 mask += 1
 
                 count, hsvMask = Utilities.createHsvMask(frame, maskVal[0], maskVal[1])
-                clnHsvMask = Utilities.cleanMask(hsvMask, 1000)
-                count, greyMask = Utilities.createGreyMask(frame, greyVals[0], greyVals[1])
-                clnGreyMask = Utilities.cleanMask(greyMask, 1000)
-                #weightedMask = cv2.addWeighted(clnHsvMask, 1, clnGreyMask, beta, 0.0)
+                if clean == True:
+                    hsvMask = Utilities.cleanMask(hsvMask, 1000)
                 maskList.append((cam, mask))
-                maskList.append(clnHsvMask)
+                maskList.append(hsvMask)
 
+            for greyVal in greyValsList:
+
+                count, greyMask = Utilities.createGreyMask(frame, greyVal[0], greyVal[1])
+                if clean == True:
+                    greyMask = Utilities.cleanMask(greyMask, 1000)
+                maskList.append((cam, mask))
+                maskList.append(greyMask)
+                
         return maskList
 
     @staticmethod
@@ -127,7 +132,7 @@ class Utilities():
             #Filter by Area
             object.filterByArea = True
             object.minArea = 100
-            object.maxArea = 250
+            object.maxArea = 1500
 
             #Filter by Circularity
             object.filterByCircularity = False
@@ -159,14 +164,14 @@ class Utilities():
 
             else:           
                 while detect == True:
-
+                    
                     mask = maskList[m]
                     obj = detector.detect(mask)
                     if not (obj == []):
                         x = int(obj[0].pt[0])
                         y = int(obj[0].pt[1])
                         r = int(obj[0].size/2)
-                        
+                        #print "area", obj[0].area
                         if r < 15:
                             r += 25
                             

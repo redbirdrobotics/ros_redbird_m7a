@@ -11,6 +11,7 @@ class Robot():
 #---------------------------------------------------#
     def __init__(self, num):
         self.ident = num
+        self.found = False
         self.cam = None
         self.coords = (0,0)
         self.radius = 0
@@ -20,7 +21,8 @@ class Robot():
         self.blob = None
         self.lostNum = 0
         self.mcoords = (0,0)
-        self.allData = [self.ident, self.cam, self.coords, self.radius, self.ROI, self.vector, self.color, self.blob, self.lostNum, self.mcoords]
+        self.height = 0
+        self.allData = [self.ident, self.cam, self.coords, self.radius, self.ROI, self.vector, self.color, self.lostNum, self.mcoords]
         return
 
 #_______________________________________________________#
@@ -28,6 +30,7 @@ class Robot():
 #---------------------------------------------------#
 
     def wipeRobot(self):
+        self.found = False
         self.cam = None
         self.coords = (0,0)
         self.radius = 0
@@ -54,6 +57,32 @@ class Robot():
     def printAllData(objList):
         for robot in objList:
             print robot.allData
+        return
+
+#_______________________________________________________#
+    #COORDINATE CONVERSION
+#---------------------------------------------------#
+
+    def coordConvert(self, xN, yN, xAxis, yAxis, height):
+        x, y = self.coords
+        theta = xAxis[x]
+        phi = yAxis[y]
+        yDist = height*np.tan(phi)
+        xDist = yDist*np.tan(theta)
+        self.mcoords = (xDist + xN, yDist + yN)
+        return
+    
+    @staticmethod
+    def listConversion(objQuad, objRobotList, objCamList):
+        xN, yN = objQuad.mcoords
+        h = objQuad.height
+
+        for robot in objRobotList:
+            if robot.found == True:
+                xAxis = objCamList[robot.cam].xAxis
+                yAxis = objCamList[robot.cam].yAxis
+                robot.coordConvert(xN, yN, xAxis, yAxis, h)
+        return
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
@@ -148,11 +177,11 @@ class Robot():
                 if (type(address) == int):
                      ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
                      obj = blob.detect(ROI)
-                     bBox, colorMatch = Robot.colorBox(ROI, 40)
 
                      if not obj == []:
                          robot.correctLostNum()
-                         #print 'robot', robot.ident, 'found in ROI'
+                         robot.found = True
+                         print 'robot', robot.ident, 'found in ROI'
                                                  
                          x = int(obj[0].pt[0] + roiVals[2])
                          y = int(obj[0].pt[1] + roiVals[0])
@@ -165,14 +194,24 @@ class Robot():
                          maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                          
                      else:
-                         #print 'robot', robot.ident, 'not in ROI'
+                         print 'robot', robot.ident, 'not in ROI'
+
+                         #FOR TROUBLESHOOTING ONLY
+                         cv2.imshow("ROI", ROI)
+                         k = cv2.waitKey(30) & 0xff
+                         esc = False
+                         if k == 27:
+                             esc = True
+                             break
+                         #_________________________#
+                        
                          lost = robot.incLostNum(5)
                          
                          if lost == True:
-                             #print 'lost'
+                             print 'lost'
                              robot.wipeRobot()
                          else:
-                             #print 'missing for', robot.lostNum, 'frames'
+                             print 'missing for', robot.lostNum, 'frames'
                              robot.selfUpdate(0,0,0)
         
         return maskList
@@ -233,6 +272,11 @@ class Robot():
     #UPDATE
 #---------------------------------------------------#
 
+    def quadUpdate(self, x, y, h):
+        self.mcoords = (x, y)
+        self.height = h
+        return
+    
     #SELF UPDATE
     #--------------#
     #Decision Tree:
@@ -251,8 +295,7 @@ class Robot():
         if self.lostNum == 0:
             self.createVect(x,y)
             self.coords = (x,y)
-            self.radius = r            
-            
+            self.radius = r           
             
         elif ((self.lostNum != 0) and (self.vector != (0,0))):
             oldROI = self.ROI
@@ -356,12 +399,17 @@ class Robot():
     @staticmethod
     def circleFound(image, objList):
         for robot in objList:
-            x,y = robot.coords
+            x, y = robot.coords
             r = robot.radius
+            mx, my = robot.mcoords
+            mx = round(mx, 2)
+            my = round(my, 2)
             
             if not r == 0:
                 image = cv2.circle(image, (x,y), r, (0,0,0), 1)
                 image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                image = cv2.putText(image, ("mx: %s" % mx), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                image = cv2.putText(image, ("my: %s" % my), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
         return image
 
 
