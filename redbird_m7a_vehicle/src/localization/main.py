@@ -74,6 +74,7 @@ while True:
     workingFrameList = Utilities.copyFrameList(showingFrameList)
     robotMaskList = Utilities.getMaskList(workingFrameList, hsvBlobMaskList, greyBlobMaskList)
     goalMaskList = Utilities.getMaskList(workingFrameList, hsvHoughMaskList, [])
+    #Utilities.showFramePause(robotMaskList)
 
     #Search For Landmarks
     goalLine.detectGoalLine(goalMaskList)
@@ -81,7 +82,7 @@ while True:
     
     #Search Robot ROIs
     newmaskList = Robot.ROIsearch(roboList, robotMaskList)
-    #Utilities.showFramePause(newmaskList)
+    
     
     #Search Whole Frame
     xyrcList, colList = Utilities.blobSearch(newmaskList, groundRobot)

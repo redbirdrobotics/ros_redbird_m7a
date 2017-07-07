@@ -22,6 +22,7 @@ class Robot():
         self.lostNum = 0
         self.mcoords = (0,0)
         self.height = 0
+        self.testLine = None
         self.allData = [self.ident, self.cam, self.coords, self.radius, self.ROI, self.vector, self.color, self.lostNum, self.mcoords]
         return
 
@@ -186,24 +187,25 @@ class Robot():
                          x = int(obj[0].pt[0] + roiVals[2])
                          y = int(obj[0].pt[1] + roiVals[0])
                          r = int(obj[0].size/2)
+                         
 
                          if r < 25:
                              r += 25
-                        
+                         print "XYR", x, y, r
                          robot.selfUpdate(x,y,r)
                          maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                          
                      else:
                          print 'robot', robot.ident, 'not in ROI'
 
-                         #FOR TROUBLESHOOTING ONLY
-                         cv2.imshow("ROI", ROI)
-                         k = cv2.waitKey(30) & 0xff
-                         esc = False
-                         if k == 27:
-                             esc = True
-                             break
-                         #_________________________#
+##                         #FOR TROUBLESHOOTING ONLY
+##                         cv2.imshow("ROI", ROI)
+##                         k = cv2.waitKey(30) & 0xff
+##                         esc = False
+##                         if k == 27:
+##                             esc = True
+##                             break
+##                         #_________________________#
                         
                          lost = robot.incLostNum(5)
                          
@@ -319,7 +321,6 @@ class Robot():
             self.wipeRobot()
             #print "robot", self.ident, "unestablished vector, cleared"
         return
-
         
         
     #UPDATE ROBOT DATA
@@ -400,6 +401,7 @@ class Robot():
     def circleFound(image, objList):
         for robot in objList:
             x, y = robot.coords
+            vX, vY = robot.vector
             r = robot.radius
             mx, my = robot.mcoords
             mx = round(mx, 2)
@@ -408,8 +410,9 @@ class Robot():
             if not r == 0:
                 image = cv2.circle(image, (x,y), r, (0,0,0), 1)
                 image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
-                image = cv2.putText(image, ("mx: %s" % mx), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
-                image = cv2.putText(image, ("my: %s" % my), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                image = cv2.putText(image, ("mx: %s Vx %s" % (mx, vX)), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                image = cv2.putText(image, ("my: %s Vy %s" % (my, vY)), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                image = cv2.line(image, (x,y), (x + vX, y + vY), (0,0,0), 5)
         return image
 
 
