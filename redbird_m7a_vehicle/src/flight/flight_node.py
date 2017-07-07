@@ -2,7 +2,7 @@
 
 import rospy
 import time
-from utils import Vehicle, Flight_Controller, Flight_Node
+from utils import Vehicle, Flight_Controller, Flight_Mode
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
 class Flight(object):

@@ -4,7 +4,7 @@ import time
 from geometry_msgs.msg import TwistStamped, PoseStamped
 
 class Flight_Mode:
-    INITIAL, TAKEOFF, HOLD, LAND, VELOCITY, POSITION = range(0, 5)
+    INITIAL, TAKEOFF, HOLD, LAND, VELOCITY, POSITION = range(0, 6)
 
 class Flight_Controller:
     def __init__(self, vehicle):
@@ -52,7 +52,7 @@ class Flight_Controller:
         """
         self._mode = mode
 
-    def set_velocity(self, vel, time):
+    def set_velocity(self, vel, time=0):
         """Sets the desired velocity for the vehicle.
 
         The velocity is in the form of a tuple representing  the X, Y, and Z velocities (in m/s)
@@ -60,10 +60,11 @@ class Flight_Controller:
 
         Args:
             vel (tuple): Velocity in the form (X, Y, Z).
-            time (int): The time in seconds to maintain the velocity.
+            time (int): The time in seconds to maintain the velocity. 0 represents infinity. Default: 0
 
         """
         self._target_velocity = vel
+        self._target_velocity_time = time
 
     def set_position(self, pos):
         """Sets the desired position for the vehicle.
@@ -101,8 +102,8 @@ class Flight_Controller:
                 # Perform a takeoff and enter Flight_Mode.HOLD
                 pass
             elif self._mode == Flight_Mode.HOLD:
-                # Hold the current position
-                pass
+                # Hold the current positio
+n                pass
             elif self._mode == Flight_Mode.LAND:
                 # Perform a landing and return to Flight_Mode.INITIAL
                 pass
@@ -113,15 +114,27 @@ class Flight_Controller:
                 # Enter the position control loop
                 position_loop()
 
+    def takeoff_loop():
+        """Loops in Flight_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
+        while self._mode = Flight_Mode.TAKEOFF and not self._target_altitude_reached:
+            # Build and publish message
+            msg = TwistStamped(header = Header(stamp=rospy.Time.now()))
+            msg.twist.linear.x = 0
+            msg.twist.linear.y = 0
+            msg.twist.linear.z = 0.5
+
+            # Publish message
+            self._pos_pub.publish(msg)
+
+            # todo
+
+        # Set mode to HOLD
+        self._mode = Flight_Mode.HOLD
+
+
     def position_loop():
         """Loops in Flight_Mode.POSITION until either the mode is switched or the target has been reached."""
         while self._mode == Flight_Mode.POSITON and not self._target_position_reached:
-            # Build and publish the target position
-            msg = PoseStamped(header = Header(stamp=rospy.Time.now()))
-            msg.pose.x = self._target_position[0]
-            msg.pose.y = self._target_position[1]
-            msg.pose.z = self._target_position[2]
-
             # Break if within allowed distance of target
             def is_near(x, y):
                 return abs(x - y) < 0.25
@@ -130,6 +143,15 @@ class Flight_Controller:
                is_near(self._vehicle.get_position_y(), self._target_position[1]) and \
                is_near(self._vehicle.get_position_z(), self._target_position[2]):
                 break
+
+            # Build target position message
+            msg = PoseStamped(header = Header(stamp=rospy.Time.now()))
+            msg.pose.x = self._target_position[0]
+            msg.pose.y = self._target_position[1]
+            msg.pose.z = self._target_position[2]
+
+            # Publish message
+            self._pos_pub.publish(msg)
 
         # Set mode to HOLD
         self._mode = Flight_Mode.HOLD
