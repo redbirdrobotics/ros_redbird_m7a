@@ -1,7 +1,7 @@
 from threading import Thread
 from random import randint
 from math import tan, pow, sqrt
-from Sim_Timer import Sim_Timer, PAUSED
+from Sim_Timer import Sim_Timer
 from time import sleep
 
 class Ground_Robot_Interface(Thread, object):
@@ -15,22 +15,15 @@ class Ground_Robot_Interface(Thread, object):
         self._id = id
         self.color = color
         self._radius = 1.0 #m
+        self._omega = 0
 
         self._deltaX = ((randint(-33, 33)) / 100 )
 
         self._deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
-        
-        if(self._deltaX != 0):
-            self.angle = tan((self._deltaY / self._deltaX))
-        else:
-            self.angle = 90
 
         self.thread_cancelled = False
         self.collision = False
         self._boundary = False
-
-        self.pError = 0.0 
-        self.pErrorV = 0.0
         
     def get_coordinates(self):
         return (self.x, self.y)

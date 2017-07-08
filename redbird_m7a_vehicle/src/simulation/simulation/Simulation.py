@@ -5,33 +5,45 @@ import time
 
 class Simulation(object):
     """description of class"""
-    global _timer
-    _timer = Sim_Timer()
 
     def __init__(self):
-        global _timer
-        self.Timer= Sim_Timer()
+        self._timer = Sim_Timer()
 
-        robot = Target_Robot(0.5, 0.7, 1, 2, self._timer)
-        robot1 = Target_Robot(1.0, 6.7, 2, 1, self._timer)
         #oRobot = Obstacle_Robots(TIMER)
 
-        self.target_robot = []
+        #creating the main array of both the ground and obstacle robots
+        self.target_robots = []
+        self.obstacle_robots = []
+
+        for robot in range(1, 10):
+            self.target_robots.append(Target_Robot(0, 0, robot, 1, self._timer))
+
+        for robot in range(11, 15):
+            print("appending the obstacle robots")
+
+            self.obstacle_robots.append(Obstacle_Robots(0,0, robot, 0, self._timer))
+
+        print(self._timer.get_pause())
+
         #self.obstacle_robot = []
 
-        self.target_robot.append(robot)
-        self.target_robot.append(robot1)
-        #self.obstacle_robot.append(oRobot)
-
     def run(self):
-        global _timer
         self._timer.run()
 
-        for arduino in self.target_robot:
-            arduino.run(self.target_robot)
+        #for arduino in self.target_robots:
+        #    print("initing all of the ground robots")
+        #    arduino.run(self.target_robot)
+
+        for robot in self.obstacle_robots:
+            print("initing the obstacle robots")
+            robot.run()
+
+        print("trying to sleep")
 
         time.sleep(5)
-        print(self._timer.get_current_timer())
+        print(self._timer.get_pause())
+
+        print("trying to pause the sim")
 
         self._timer.pause()
 

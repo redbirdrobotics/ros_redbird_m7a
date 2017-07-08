@@ -1,5 +1,5 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
-from Sim_Timer import Sim_Timer, PAUSED
+from Sim_Timer import Sim_Timer
 from time import sleep
 from threading import Thread
 
@@ -7,7 +7,7 @@ class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
 
     def __init__(self, x, y, id, color, timer): 
-        self._timer = timer
+        self._timer = timer 
 
         return super().__init__(x, y, id, color)
 
@@ -22,9 +22,10 @@ class Target_Robot(Ground_Robot_Interface, object):
         return self._y
      
     def update_movement(self):
-        while(PAUSED == False):
+        while not (self._timer._PAUSED.is_set()):
             self.current_pos = (self._x, self._y , self._id)
             print(self.current_pos)
+            print(self._timer.get_pause())
 
             if(self.collision == True):
                 self._deltaX = self._deltaX * -1

@@ -81,9 +81,9 @@ class Simulation_Node:
 if __name__ == '__main__':
     try:
         # Create simulation node object
-        sim = Simulation_Node()
+        sim_n = Simulation_Node()
         
         # Start simulation data publisher
-        sim.publish_data()
+        sim_n.publish_data()
     except rospy.ROSInterruptException:
         pass
