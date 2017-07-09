@@ -1,5 +1,7 @@
 import yaml
 
+# TODO: Add header docstring
+
 class Configuration:
     def __init__(self, file_name):
         # Open file

@@ -1,15 +1,15 @@
 #!/usr/bin/python
 
+# TODO: Add header docstring
+
 import rospy
 import time
 from utils import Vehicle, Flight_Controller, Flight_Mode
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
+
 class Flight(object):
     def __init__(self):
-        # Initialize node
-        rospy.init_node('flight_node', anonymous=True)
-
         # Initialize variables
         self._loc_map = Map()
         self._sim_map = Map()
@@ -138,8 +138,11 @@ class Flight(object):
             return
 
 if __name__ == '__main__':
+    # Initialize node
+    rospy.init_node('flight_node')
+
     try:
-        # Initialize node
+        # Initialize flight
         node = Flight()
 
         # Start node
