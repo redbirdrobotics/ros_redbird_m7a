@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# TODO: Add header docstring
+
 import rospy
 import mavros
 import time
@@ -37,7 +39,7 @@ class Vehicle:
 
     def arm(self):
         self._arm_serv(True)
-        time.sleep(1)
+        rospy.sleep(1)
 
     def disarm(self):
         self._arm_serv(False)
@@ -49,7 +51,7 @@ class Vehicle:
             self._set_mode_serv(custom_mode=mode)
 
             # Allow a moment for change to propogate
-            time.sleep(0.1)
+            rospy.sleep(0.1)
 
             # Return true for success
             return True
