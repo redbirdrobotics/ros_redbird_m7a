@@ -5,17 +5,17 @@
 import rospy
 import threading
 import math
+import utils
 from enum import Enum
-from Utilities import Utilities
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from std_msgs.msg import Header
 
 
-class Flight_Mode(Enum):
+class Control_Mode(Enum):
     INITIAL, TAKEOFF, HOLD, LAND, VELOCITY, POSITION = range(0, 6)
 
 
-class Flight_Controller:
+class Controller(object):
     def __init__(self, vehicle):
         # Define queue size
         self._queue_size = 10
@@ -40,7 +40,7 @@ class Flight_Controller:
         self._thread_done = threading.Event()
 
         # State machine
-        self._mode = Flight_Mode.INITIAL
+        self._mode = Control_Mode.INITIAL
 
         # Handle threading
         try:
@@ -56,10 +56,10 @@ class Flight_Controller:
             rospy.logerror("Unable to start flight control thread")
 
     def set_mode(self, mode):
-        """Sets the vehicle mode to one of those available in the Flight_Mode class.
+        """Sets the vehicle mode to one of those available in the Control_Mode class.
 
         Args:
-            mode (Flight_Mode): The desired flight control mode.
+            mode (Control_Mode): The desired flight control mode.
 
         """
         # Set mode
@@ -69,7 +69,7 @@ class Flight_Controller:
         rospy.loginfo(self._log_tag + "Mode changed to %s" % self._mode)
 
     def get_mode(self):
-        """Returns the current Flight_Mode of the controller."""
+        """Returns the current Control_Mode of the controller."""
         return self._mode
 
     def set_velocity(self, vel, time=0.0):
@@ -85,7 +85,7 @@ class Flight_Controller:
         """
         # Verify parameter data types
         if type(vel) is not tuple or not all(isinstance(i, float) for i in vel) or type(time) is not float:
-            raise TypeError('Specified parameter data type is incorrect')
+            raise TypeError("Invalid parameter data type(s)")
 
         # Set parameters
         self._target_velocity = vel
@@ -106,7 +106,7 @@ class Flight_Controller:
         """
         # Verify parameter data types
         if type(pos) is not tuple or not all(isinstance(i, float) for i in pos):
-            raise TypeError('Specified parameter data type is incorrect')
+            raise TypeError("Invalid parameter data type(s)")
 
         # Set the position setpoint
         self._target_position = pos
@@ -123,7 +123,7 @@ class Flight_Controller:
         """
         # Verify parameter data types
         if type(alt) is not float:
-            raise TypeError('Specified parameter data type is incorrect')
+            raise TypeError("Invalid parameter data type(s)")
 
         # Set takeoff altitude
         self._takeoff_altitude = alt
@@ -136,27 +136,27 @@ class Flight_Controller:
 
         # Enter loop indefinitely
         while not rospy.is_shutdown():
-            if self._mode == Flight_Mode.INITIAL:
+            if self._mode == Control_Mode.INITIAL:
                 # Wait for direction
                 pass
-            elif self._mode == Flight_Mode.TAKEOFF:
-                # Perform a takeoff and enter Flight_Mode.HOLD
+            elif self._mode == Control_Mode.TAKEOFF:
+                # Perform a takeoff and enter Control_Mode.HOLD
                 self.takeoff_loop()
-            elif self._mode == Flight_Mode.HOLD:
+            elif self._mode == Control_Mode.HOLD:
                 # Hold the current position
                 self.hold_loop()
-            elif self._mode == Flight_Mode.LAND:
-                # Perform a landing and return to Flight_Mode.INITIAL
+            elif self._mode == Control_Mode.LAND:
+                # Perform a landing and return to Control_Mode.INITIAL
                 self.land_loop()
-            elif self._mode == Flight_Mode.VELOCITY:
+            elif self._mode == Control_Mode.VELOCITY:
                 # Enter the velocity control loop
                 self.velocity_loop()
-            elif self._mode == Flight_Mode.POSITION:
+            elif self._mode == Control_Mode.POSITION:
                 # Enter the position control loop
                 self.position_loop()
 
     def hold_loop(self):
-        """Loops in Flight_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
+        """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
 
         # Grab current position
         current_position = self._vehicle.get_position()
@@ -164,8 +164,8 @@ class Flight_Controller:
         # Queue counter
         queue_count = 0
 
-        # Loop while in Flight_Mode.HOLD
-        while not rospy.is_shutdown() and self._mode == Flight_Mode.HOLD:
+        # Loop while in Control_Mode.HOLD
+        while not rospy.is_shutdown() and self._mode == Control_Mode.HOLD:
             # Build target position message
             msg = PoseStamped(header = Header(stamp=rospy.get_rostime()))
             msg.pose.position.x = current_position[0]
@@ -186,7 +186,7 @@ class Flight_Controller:
             self._rate.sleep()
 
     def land_loop(self):
-        """Loops in Flight_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
+        """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
 
         # Count the number of iterations through the loop
         loops = 0
@@ -194,7 +194,7 @@ class Flight_Controller:
         # Queue counter
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Flight_Mode.LAND:
+        while not rospy.is_shutdown() and self._mode == Control_Mode.LAND:
             # Break if the number of loops has exceeded the required amount and the magnitude of movement is less than 0.1
             if loops >= 10 and \
                 abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + \
@@ -225,17 +225,17 @@ class Flight_Controller:
             loops += 1
 
         # Set mode to HOLD
-        self.set_mode(Flight_Mode.INITIAL)
+        self.set_mode(Control_Mode.INITIAL)
 
     def takeoff_loop(self):
-        """Loops in Flight_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
+        """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
 
         # Queue counter
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Flight_Mode.TAKEOFF:
+        while not rospy.is_shutdown() and self._mode == Control_Mode.TAKEOFF:
             # Break if within allowed deviation of target altitude
-            if Utilities.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), allowed_range=0.1):
+            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), allowed_range=0.1):
                 break
 
             # Build and publish message
@@ -258,17 +258,17 @@ class Flight_Controller:
             self._rate.sleep()
 
         # Set mode to HOLD
-        self.set_mode(Flight_Mode.HOLD)
+        self.set_mode(Control_Mode.HOLD)
 
     def position_loop(self):
-        """Loops in Flight_Mode.POSITION until either the mode is switched or the target has been reached."""
+        """Loops in Control_Mode.POSITION until either the mode is switched or the target has been reached."""
 
         # Queue count
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Flight_Mode.POSITION:
+        while not rospy.is_shutdown() and self._mode == Control_Mode.POSITION:
             # Break if within allowed deviation of target
-            if Utilities.is_near(self._vehicle.get_position(), self._target_position):
+            if utils.is_near(self._vehicle.get_position(), self._target_position):
                 break
 
             # Build target position message
@@ -291,10 +291,10 @@ class Flight_Controller:
             self._rate.sleep()
 
         # Set mode to HOLD
-        self.set_mode(Flight_Mode.HOLD)
+        self.set_mode(Control_Mode.HOLD)
 
     def velocity_loop(self):
-        """Loops in Flight_Mode.VELOCITY until either the mode is switched or the set duration has been met."""
+        """Loops in Control_Mode.VELOCITY until either the mode is switched or the set duration has been met."""
 
         # Queue counter
         queue_count = 0
@@ -302,7 +302,7 @@ class Flight_Controller:
         # Record start time for timeout tracking
         start_time = rospy.get_time()
 
-        while not rospy.is_shutdown() and self._mode == Flight_Mode.VELOCITY:
+        while not rospy.is_shutdown() and self._mode == Control_Mode.VELOCITY:
             # Break if timeout is enabled and has been surpassed
             if self._travel_time > 0 and (rospy.get_time() - start_time) > self._travel_time:
                 break
@@ -327,7 +327,7 @@ class Flight_Controller:
             self._rate.sleep()
 
         # Set mode to HOLD
-        self.set_mode(Flight_Mode.HOLD)
+        self.set_mode(Control_Mode.HOLD)
 
         # Reset velocity target
         self.set_velocity((0.0, 0.0, 0.0))
