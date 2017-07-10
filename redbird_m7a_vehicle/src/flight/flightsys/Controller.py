@@ -6,6 +6,7 @@ import rospy
 import threading
 import math
 import utils
+import multiprocessing
 from enum import Enum
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from std_msgs.msg import Header
@@ -15,8 +16,11 @@ class Control_Mode(Enum):
     INITIAL, TAKEOFF, HOLD, LAND, VELOCITY, POSITION = range(0, 6)
 
 
-class Controller(object):
+class Controller(threading.Thread):
     def __init__(self, vehicle):
+        # Call super
+        threading.Thread.__init__(self)
+
         # Define queue size
         self._queue_size = 10
 
@@ -36,24 +40,14 @@ class Controller(object):
         # Set rospy rate
         self._rate = rospy.Rate(20)
 
-        # Threading
-        self._thread_done = threading.Event()
-
         # State machine
         self._mode = Control_Mode.INITIAL
 
-        # Handle threading
-        try:
-            # Create thread object
-            self._thread = threading.Thread(target=self.loop, args=())
+        # Threading
+        self._thread_event = threading.Event()
 
-            # Start thread
-            self._thread.start()
-
-            # Allow thread to start
-            rospy.sleep(1)
-        except:
-            rospy.logerror("Unable to start flight control thread")
+        # Startup
+        self.start()
 
     def set_mode(self, mode):
         """Sets the vehicle mode to one of those available in the Control_Mode class.
@@ -131,29 +125,35 @@ class Controller(object):
         # Log info
         rospy.loginfo(self._log_tag + "Takeoff altitude set to %0.2f m" % self._takeoff_altitude)
 
-    def loop(self):
-        """This is the main loop that processes flight modes and enters the appropriate control loop."""
+    def get_takeoff_altitude(self):
+        """Returns the set takeoff altitude."""
+        return self._takeoff_altitude
 
-        # Enter loop indefinitely
-        while not rospy.is_shutdown():
-            if self._mode == Control_Mode.INITIAL:
-                # Wait for direction
-                pass
-            elif self._mode == Control_Mode.TAKEOFF:
-                # Perform a takeoff and enter Control_Mode.HOLD
-                self.takeoff_loop()
-            elif self._mode == Control_Mode.HOLD:
-                # Hold the current position
-                self.hold_loop()
-            elif self._mode == Control_Mode.LAND:
-                # Perform a landing and return to Control_Mode.INITIAL
-                self.land_loop()
-            elif self._mode == Control_Mode.VELOCITY:
-                # Enter the velocity control loop
-                self.velocity_loop()
-            elif self._mode == Control_Mode.POSITION:
-                # Enter the position control loop
-                self.position_loop()
+    def run(self):
+        """This is the main loop that processes flight modes and enters the appropriate control loop."""
+        try:
+            # Enter loop indefinitely
+            while not self._thread_event.is_set() and not rospy.is_shutdown():
+                if self._mode == Control_Mode.INITIAL:
+                    # Wait for direction
+                    pass
+                elif self._mode == Control_Mode.TAKEOFF:
+                    # Perform a takeoff and enter Control_Mode.HOLD
+                    self.takeoff_loop()
+                elif self._mode == Control_Mode.HOLD:
+                    # Hold the current position
+                    self.hold_loop()
+                elif self._mode == Control_Mode.LAND:
+                    # Perform a landing and return to Control_Mode.INITIAL
+                    self.land_loop()
+                elif self._mode == Control_Mode.VELOCITY:
+                    # Enter the velocity control loop
+                    self.velocity_loop()
+                elif self._mode == Control_Mode.POSITION:
+                    # Enter the position control loop
+                    self.position_loop()
+        except rospy.ROSException, KeyboardInterrupt:
+            pass
 
     def hold_loop(self):
         """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
@@ -165,7 +165,7 @@ class Controller(object):
         queue_count = 0
 
         # Loop while in Control_Mode.HOLD
-        while not rospy.is_shutdown() and self._mode == Control_Mode.HOLD:
+        while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.HOLD:
             # Build target position message
             msg = PoseStamped(header = Header(stamp=rospy.get_rostime()))
             msg.pose.position.x = current_position[0]
@@ -194,7 +194,7 @@ class Controller(object):
         # Queue counter
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Control_Mode.LAND:
+        while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.LAND:
             # Break if the number of loops has exceeded the required amount and the magnitude of movement is less than 0.1
             if loops >= 10 and \
                 abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + \
@@ -233,7 +233,9 @@ class Controller(object):
         # Queue counter
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Control_Mode.TAKEOFF:
+        print 'takeoff'
+
+        while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.TAKEOFF:
             # Break if within allowed deviation of target altitude
             if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), allowed_range=0.1):
                 break
@@ -246,6 +248,8 @@ class Controller(object):
 
             # Publish message
             self._vel_pub.publish(msg)
+
+            print 'publishing'
 
             # Increment queue count
             queue_count += 1
@@ -266,7 +270,7 @@ class Controller(object):
         # Queue count
         queue_count = 0
 
-        while not rospy.is_shutdown() and self._mode == Control_Mode.POSITION:
+        while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.POSITION:
             # Break if within allowed deviation of target
             if utils.is_near(self._vehicle.get_position(), self._target_position):
                 break
@@ -302,7 +306,7 @@ class Controller(object):
         # Record start time for timeout tracking
         start_time = rospy.get_time()
 
-        while not rospy.is_shutdown() and self._mode == Control_Mode.VELOCITY:
+        while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.VELOCITY:
             # Break if timeout is enabled and has been surpassed
             if self._travel_time > 0 and (rospy.get_time() - start_time) > self._travel_time:
                 break
