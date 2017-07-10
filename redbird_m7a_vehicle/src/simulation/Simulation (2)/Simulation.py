@@ -1,6 +1,6 @@
 from Sim_Timer import Sim_Timer
 from Target_Robot import Target_Robot
-from Obstacle_Robot import Obstacle_Robot
+from Obstacle_Robot import Obstacle_Robots
 import time
 
 class Simulation(object):
@@ -21,7 +21,7 @@ class Simulation(object):
         for robot in range(11, 15):
             print("appending the obstacle robots")
 
-            self.obstacle_robots.append(Obstacle_Robot(0,0, robot, 0, self._timer))
+            self.obstacle_robots.append(Obstacle_Robots(0,0, robot, 0, self._timer))
 
         print(self._timer.get_pause())
 
@@ -30,27 +30,22 @@ class Simulation(object):
     def run(self):
         self._timer.run()
 
-        for arduino in self.target_robots:
-            print("initing all of the ground robots")
-            arduino.run(self.get_Target_robots, self.get_Obstacle_Robots)
+        #for arduino in self.target_robots:
+        #    print("initing all of the ground robots")
+        #    arduino.run(self.target_robot)
 
-        for arduino in self.obstacle_robots:
-            print("Initing the index of obstacle robots")
-            arduino.run()
-
-            print("going to the next robot")
+        for robot in self.obstacle_robots:
+            print("initing the obstacle robots")
+            robot.run()
 
         print("trying to sleep")
 
-        time.sleep(10)
+        time.sleep(5)
         print(self._timer.get_pause())
 
         print("trying to pause the sim")
 
         self._timer.pause()
 
-    def get_Target_robots(self):
-        return self.target_robots
-
-    def get_Obstacle_Robots(self):
-        return self.obstacle_robots
+    def get_robots(self):
+        return self.target_robot

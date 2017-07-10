@@ -1,15 +1,17 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer
+from Obstacle_Robot import Obstacle_Robot
 from time import sleep
 from threading import Thread
+from math import fabs
 
 class Target_Robot(Ground_Robot_Interface, object):
     """description of class"""
 
     def __init__(self, x, y, id, color, timer): 
-        self._timer = timer 
+        self._timer = timer
 
-        return super().__init__(x, y, id, color)
+        return super().__init__(x, y, id, color,)
 
     def update_posX(self):
         changeX = self._deltaX * iterations
@@ -21,9 +23,9 @@ class Target_Robot(Ground_Robot_Interface, object):
         self._y = changeY + self._y
         return self._y
      
-    def update_movement(self):
-        while not (self._timer._PAUSED.is_set()):
-            self.current_pos = (self._x, self._y , self._id)
+    def update_movement(self, obstacle_robots, target_robots):
+        while not self._timer._PAUSED.is_set():
+
             print(self.current_pos)
             print(self._timer.get_pause())
 
@@ -35,41 +37,57 @@ class Target_Robot(Ground_Robot_Interface, object):
                 sleep(iterations)
 
             else:
-                self.update_posX()
-                self.update_posY()
+                self._current_pos = (self.update_posX(), self.update_posY(), self._id)
 
                 sleep(iterations)
+
+            self.check_collisions(target_robots, obstacle_robots)
         #super().set_coordinates(self.x, self.y) 
 
-    def check_collisions(self, target_robot):
+    def check_collisions(self, target_robots, obstacle_robots):
         min_num = 0
-        max_num = len(target_robot)
+        max_num = len(target_robots)
 
-        target_robot = [Target_Robot]
+        target_robots = [Target_Robot]
+        obstacle_robots = [Obstacle_Robot]
 
         while min_num < max_num:
-            for robot in range(1, len(target_robot)):
 
-                if(target_robot[robot].boundary):
-                    del target_robot[robot]
+            for robot in range(1, max_num):
+
+                if(target_robots[robot].boundary):
+                    del target_robots[robot]
 
                     break
 
-                if (target_robot[robot]._x >= 10 and target_robot[robot]._y >= 10):
-                    target_robot[robot].boundary = True
+                if (target_robots[robot]._x >= 10 and target_robots[robot]._y >= 10):
+                    target_robots[robot].boundary = True
 
                 else:
-                    dXX = target_robot[min_num]._x - target_robot[robot]._x
-                    dYY = target_robot[min_num]._y - target_robot[robot]._y
+                    dXX = fabs(target_robots[min_num]._x - target_robots[robot]._x)
+                    dYY = fabs(target_robots[min_num]._y - target_robots[robot]._y)
 
                     dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                    if dCC <= 2*radius :
-                        target_robot[min_num].button_pushed(target_robot[robot])
+                    if dCC <= 2*self._radius:
+                        target_robots[min_num].button_pushed(target_robots[robot])
 
                         self.collision = True
 
             min_num = min_num + 1
+
+        for robot in target_robots:
+
+            for oRobot in obstacle_robots:
+
+                dXX = fabs(oRobot._x - target_robots[min_num]._x)
+                dYY = fabs(oRobot._y - target_robots[min_num]._y)
+
+                dCC = sqrt((pow(dXX, 2)) + pow(dYY, 2))
+
+                if dCC <= 2 * self._radius:
+
+                    target_robots[min_num].oButton_pushed(oRobot)
 
     def button_pushed(self, robot):
          robot = Target_Robot
@@ -85,36 +103,63 @@ class Target_Robot(Ground_Robot_Interface, object):
          if(theta >= min_theta and theta <= max_theta):
              self.button_pushed = True
 
-    def run(self, target_robots):
-        self._distanceThread = Thread(target = self.update_movement)
+    def oButton_pushed(self, robot):
+         robot = Obstacle_Robot
+         
+         vector_i = self._x - robot._x
+         vector_j = self._y - robot._y
 
-        self._collision_thread = Thread(target = self.check_collisions, args = (target_robots,))
+         theta = tan(vector_j / vector_i)
 
-        start_time = self._timer.get_current_timer()
-        current_time = 0
+         min_theta = self.theta - 70
+         max_theta = self.theta + 70
+
+         if(theta >= min_theta and theta <= max_theta):
+             self.button_pushed = True
+
+    def run(self, target_robots, obstacle_robots):
+        self._target_robot = Thread(target = self.update_movement(), args = (target_robots, obstacle_robots,))
 
         try:
-            self._distanceThread.start()
-            self._collision_thread.start()
+            self._target_robot.start()
 
-            print("Thread has started!")
+            print("Thread has started")
+
         except:
-            print("Thread failed")
+            print("Thread could not start")
 
-        #while not PAUSED == True and current_time < 20:
-        #    self.update_movement()
+    def update_posX(self):
+        changeX = self._deltaX * iterations
+        self._x = changeX + self._x
+        return self._x
 
-        #    current_time = self.Timer.get_current_timer() - start_time
+    def update_posY(self):
+        changeY = self._deltaY * iterations
+        self._y = changeY + self._y
+        return self._y
 
-        #    sleep(1.0)
-    
+    def update_movement(self):
+        self.current_pos = (self._x, self._y , self._id)
+        print(self.current_pos)
+
+        if(self.collision == True):
+            self.deltaX = self._deltaX * -1
+
+            self._deltaY = self.deltay * -1 
+
+            sleep(1)
+
+        else:
+            self.update_posX()
+            self.update_posY()
+
     def change_X_data(self, x):
         self._x = x
 
     def change_Y_data(self, y):
         self._y = y
 
-    def change_VX_data(self, velocityX, velocityY):
+    def change_VX_data(self, velocityX):
         self._deltaX = velocityX
 
     def change_VY_data(self, velocityY):

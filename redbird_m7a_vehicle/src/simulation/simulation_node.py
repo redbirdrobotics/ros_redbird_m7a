@@ -43,6 +43,7 @@ class Simulation_Node:
         for x in xrange(14):
             target_robots.append(GroundRobotPosition())
 
+        counter = 0
         # Enter main loop while ROS is running
         while not rospy.is_shutdown():
             # Loop through all simulated robots
@@ -56,6 +57,12 @@ class Simulation_Node:
                         robot_msg.vec_x = sim_robot.deltaX
                         robot_msg.vec_y = sim_robot.deltaY
                         robot_msg.color = sim_robot.color
+
+            for sim_robot in sim.get_Obtacle_Robots():
+                for robot_msg in robot_msgs:
+                    if robot_msg.id == sim_robot.get_id():
+                        robot 
+
             
             # Add robots to map
             map.ground_robots = robot_msgs

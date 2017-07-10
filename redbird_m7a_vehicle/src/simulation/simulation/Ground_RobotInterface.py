@@ -15,6 +15,8 @@ class Ground_Robot_Interface(Thread, object):
         self._id = id
         self.color = color
         self._radius = 1.0 #m
+
+        #for obstacle robots travelling in a circle
         self._omega = 0
 
         self._deltaX = ((randint(-33, 33)) / 100 )
@@ -25,50 +27,35 @@ class Ground_Robot_Interface(Thread, object):
         self.collision = False
         self._boundary = False
         
-    def get_coordinates(self):
-        return (self.x, self.y)
-
-    def get_id(self):
-        return self.ID 
-
-    def set_coordinates(self, x, y):
-        self._x = x
-        self._y = y
-
-    def get_angle(self):
-        pass
-
-    def run(self):
-        pass
-
-
-    def cancel(self):
-        pass
-
     def update_posX(self):
-        changeX = self._deltaX * iterations
-        self._x = changeX + self._x
-        return self._x
+        pass
 
     def update_posY(self):
-        changeY = self._deltaY * iterations
-        self._y = changeY + self._y
-        return self._y
-
+        pass
+     
     def update_movement(self):
-        self.current_pos = (self._x, self._y , self._id)
-        print(self.current_pos)
+        pass
 
-        if(self.collision == True):
-            self.deltaX = self._deltaX * -1
+    def check_collisions(self, target_robot, obstacle_robots):
+        pass
 
-            self._deltaY = self.deltay * -1 
+    def button_pushed(self, robot):
+        pass
 
-            sleep(1)
+    def run(self, target_robots, obstacle_robots):
+        pass
+    
+    def change_X_data(self, x):
+        pass
 
-        else:
-            self.update_posX()
-            self.update_posY()
+    def change_Y_data(self, y):
+        pass
 
-    def check_collisions(self):
+    def change_VX_data(self, velocityX):
+        pass
+
+    def change_VY_data(self, velocityY):
+        pass
+
+    def check_error(self, x, y, velocityX, velocityY):
         pass
