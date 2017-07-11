@@ -99,7 +99,6 @@ class RedbirdPanel(wx.Panel):
         self.drawGridPanel.Refresh()
 
     def redrawGrid(self, event):
-        print "in redrawGrid"
         dc = wx.PaintDC(self.drawGridPanel)
         for i in range(20):
             dc.DrawLine(0, i * 10, 200, i * 10)
@@ -159,9 +158,24 @@ class TopButtonsPanel(wx.Panel):
         buttonGBS = wx.GridBagSizer(5, 5)
 
         # Start Button
-        startButton = wx.Button(self, id=-1, label="Start")
-        buttonGBS.Add(startButton, pos=(0, 0), flag=wx.ALL, border=1)
-        startButton.Bind(wx.EVT_BUTTON, self.startClicked)
+        # startButton = wx.Button(self, id=-1, label="Start")
+
+        # Ensure the services have fully started up
+        # rospy.wait_for_service('get_flights')
+
+        # # Get flight script names
+        # get_flights_srv = rospy.ServiceProxy('get_flights', GetFlights)
+        # flight_names = get_flight_srv(empty=[])
+        
+        flight_names = ['--FLIGHT--', 'test_flight1', 'test_flight2']
+        # print "flight names == " + flight_names
+        self.startDropDown = wx.Choice(self,  choices = flight_names, name="Available flights")
+        self.startDropDown.SetSelection(0)
+
+        #buttonGBS.Add(startButton, pos=(0, 0), flag=wx.ALL, border=1)
+        buttonGBS.Add(self.startDropDown, pos=(0, 0), flag=wx.ALL, border=1)
+        self.startDropDown.Bind(wx.EVT_CHOICE, self.chooseFlightScript)
+        # startButton.Bind(wx.EVT_BUTTON, self.startClicked)
 
         # Stop Button
         stopButton = wx.Button(self, id=-1, label="Stop")
@@ -186,6 +200,10 @@ class TopButtonsPanel(wx.Panel):
         buttonGBS.AddGrowableCol(buttonGBS.GetEffectiveColsCount() - 1)
         buttonGBS.AddGrowableRow(buttonGBS.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(buttonGBS)
+
+    # This method is called when the user selects a flight script
+    def chooseFlightScript(self, event):
+        print "You chose " + self.startDropDown.GetString(self.startDropDown.GetSelection())
 
     # This method is called when the Start button is clicked
     def startClicked(self, event):
@@ -337,7 +355,6 @@ class RosLoggerPanel(wx.Panel):
     def addLog(self, evt):
         digits = "".join([random.choice(string.digits) for i in xrange(8)])
         chars = "".join([random.choice(string.letters) for i in xrange(15)])
-        print digits + chars
         self.t3.AppendText("\nLOG: " + digits + chars + "MOOO")
 
 
