@@ -46,7 +46,6 @@ class Controller(threading.Thread):
         # Threading
         self._thread_event = threading.Event()
 
-        # Startup
         self.start()
 
     def set_mode(self, mode):
