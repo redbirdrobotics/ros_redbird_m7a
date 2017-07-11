@@ -2,7 +2,7 @@ import yaml
 
 # TODO: Add header docstring
 
-class Configuration:
+class Configuration(object):
     def __init__(self, file_name):
         # Open file
         self._config_file = open(file_name, 'r')
