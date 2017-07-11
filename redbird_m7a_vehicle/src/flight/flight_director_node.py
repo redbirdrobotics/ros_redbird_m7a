@@ -11,6 +11,7 @@ from flightsys import Control_Mode
 from std_msgs.msg import Empty
 from redbird_m7a_msgs.srv import *
 from Test_Flight import Test_Flight
+from Competition import Competition
 
 class Flight_Director(object):
     def __init__(self, vehicle):
@@ -168,6 +169,7 @@ if __name__ == '__main__':
 
         # Add flights
         fd.add_flight('test_flight', Test_Flight(vehicle))
+        fd.add_flight('comp_flight', Competition(vehicle))
 
         # Waiting for command
         rospy.loginfo(fd.get_log_tag() + "Waiting for command...")
