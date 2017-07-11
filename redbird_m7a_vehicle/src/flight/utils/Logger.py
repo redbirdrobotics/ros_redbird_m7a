@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 # TODO: Add header docstring
 
@@ -12,7 +13,7 @@ class Colors(Enum):
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-class Logger:
+class Logger(object):
     def __init__(self, file_name):
         # Generate file name
         self._file_name = file_name + "_" + str(datetime.now().strftime("%Y%m%d_%H-%M-%S")) + ".txt"

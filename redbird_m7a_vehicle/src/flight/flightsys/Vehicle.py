@@ -10,7 +10,7 @@ from mavros_msgs.msg import State
 from geometry_msgs.msg import PoseStamped, TwistStamped
 
 
-class Vehicle:
+class Vehicle(object):
     def __init__(self):
         # Set rate
         self._rate = rospy.Rate(10)
