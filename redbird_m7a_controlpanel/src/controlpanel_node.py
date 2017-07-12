@@ -167,7 +167,7 @@ class TopButtonsPanel(wx.Panel):
         # get_flights_srv = rospy.ServiceProxy('get_flights', GetFlights)
         # flight_names = get_flight_srv(empty=[])
         
-        flight_names = ['--FLIGHT--', 'test_flight1', 'test_flight2']
+        flight_names = ['---FLIGHT---', 'test_flight1', 'test_flight2']
         # print "flight names == " + flight_names
         self.startDropDown = wx.Choice(self,  choices = flight_names, name="Available flights")
         self.startDropDown.SetSelection(0)
@@ -203,7 +203,10 @@ class TopButtonsPanel(wx.Panel):
 
     # This method is called when the user selects a flight script
     def chooseFlightScript(self, event):
-        print "You chose " + self.startDropDown.GetString(self.startDropDown.GetSelection())
+        choice = self.startDropDown.GetString(self.startDropDown.GetSelection())
+        # Make sure the flight suggestion from the dropdown menu wasn't accidentally selected
+        if choice != "---FLIGHT---":
+            print "You chose " + 
 
     # This method is called when the Start button is clicked
     def startClicked(self, event):
