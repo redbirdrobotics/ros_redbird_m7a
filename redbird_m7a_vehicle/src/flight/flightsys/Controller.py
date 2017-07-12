@@ -109,7 +109,7 @@ class Controller(object):
         self._travel_time = time
 
         # Log info
-        rospy.loginfo(self._log_tag + "Target velocity set to %s m/s" % (self._target_velocity,))
+        rospy.loginfo(self._log_tag + "Target velocity set to %0.2f, %0.2f, %0.2f m/s" % self._target_velocity)
         if self._travel_time > 0: rospy.loginfo(self._log_tag + "Travel time set to %0.2f sec" % self._travel_time)
 
     def set_position(self, pos):
@@ -133,7 +133,7 @@ class Controller(object):
         self._target_position = pos
 
         # Log info
-        rospy.loginfo(self._log_tag + "Target position set to %s m" % (self._target_position,))
+        rospy.loginfo(self._log_tag + "Target position set to %0.2f, %0.2f, %0.2f m" % self._target_position)
 
     def set_takeoff_altitude(self, alt):
         """Sets the desired altitude to reach when taking off.s

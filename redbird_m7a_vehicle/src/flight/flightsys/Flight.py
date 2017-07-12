@@ -38,8 +38,14 @@ class Flight(object):
             # Reset controller
             self.controller.reset()
 
+            # Flight starting
+            rospy.loginfo(self.log_tag + "Flight starting")
+
             # Start flight
             self.flight()
+
+            # Flight complete
+            rospy.loginfo(self.log_tag + "Flight complete")
         except Exception as e:
             # Reset controller
             self.controller.reset()
@@ -51,6 +57,9 @@ class Flight(object):
         """Template for function that starts flight."""
         # Raise error to highlight lack of implementation
         raise NotImplementedError("The start method has not been properly overridden by the flight implementation!")
+
+    def is_running(self):
+        return not rospy.is_shutdown() and not self.event.is_set()
 
     def sleep(self, time):
         self.event.wait(time)

@@ -26,17 +26,17 @@ class Follow_Land_Flight(flightsys.Flight, object):
         self.vehicle.arm()
 
         # Wait a moment
-        rospy.sleep(2)
+        self.sleep(2)
 
         # Set takeoff altitude
         self.takeoff(2.5)
 
         # Hold
-        rospy.loginfo(self.log_tag + "Altitude met, holding for 1.0 seconds")
-        rospy.sleep(1)
+        self.loginfo("Altitude met, holding for 1.0 seconds")
+        self.sleep(1)
 
         i = 0
-        while not rospy.is_shutdown() and (i < 5):
+        while self.is_running() and (i < 5):
             target_point = (self.x, self.y, 2.5)
 
             self.fly_to_point(target_point)
@@ -46,7 +46,7 @@ class Follow_Land_Flight(flightsys.Flight, object):
         # landing logic
         alt = 2.5
         counter = 1
-        while not rospy.is_shutdown() and (alt >= .5):
+        while self.is_running() and (alt >= .5):
             alt-=.25
             self.x = self.x + random.uniform(-.5, .5)
             self.y = self.y + random.uniform(-.5, .5)
