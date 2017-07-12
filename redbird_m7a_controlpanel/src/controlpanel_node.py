@@ -247,7 +247,7 @@ class FlightInfoPanel(wx.Panel):
         super(FlightInfoPanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init FlightInfoPanel"
 
-        rospy.init_node("rcp") # , anonymous=True)
+        rospy.init_node("rcp", anonymous=True)
         velocitySubscriber = rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, self.updateVelocity)
         altitudeAndAttitudeSubscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped,
                                                          self.updateAltitudeAndAttitude)
