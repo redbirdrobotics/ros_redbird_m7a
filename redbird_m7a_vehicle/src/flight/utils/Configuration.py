@@ -1,6 +1,12 @@
+#!/usr/bin/python
+
+"""Configuration.py: Loads configuration values from a .yaml file."""
+
 import yaml
 
-# TODO: Add header docstring
+__author__ = "Alex Bennett"
+__email__ = "alex.eugene.bennett@gmail.com"
+
 
 class Configuration(object):
     def __init__(self, file_name):

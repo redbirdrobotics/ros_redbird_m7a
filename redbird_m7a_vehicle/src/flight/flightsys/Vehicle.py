@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# TODO: Add header docstring
+"""Vehicle.py: Vehicle is a streamlined interface to the vehicle that allows for quick arm, disarm, etc."""
 
 import rospy
 import mavros
@@ -8,6 +8,9 @@ import time
 from mavros_msgs.srv import SetMode, CommandBool
 from mavros_msgs.msg import State
 from geometry_msgs.msg import PoseStamped, TwistStamped
+
+__author__ = "Alex Bennett"
+__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Vehicle(object):
@@ -19,6 +22,7 @@ class Vehicle(object):
         self._state_topic = State()
         self._local_position_topic = PoseStamped()
         self._local_velocity_topic = TwistStamped()
+        self._log_tag = "[V] "
 
         # Wait for service startup
         rospy.wait_for_service('/mavros/set_mode')
@@ -39,25 +43,21 @@ class Vehicle(object):
 
     def arm(self):
         self._arm_serv(True)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
+        rospy.loginfo(self._log_tag + "Vehicle armed")
 
     def disarm(self):
         self._arm_serv(False)
+        rospy.loginfo(self._log_tag + "Vehicle disarmed")
 
     def set_mode(self, mode):
-        # If in AUTO.LAND, reject mode change
-        if self.get_mode() != 'AUTO.LAND':
-            # Set mode
-            self._set_mode_serv(custom_mode=mode)
+        # Set mode
+        self._set_mode_serv(custom_mode=mode)
 
-            # Allow a moment for change to propogate
-            rospy.sleep(0.1)
+        # Allow a moment for change to propogate
+        rospy.sleep(0.1)
 
-            # Return true for success
-            return True
-
-        # Default false
-        return False
+        rospy.loginfo(self._log_tag + "Vehicle mode changed to %s" % mode)
 
     def is_connected(self):
         return self._state_topic.connected

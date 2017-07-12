@@ -1,7 +1,13 @@
+#!/usr/bin/python
+
+"""Logger.py: A utility that allows for quick logging to a file and terminal."""
+
 from datetime import datetime
 from enum import Enum
 
-# TODO: Add header docstring
+__author__ = "Alex Bennett"
+__email__ = "alex.eugene.bennett@gmail.com"
+
 
 class Colors(Enum):
     HEADER = '\033[95m'
@@ -12,6 +18,7 @@ class Colors(Enum):
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 class Logger(object):
     def __init__(self, file_name):

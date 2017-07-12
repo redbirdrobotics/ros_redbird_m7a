@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# TODO: Add header docstring
+"""Controller.py: The controller serves as a state machine that handles communication with MAVROS setpoint types."""
 
 import rospy
 import threading
@@ -11,16 +11,16 @@ from enum import Enum
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from std_msgs.msg import Header
 
+__author__ = "Alex Bennett"
+__email__ = "alex.eugene.bennett@gmail.com"
+
 
 class Control_Mode(Enum):
     INITIAL, TAKEOFF, HOLD, LAND, VELOCITY, POSITION = range(0, 6)
 
 
-class Controller(threading.Thread):
+class Controller(object):
     def __init__(self, vehicle):
-        # Call super
-        threading.Thread.__init__(self)
-
         # Define queue size
         self._queue_size = 10
 
@@ -31,22 +31,46 @@ class Controller(threading.Thread):
         # Store vehicle reference
         self._vehicle = vehicle
 
+        # Threading event
+        self._thread_event = threading.Event()
+
         # Setup variables
         self._log_tag = "[FC] "
-        self._takeoff_altitude = 2.0
-        self._target_velocity = (0.0, 0.0, 0.0)
-        self._target_position = (0.0, 0.0, 0.0)
+        self.reset()
 
         # Set rospy rate
         self._rate = rospy.Rate(20)
 
-        # State machine
+        # Start thread
+        try:
+            # Create thread object
+            self._thread = threading.Thread(target=self.loop, args=())
+
+            # Start thread
+            self._thread.start()
+
+            # Allow thread to start
+            rospy.sleep(1)
+        except:
+            rospy.logerr("Unable to start flight control thread")
+
+    def is_running(self):
+        """Returns the inverse of the thread event flag."""
+        return not self._thread_event.is_set()
+
+    def kill(self):
+        """Kills the loop by setting the thread event."""
+        self._thread_event.set()
+
+    def reset(self):
+        # Reset variables
+        self._takeoff_altitude = 2.0
+        self._target_velocity = (0.0, 0.0, 0.0)
+        self._target_position = (0.0, 0.0, 0.0)
         self._mode = Control_Mode.INITIAL
 
-        # Threading
-        self._thread_event = threading.Event()
-
-        self.start()
+        # Reset thread event
+        self._thread_event.clear()
 
     def set_mode(self, mode):
         """Sets the vehicle mode to one of those available in the Control_Mode class.
@@ -59,7 +83,7 @@ class Controller(threading.Thread):
         self._mode = mode
 
         # Log info
-        rospy.loginfo(self._log_tag + "Mode changed to %s" % self._mode)
+        rospy.loginfo(self._log_tag + "Control mode changed to %s" % self._mode)
 
     def get_mode(self):
         """Returns the current Control_Mode of the controller."""
@@ -105,7 +129,7 @@ class Controller(threading.Thread):
         self._target_position = pos
 
         # Log info
-        rospy.loginfo(self._log_tag + "Target position set to %s m" % (self._target_position,))
+        rospy.loginfo(self._log_tag + "Target position set to x: %0.2fm, y: %0.2fm, z: %0.2fm" % self._target_position)
 
     def set_takeoff_altitude(self, alt):
         """Sets the desired altitude to reach when taking off.
@@ -122,13 +146,13 @@ class Controller(threading.Thread):
         self._takeoff_altitude = alt
 
         # Log info
-        rospy.loginfo(self._log_tag + "Takeoff altitude set to %0.2f m" % self._takeoff_altitude)
+        rospy.loginfo(self._log_tag + "Takeoff altitude set to %0.2fm" % self._takeoff_altitude)
 
     def get_takeoff_altitude(self):
         """Returns the set takeoff altitude."""
         return self._takeoff_altitude
 
-    def run(self):
+    def loop(self):
         """This is the main loop that processes flight modes and enters the appropriate control loop."""
         try:
             # Enter loop indefinitely
@@ -223,16 +247,16 @@ class Controller(threading.Thread):
             # Increment number of loops
             loops += 1
 
-        # Set mode to HOLD
-        self.set_mode(Control_Mode.INITIAL)
+        # Only perform if controller is still running
+        if not self._thread_event.is_set():
+            # Set mode to INITIAL
+            self.set_mode(Control_Mode.INITIAL)
 
     def takeoff_loop(self):
         """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
 
         # Queue counter
         queue_count = 0
-
-        print 'takeoff'
 
         while not self._thread_event.is_set() and not rospy.is_shutdown() and self._mode == Control_Mode.TAKEOFF:
             # Break if within allowed deviation of target altitude
@@ -248,8 +272,6 @@ class Controller(threading.Thread):
             # Publish message
             self._vel_pub.publish(msg)
 
-            print 'publishing'
-
             # Increment queue count
             queue_count += 1
 
@@ -260,8 +282,10 @@ class Controller(threading.Thread):
             # Sleep to maintain appropriate update frequency
             self._rate.sleep()
 
-        # Set mode to HOLD
-        self.set_mode(Control_Mode.HOLD)
+        # Only perform if controller is still running
+        if not self._thread_event.is_set():
+            # Set mode to HOLD
+            self.set_mode(Control_Mode.HOLD)
 
     def position_loop(self):
         """Loops in Control_Mode.POSITION until either the mode is switched or the target has been reached."""
@@ -293,8 +317,10 @@ class Controller(threading.Thread):
             # Sleep to maintain appropriate update frequency
             self._rate.sleep()
 
-        # Set mode to HOLD
-        self.set_mode(Control_Mode.HOLD)
+        # Only perform if controller is still running
+        if not self._thread_event.is_set():
+            # Set mode to HOLD
+            self.set_mode(Control_Mode.HOLD)
 
     def velocity_loop(self):
         """Loops in Control_Mode.VELOCITY until either the mode is switched or the set duration has been met."""
@@ -329,8 +355,20 @@ class Controller(threading.Thread):
             # Sleep to maintain appropriate update frequency
             self._rate.sleep()
 
-        # Set mode to HOLD
-        self.set_mode(Control_Mode.HOLD)
+        # Only perform if controller is still running
+        if not self._thread_event.is_set():
+            # Set mode to HOLD
+            self.set_mode(Control_Mode.HOLD)
 
-        # Reset velocity target
-        self.set_velocity((0.0, 0.0, 0.0))
+            # Reset velocity target
+            self.set_velocity((0.0, 0.0, 0.0))
+
+    def wait_for_mode_change(self, mode):
+        """Waits for the mode to change from what is passed in.
+
+        Args:
+            mode (Control_Mode): The mode to check for change from.
+        """
+        while self.get_mode() == mode:
+            if rospy.is_shutdown():
+                raise Exception("ROS shutdown")

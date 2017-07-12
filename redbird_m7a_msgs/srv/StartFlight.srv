@@ -2,4 +2,4 @@
 string name
 ---
 # Response
-std_msgs/Empty msg
+bool success

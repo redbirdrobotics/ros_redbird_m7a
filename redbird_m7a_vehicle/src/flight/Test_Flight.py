@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# TODO: Add header docstring
+"""Test_Flight.py: A quick demonstration of the capabilities of the flight system."""
 
 import rospy
 import time
@@ -8,70 +8,59 @@ import flightsys
 from flightsys import Controller, Control_Mode
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
+__author__ = "Alex Bennett"
+__email__ = "alex.eugene.bennett@gmail.com"
+
 
 class Test_Flight(flightsys.Flight, object):
-    def __init__(self, vehicle):
+    def __init__(self, vehicle, controller):
         # Call super constructor
-        super(Test_Flight, self).__init__(name='test_flight', log_tag='[TEST FLIGHT]', vehicle=vehicle)
+        super(Test_Flight, self).__init__(name='test_flight', log_tag='[TEST FLIGHT]', vehicle=vehicle, controller=controller)
 
     def start(self):
-        try:
-            # Arm the vehicle
-            self._v.arm()
+        # Arm the vehicle
+        self._v.arm()
 
-            rospy.loginfo(self._log_tag + "Vehicle armed")
+        # Wait a moment
+        rospy.sleep(2)
 
-            # Wait a moment
-            rospy.sleep(2)
+        # Set takeoff altitude
+        self._c.set_takeoff_altitude(4.0)
 
-            # Set takeoff altitude
-            self._c.set_takeoff_altitude(4.0)
+        # Switch mode to takeoff
+        self._c.set_mode(Control_Mode.TAKEOFF)
 
-            print self._c.get_takeoff_altitude()
+        # Wait for takeoff to complete
+        self._c.wait_for_mode_change(Control_Mode.TAKEOFF)
 
-            # Switch mode to takeoff
-            self._c.set_mode(Control_Mode.TAKEOFF)
+        # Hold
+        rospy.loginfo(self._log_tag + "Altitude met, holding for 5.0 seconds")
+        rospy.sleep(5)
 
-            print self._c.get_mode()
+        # Fly to point
+        target_point = (5.0, 5.0, 5.0)
+        rospy.loginfo(self._log_tag + "Flying to %s" % (target_point,))
+        self._c.set_position(target_point)
+        self._c.set_mode(Control_Mode.POSITION)
 
-            # Wait for takeoff to complete
-            while not rospy.is_shutdown() and self._c.get_mode() == Control_Mode.TAKEOFF:
-                pass
+        # Wait for position to be reached
+        self._c.wait_for_mode_change(Control_Mode.POSITION)
 
-            # Hold
-            rospy.loginfo(self._log_tag + "Altitude met, holding for 5.0 seconds")
-            rospy.sleep(5)
+        # Fly up at 5 m/s for 3 seconds
+        rospy.loginfo(self._log_tag + "Flying up at 5.0 m/s for 3.0 seconds")
+        self._c.set_velocity((0.0, 0.0, 5.0), 3.0)
+        self._c.set_mode(Control_Mode.VELOCITY)
 
-            # Fly to point
-            target_point = (5.0, 5.0, 5.0)
-            rospy.loginfo(self._log_tag + "Flying to %s" % (target_point,))
-            self._c.set_position(target_point)
-            self._c.set_mode(Control_Mode.POSITION)
+        # Wait for velocity target to complete
+        self._c.wait_for_mode_change(Control_Mode.VELOCITY)
 
-            # Wait for position to be reached
-            while not rospy.is_shutdown() and self._c.get_mode() == Control_Mode.POSITION:
-                pass
+        # Switch mode to land
+        rospy.loginfo(self._log_tag + "Landing")
+        self._c.set_mode(Control_Mode.LAND)
 
-            # Fly up at 5 m/s for 3 seconds
-            rospy.loginfo(self._log_tag + "Flying up at 5.0 m/s for 3.0 seconds")
-            self._c.set_velocity((0.0, 0.0, 5.0), 3.0)
-            self._c.set_mode(Control_Mode.VELOCITY)
+        # Wait for land to complete
+        self._c.wait_for_mode_change(Control_Mode.LAND)
 
-            # Wait for velocity target to complete
-            while not rospy.is_shutdown() and self._c.get_mode() == Control_Mode.VELOCITY:
-                pass
-
-            # Switch mode to land
-            rospy.loginfo(self._log_tag + "Landing")
-            self._c.set_mode(Control_Mode.LAND)
-
-            # Wait for land to complete
-            while not rospy.is_shutdown() and self._c.get_mode() == Control_Mode.LAND:
-                pass
-
-            # Disarm
-            rospy.loginfo(self._log_tag + "Disarming")
-            self._v.disarm()
-        except KeyboardInterrupt:
-            pass
-
+        # Disarm
+        rospy.loginfo(self._log_tag + "Disarming")
+        self._v.disarm()
