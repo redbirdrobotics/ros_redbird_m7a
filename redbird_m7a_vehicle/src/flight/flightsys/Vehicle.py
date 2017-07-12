@@ -22,7 +22,7 @@ class Vehicle(object):
         self._state_topic = State()
         self._local_position_topic = PoseStamped()
         self._local_velocity_topic = TwistStamped()
-        self._log_tag = "[V] "
+        self._log_tag = "[VHCL] "
 
         # Wait for service startup
         rospy.wait_for_service('/mavros/set_mode')
@@ -51,13 +51,15 @@ class Vehicle(object):
         rospy.loginfo(self._log_tag + "Vehicle disarmed")
 
     def set_mode(self, mode):
+        # Log if unique mode change
+        if self.get_mode() != mode:
+            rospy.loginfo(self._log_tag + "Vehicle mode changed to %s" % mode)
+
         # Set mode
         self._set_mode_serv(custom_mode=mode)
 
         # Allow a moment for change to propogate
-        rospy.sleep(0.1)
-
-        rospy.loginfo(self._log_tag + "Vehicle mode changed to %s" % mode)
+        # rospy.sleep(0.1)
 
     def is_connected(self):
         return self._state_topic.connected

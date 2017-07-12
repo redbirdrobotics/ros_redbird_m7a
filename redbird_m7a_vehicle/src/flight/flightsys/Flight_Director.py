@@ -4,6 +4,7 @@
 
 import rospy
 import threading
+from Queue import Queue
 from std_msgs.msg import Empty
 from redbird_m7a_msgs.srv import *
 from Flight import Flight
@@ -17,16 +18,11 @@ class Flight_Director(object):
         # Store parameters
         self._vehicle = vehicle
         self._controller = controller
-        self._log_tag = "[FD] "
+        self.log_tag = "[FD] "
         self._current_flight = None
 
-        # Flight threading
-        self._kill_flight = threading.Event()
-        self._flight_process = None
-        self._flight_thread = threading.Thread()
-
         # Log startup
-        rospy.loginfo(self._log_tag + "Starting flight director...")
+        rospy.loginfo(self.log_tag + "Starting flight director...")
 
         # Store flights
         self._available_flights = []
@@ -37,7 +33,7 @@ class Flight_Director(object):
         self._kill_flight_srv = rospy.Service('kill_flight', KillFlight, self.kill_flight_service_handler)
 
         # Log service ready
-        rospy.loginfo(self._log_tag + "Flight services ready")
+        rospy.loginfo(self.log_tag + "Flight services ready")
 
         # Register shutdown hook
         rospy.on_shutdown(self.shutdown)
@@ -45,28 +41,27 @@ class Flight_Director(object):
     def shutdown(self):
         """Performs shutdown actions to cleanly exit."""
         # Log shutdown
-        rospy.loginfo(self._log_tag + "Shutting down current flight...")
+        rospy.loginfo(self.log_tag + "Shutting down current flight...")
+
+        # Kill flight if one exists
+        if self._current_flight is not None:
+            self._current_flight.event.set()
 
         # Disarm
         self._vehicle.disarm()
 
         # Kill the controller
-        self._controller.kill()
+        self._controller.event.set()
 
         # Wait for the controller to die
-        while self._controller.is_running():
-            pass
+        self._controller.thread.join()
 
         # Log shutdown complete
-        rospy.loginfo(self._log_tag + "Shutdown complete")
+        rospy.loginfo(self.log_tag + "Shutdown complete")
 
     def get_kill_flight_flag(self):
         """Returns the kill flight threading event."""
         return self._kill_flight
-
-    def get_log_tag(self):
-        """Returns the log tag."""
-        return self._log_tag
 
     def add_flight(self, name, flight):
         """Adds a flight to the list of available flights.
@@ -83,7 +78,7 @@ class Flight_Director(object):
         self._available_flights.append((name, flight))
 
         # Log added flight
-        rospy.loginfo(self._log_tag + "Flight \"%s\" loaded" % name)
+        rospy.loginfo(self.log_tag + "Flight \"%s\" loaded" % name)
 
     def get_flights(self):
         """Returns a list of all available flights."""
@@ -95,9 +90,12 @@ class Flight_Director(object):
         Args:
             name (string): The name/identifier of the flight to start.
         """
+        # Log the attempt
+        rospy.loginfo(self.log_tag + "Attempting to start flight...")
+
         # First verify that no flight is currently running
-        if self._flight_thread.is_alive():
-            rospy.logerr("There is a flight currently running! (name: \"%s\")" % self._flight_thread.name)
+        if self._current_flight is not None and self._current_flight.thread.is_alive():
+            rospy.logerr(self.log_tag + "\"%s\" is currently running!" % self._current_flight.name)
 
             # Error, return false
             return False
@@ -105,30 +103,20 @@ class Flight_Director(object):
         # Find matching flight
         for _name, _flight in self._available_flights:
             if _name == name:
-                # Log the start
-                rospy.loginfo(self._log_tag + "Starting flight \"%s\"..." % name)
+                # Store current flight
+                self._current_flight = _flight
 
-                # Handle multiprocessing
-                try:
-                    # Create process
-                    self._flight_thread = threading.Thread(target=_flight.start, args=())
+                # Create the thread
+                self._current_flight.thread = threading.Thread(target=self._current_flight.run)
 
-                    # Name the thread
-                    self._flight_thread.name = name
+                # Reset event
+                self._current_flight.event.clear()
 
-                    # Clear kill flight flag
-                    self._kill_flight.clear()
+                # Start the flight
+                self._current_flight.thread.start()
 
-                    # Start the thread
-                    self._flight_thread.start()
-
-                    # Display the process identifier
-                    rospy.loginfo(self._log_tag + "Flight started with identifier %d" % self._flight_thread.ident)
-
-                    rospy.sleep(1)
-                except Exception:
-                    # Error starting thread
-                    rospy.logerr("Could not start flight thread")
+                # Display the process identifier
+                rospy.loginfo(self.log_tag + "\"%s\" flight thread started (id: %s)" % (_name, self._current_flight.thread.ident))
 
                 # Return after flight is complete
                 return True
@@ -161,21 +149,34 @@ class Flight_Director(object):
         success = False
 
         # If kill boolean is true
-        if req.kill and self._flight_thread.is_alive():
-            # Log event
-            rospy.logwarn(self._log_tag + "Killing current flight!")
+        if req.kill:
+            # Check that flight is running
+            if self._current_flight is None or not self._current_flight.thread.is_alive():
+                rospy.logwarn("No flight to kill")
+            elif self._current_flight is not None and self._current_flight.thread.is_alive():
+                # Log event
+                rospy.logwarn(self.log_tag + "Killing current flight!")
 
-            # Set poison pill
-            self._kill_flight.set()
+                # Disarm
+                self._current_flight.vehicle.disarm()
 
-            # Reset controller
-            self._controller.reset()
+                # Reset controller
+                self._current_flight.controller.reset()
 
-            # Response flag
-            success = True
+                # Set poison pill to kill thread
+                self._current_flight.event.set()
 
-            # Log event
-            rospy.logwarn(self._log_tag + "Flight killed")
+                # Join and wait for termination
+                self._current_flight.thread.join()
+
+                # Response flag
+                success = True
+
+                # Log event
+                rospy.logwarn(self.log_tag + "Flight killed")
+        else:
+            # Log error
+            rospy.logerr(self.log_tag + "Flight not killed")
 
         # Return response
         return KillFlightResponse(success=success)

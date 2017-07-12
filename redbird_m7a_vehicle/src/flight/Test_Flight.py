@@ -15,52 +15,30 @@ __email__ = "alex.eugene.bennett@gmail.com"
 class Test_Flight(flightsys.Flight, object):
     def __init__(self, vehicle, controller):
         # Call super constructor
-        super(Test_Flight, self).__init__(name='test_flight', log_tag='[TEST FLIGHT]', vehicle=vehicle, controller=controller)
+        super(Test_Flight, self).__init__(name='test_flight', log_tag='TEST FLIGHT', vehicle=vehicle, controller=controller)
 
-    def start(self):
+    def flight(self):
         # Arm the vehicle
-        self._v.arm()
+        self.vehicle.arm()
 
-        # Wait a moment
-        rospy.sleep(2)
-
-        # Set takeoff altitude
-        self._c.set_takeoff_altitude(4.0)
-
-        # Switch mode to takeoff
-        self._c.set_mode(Control_Mode.TAKEOFF)
-
-        # Wait for takeoff to complete
-        self._c.wait_for_mode_change(Control_Mode.TAKEOFF)
+        # Takeoff
+        self.takeoff(4.0)
 
         # Hold
-        rospy.loginfo(self._log_tag + "Altitude met, holding for 5.0 seconds")
-        rospy.sleep(5)
+        self.loginfo("Altitude goal met! Holding for 5 seconds...")
+        self.sleep(5.0)
 
         # Fly to point
-        target_point = (5.0, 5.0, 5.0)
-        rospy.loginfo(self._log_tag + "Flying to %s" % (target_point,))
-        self._c.set_position(target_point)
-        self._c.set_mode(Control_Mode.POSITION)
+        self.fly_to_point((5.0, 5.0, 5.0))
 
-        # Wait for position to be reached
-        self._c.wait_for_mode_change(Control_Mode.POSITION)
+        # Fly velocity
+        self.fly_velocity((0.0, -6.0, 5.0), time=3.0)
 
-        # Fly up at 5 m/s for 3 seconds
-        rospy.loginfo(self._log_tag + "Flying up at 5.0 m/s for 3.0 seconds")
-        self._c.set_velocity((0.0, 0.0, 5.0), 3.0)
-        self._c.set_mode(Control_Mode.VELOCITY)
+        # Fly to point
+        self.fly_to_point((0.0, 0.0, 2.0))
 
-        # Wait for velocity target to complete
-        self._c.wait_for_mode_change(Control_Mode.VELOCITY)
-
-        # Switch mode to land
-        rospy.loginfo(self._log_tag + "Landing")
-        self._c.set_mode(Control_Mode.LAND)
-
-        # Wait for land to complete
-        self._c.wait_for_mode_change(Control_Mode.LAND)
+        # Land
+        self.land()
 
         # Disarm
-        rospy.loginfo(self._log_tag + "Disarming")
-        self._v.disarm()
+        self.vehicle.disarm()

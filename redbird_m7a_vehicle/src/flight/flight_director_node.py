@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-"""flight_director_node.py: The outward facing node that is launched by ROS."""
+"""flight_director_node.py: Frontend ROS node implementation of the Flight_Director handler."""
 
 import rospy
 import mavros
 import flightsys
 from Test_Flight import Test_Flight
-from Test_Flight2 import Test_Flight2
+from Follow_Land_Flight import Follow_Land_Flight
 
 __author__ = "Alex Bennett"
 __email__ = "alex.eugene.bennett@gmail.com"
@@ -29,10 +29,10 @@ if __name__ == '__main__':
         # Create and add flights
         for klass in flightsys.Flight.__subclasses__():
             inst = klass(vehicle, controller)
-            fd.add_flight(inst.get_name(), inst)
+            fd.add_flight(inst.name, inst)
 
         # Waiting for command
-        rospy.loginfo(fd.get_log_tag() + "Waiting for service call...")
+        rospy.loginfo(fd.log_tag + "Waiting for service call...")
 
         # Spin until killed
         rospy.spin()
