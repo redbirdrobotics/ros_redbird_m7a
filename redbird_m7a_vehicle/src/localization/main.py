@@ -51,9 +51,9 @@ hsvHoughMaskList = [goalVals]
 
 #BLOB
 greenVals = np.array([[70,81,78],[94,241,154]])
-redVals = np.array([[163,182,136],[180,255,255]])
+redVals = np.array([[170,175,161],[180,192,182]])
 whiteVals = np.array([[230],[255]])
-hsvBlobMaskList = [greenVals]
+hsvBlobMaskList = [greenVals, redVals]
 greyBlobMaskList = []
 
 robotParams = cv2.SimpleBlobDetector_Params()
@@ -81,12 +81,11 @@ while True:
     goalLine.remove(robotMaskList, 15)
     
     #Search Robot ROIs
-    newmaskList = Robot.ROIsearch(roboList, robotMaskList)
-    
+    robotMaskListB, foundList = Robot.ROIsearch(roboList, robotMaskList)
     
     #Search Whole Frame
-    xyrcList, colList = Utilities.blobSearch(newmaskList, groundRobot)
-    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList)
+    xyrcList, colList = Utilities.blobSearch(robotMaskListB, groundRobot)
+    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList)
     
     #For Testing
     showingFrame = Robot.circleFound(showingFrameList[0], roboList)

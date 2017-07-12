@@ -65,6 +65,7 @@ class Robot():
 #---------------------------------------------------#
 
     def coordConvert(self, xN, yN, xAxis, yAxis, height):
+        print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]
@@ -87,9 +88,6 @@ class Robot():
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
-    def setLostNum(self, lostNum):
-        self.lostNum = lostNum
-        return
 
     def incLostNum(self, threshold):
         lost = False
@@ -100,20 +98,14 @@ class Robot():
             self.lostNum = 0
         return lost
 
-    def correctLostNum(self):
-        self.lostNum = 0
-
     def lostNumAsScalar(self):
-        scalarVals = [1, 2, 2.5, 3.5, 4.5, 5.5]
+        scalarVals = [1, 3, 4, 5.5, 7, 8.5]
         scalar = scalarVals[self.lostNum]
         return scalar
     
 #_______________________________________________________#
     #COLOR METHODS
 #---------------------------------------------------#
-    def getColor(self):
-        return self.color
-
     def updateColorProps(self, maskList, blobList):
         if self.color == 0:
             return
@@ -134,6 +126,38 @@ class Robot():
     #ROI METHODS
 #---------------------------------------------------#
     
+
+    @staticmethod
+    def checkDist(objList, dataArray, buff, foundList):
+        if foundList == []:
+            return dataArray
+        
+        print dataArray.shape, "Robots Found"
+
+        rFound = len(foundList)
+        dataShape = dataArray.shape
+        iR = 0
+        iD = 0
+
+        while (iR < rFound) and (iD < dataShape[0]):
+
+            rX, rY = objList[(foundList[iR])].coords
+            bX, bY, bR = dataArray[iD,1:4]
+
+            if abs(rX - bX) <= buff or abs(rY - bY) <= buff:
+                print "Appending to Robot", objList[foundList[iR]].ident
+                objList[foundList[iR]].lostNum = 0
+                objList[foundList[iR]].selfUpdate(bX, bY, bR)
+                dataArray = np.delete(dataArray, iD, 0)
+                dataShape = dataArray.shape
+                iR += 1
+                iD = 0
+
+            else:
+                iD += 1
+                
+        return dataArray
+
     def createROI(self, x, y, r):
         if y-r == 0:
             y = 0
@@ -163,60 +187,111 @@ class Robot():
     
     @staticmethod
     def ROIsearch(objList, maskList):
+
+        address = 0
         
-        address = 0       
-        for robot in objList:
+        foundList = [index for index, robot in enumerate(objList) if robot.found == True]
+
+        if foundList == []:
+            return maskList, foundList
+        
+        for rNum in foundList:
+
+            roiVals = objList[rNum].ROI
+            blob = objList[rNum].blob
             
-            if not robot.ROI == None: 
-                cam = robot.cam
-                color = robot.color
-                roiVals = robot.ROI
-                blob = robot.blob                
-                ident = (cam, color)
-                address = maskList.index(ident)
+            address = maskList.index((objList[rNum].cam, objList[rNum].color))
+            
+            if not type(address) == int:
+                print 'incorrect address'
+                return
+            
+            ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
+            obj = blob.detect(ROI)
+
+            if not obj == []:
                 
-                if (type(address) == int):
-                     ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
-                     obj = blob.detect(ROI)
+                objList[rNum].lostNum = 0
+                print "robot", objList[rNum].ident, "found in ROI"
 
-                     if not obj == []:
-                         robot.correctLostNum()
-                         robot.found = True
-                         print 'robot', robot.ident, 'found in ROI'
-                                                 
-                         x = int(obj[0].pt[0] + roiVals[2])
-                         y = int(obj[0].pt[1] + roiVals[0])
-                         r = int(obj[0].size/2)
-                         
+                x = int(obj[0].pt[0] + roiVals[2])
+                y = int(obj[0].pt[1] + roiVals[0])
+                r = int(obj[0].size/2)
 
-                         if r < 25:
-                             r += 25
-                         print "XYR", x, y, r
-                         robot.selfUpdate(x,y,r)
-                         maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
-                         
-                     else:
-                         print 'robot', robot.ident, 'not in ROI'
+                if r < 35:
+                    r += 35
 
-##                         #FOR TROUBLESHOOTING ONLY
-##                         cv2.imshow("ROI", ROI)
-##                         k = cv2.waitKey(30) & 0xff
-##                         esc = False
-##                         if k == 27:
-##                             esc = True
-##                             break
-##                         #_________________________#
-                        
-                         lost = robot.incLostNum(5)
+                objList[rNum].selfUpdate(x,y,r)
+                maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
+                
+            else:
+                print 'robot', objList[rNum].ident, 'not in ROI, last seen at', objList[rNum].coords
+                
+##                #FOR TROUBLESHOOTING ONLY
+##                cv2.imshow("ROI", ROI)
+##                k = cv2.waitKey(30) & 0xff
+##                esc = False
+##                if k == 27:
+##                    esc = True
+##                    break
+##                #_________________________#
+                
+                lost = objList[rNum].incLostNum(5)
                          
-                         if lost == True:
-                             print 'lost'
-                             robot.wipeRobot()
-                         else:
-                             print 'missing for', robot.lostNum, 'frames'
-                             robot.selfUpdate(0,0,0)
+                if lost == True:
+                    print 'lost'
+                    objList[rNum].wipeRobot()
+                    foundList.remove(rNum)
+                else:
+                    print 'missing for', objList[rNum].lostNum, 'frames'
+                    objList[rNum].selfUpdate(0,0,0)
         
-        return maskList
+        return maskList, foundList
+                
+##        for robot in objList:
+##            
+##            if not robot.ROI == None: 
+##                cam = robot.cam
+##                color = robot.color
+##                roiVals = robot.ROI
+##                blob = robot.blob                
+##                ident = (cam, color)
+##                address = maskList.index(ident)
+##                
+##                if (type(address) == int):
+##                     ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
+##                     obj = blob.detect(ROI)
+##
+##                     if not obj == []:
+##                         robot.correctLostNum()
+##                         robot.found = True
+##                         print 'robot', robot.ident, 'found in ROI'
+##                                                 
+##                         x = int(obj[0].pt[0] + roiVals[2])
+##                         y = int(obj[0].pt[1] + roiVals[0])
+##                         r = int(obj[0].size/2)
+##                         
+##
+##                         if r < 35:
+##                             r += 35
+##    
+##                         robot.selfUpdate(x,y,r)
+##                         maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
+##                         
+##                     else:
+##                         print 'robot', robot.ident, 'not in ROI'
+##                         print "last seen at", robot.coords
+                        
+##                         lost = robot.incLostNum(5)
+##                         
+##                         if lost == True:
+##                             print 'lost'
+##                             robot.wipeRobot()
+##                         else:
+##                             print 'missing for', robot.lostNum, 'frames'
+##                             robot.selfUpdate(0,0,0)
+##        
+##        return maskList
 
     
     def getNewCoords(self, scalar):
@@ -290,7 +365,7 @@ class Robot():
     #   Use old data to extend ROI to include more area in direction of vector
     
     #Case 2: If robot was was missing from previous frames and vector was not able to be established:
-    #   Wipe all data from robot so that it can be searched for 
+    #   Expand ROI in all directions
 
     def selfUpdate(self, x, y, r):
         
@@ -313,13 +388,21 @@ class Robot():
             newYb = int(oldYb + scvY)
             newXa = int(oldXa + scvX)
             newXb = int(oldXb + scvX)
-            pointList = np.array([[oldXa, oldYa],[oldXb, oldYb],[newXa, newYa],[newXb, newYb]])
+            pointList = np.array([[oldXa+r, oldYa],[oldXb+r, oldYb],[newXa, newYa],[newXb, newYb]])
             bx, by, bw, bh = cv2.boundingRect(pointList)
             self.ROI = np.array([by, by+bh, bx, bx+bw])
 
         else:
-            self.wipeRobot()
-            #print "robot", self.ident, "unestablished vector, cleared"
+            oldROI = self.ROI
+            oldYa = oldROI[0]
+            oldYb = oldROI[1]
+            oldXa = oldROI[2]
+            oldXb = oldROI[3]
+            vX, vY = self.vector
+            scalar = self.lostNumAsScalar()
+            scvX = vX * scalar
+            scvY = vY * scalar
+            self.ROI = np.array([int(oldYa - scvY), int(oldYb + scvY), int(oldXa - scvX), int(oldXb + scvX)])
         return
         
         
@@ -341,32 +424,44 @@ class Robot():
     #list of bools representing columns to be updated
       
     @staticmethod
-    def listUpdate(objList, blobDataList, colList, maskList, blobList):
-
-        blobDataArray = np.array(blobDataList)
-        blobDataShape = blobDataArray.shape
-        unfoundList = Robot.listUnfound(objList)
-        maxLen = len(unfoundList)
-        dr = 0
+    def listUpdate(objList, blobDataList, colList, maskList, blobList, foundList):
 
         #Empty Condition
         if blobDataList == []:
             return
+        
+        blobDataArray = np.array(blobDataList)
 
+        #Check to Make if Found Coords Corespond to a Lost Robot
+        newBlobDataArray = Robot.checkDist(objList, blobDataArray, 30, foundList)
+
+        #Empty Condition
+        if newBlobDataArray == []:
+            print 'I am exiting this function'
+            return
+
+        print 'postfunction dataArray', newBlobDataArray
+        blobDataShape = newBlobDataArray.shape
+        unfoundList = Robot.listUnfound(objList)
+        maxLen = len(unfoundList)
+        dr = 0
+        
         #Trim False Positives
         if blobDataShape[0] > maxLen:
             trimList = range(maxLen, blobDataShape[0])
             #print "Num Unfound", maxLen, "Trimming", trimList, "of", blobDataShape[0]
             blobDataArray = np.delete(blobDataArray, trimList, 0)
             blobDataShape = blobDataArray.shape
-
+            
         rows = []
         for r in range(blobDataShape[0]):
             rows.append(unfoundList[r])
-            #print "Appending to robot" ,unfoundList[r]
+            print "Appending to robot" ,unfoundList[r]
 
         for r in rows:
-
+            
+            objList[r].found = True
+            
             #Assign Cam
             if colList[0] == True:
                 objList[r].cam = blobDataArray[dr,0]

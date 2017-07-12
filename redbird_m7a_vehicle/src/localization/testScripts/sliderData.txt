@@ -9,6 +9,22 @@ greymin 145
 greymax = 175
 beta 15
 
+Green Robot 2
+hmin 73
+hmax 86
+smin 56
+smax178
+vmin 61
+vmax 114
+
+Green Robot 3
+hmin 69
+hmax 94
+smin 81
+smax 241
+vmin 78
+vmax 154
+
 Green Line
 rho 1
 theta 180
@@ -20,3 +36,29 @@ smax 84
 vmin 82
 vmax 115
 
+Green Line 2
+hmin 87
+hmax 98
+smin 51
+smax 94
+vmin 75
+vmax 90
+
+Green Line 3
+hmin 79
+hmax 104
+smin 57
+smax 103
+vmin 83
+vmax 99
+
+Green Line 4
+hmin 78
+hmax 99
+smin 33
+smax 111
+vmin 66
+vmax 135
+
+mx 0.03 x 648
+my 3.09 y 508
