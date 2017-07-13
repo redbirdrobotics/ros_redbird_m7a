@@ -13,6 +13,7 @@ class Robot():
         self.ident = num
         self.found = False
         self.cam = None
+        self.camProps = (0,0)
         self.coords = (0,0)
         self.radius = 0
         self.ROI = None
@@ -63,7 +64,7 @@ class Robot():
 #---------------------------------------------------#
 
     def coordConvert(self, xN, yN, xAxis, yAxis, height):
-        #print 'Robot', self.ident, 'is at', self.coords
+        print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]
@@ -147,7 +148,7 @@ class Robot():
             if abs(rX - bX) <= buff or abs(rY - bY) <= buff:
                 #print "Appending to Robot", objList[foundList[iR]].ident
                 objList[foundList[iR]].lostNum = 0
-                objList[foundList[iR]].selfUpdate(bX, bY, bR)
+                objList[foundList[iR]].selfUpdate(bX, bY, bR, objList[iR].camProps)
                 dataArray = np.delete(dataArray, iD, 0)
                 dataShape = dataArray.shape
                 iR += 1
@@ -228,7 +229,7 @@ class Robot():
                 if r < 35:
                     r += 35
 
-                objList[rNum].selfUpdate(x,y,r)
+                objList[rNum].selfUpdate(x, y, r, objList[rNum].camProps)
                 maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                 
             else:
@@ -251,7 +252,7 @@ class Robot():
                     foundList.remove(rNum)
                 else:
                     #print 'missing for', objList[rNum].lostNum, 'frames'
-                    objList[rNum].selfUpdate(0,0,0)
+                    objList[rNum].selfUpdate(0, 0, 0, objList[rNum].camProps)
         
         return maskList, foundList
 
@@ -308,7 +309,7 @@ class Robot():
     #Case 2: If robot was was missing from previous frames and vector was not able to be established:
     #   Expand ROI in all directions
 
-    def selfUpdate(self, x, y, r):
+    def selfUpdate(self, x, y, r, (hRes, vRes)):
         
         if self.lostNum == 0:
             self.createVect(x,y)
@@ -325,14 +326,14 @@ class Robot():
             scalar = self.lostNumAsScalar()
             scvX = vX * scalar
             scvY = vY * scalar
-            newYa = int(oldYa + scvY)
-            newYb = int(oldYb + scvY)
-            newXa = int(oldXa + scvX)
-            newXb = int(oldXb + scvX)
+            newYa = min(abs(int(oldYa + scvY)), vRes)
+            newYb = min(abs(int(oldYb + scvY)), vRes)
+            newXa = min(abs(int(oldXa + scvX)), hRes)
+            newXb = min(abs(int(oldXb + scvX)), hRes)
             pointList = np.array([[oldXa+r, oldYa],[oldXb+r, oldYb],[newXa, newYa],[newXb, newYb]])
             bx, by, bw, bh = cv2.boundingRect(pointList)
             self.ROI = np.array([by, by+bh, bx, bx+bw])
-
+            
         else:
             oldROI = self.ROI
             oldYa = oldROI[0]
@@ -365,7 +366,7 @@ class Robot():
     #list of bools representing columns to be updated
       
     @staticmethod
-    def listUpdate(objList, blobDataList, colList, maskList, blobList, foundList):
+    def listUpdate(objList, blobDataList, colList, maskList, blobList, foundList, camList):
 
         #Empty Condition
         if blobDataList == []:
@@ -406,6 +407,7 @@ class Robot():
             #Assign Cam
             if colList[0] == True:
                 objList[r].cam = blobDataArray[dr,0]
+                objList[r].camProps = (camList[objList[r].cam].hRes, camList[objList[r].cam].vRes)
             
             #Assign Coords
             if colList[1] == True:

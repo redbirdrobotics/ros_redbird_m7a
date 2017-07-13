@@ -84,7 +84,7 @@ while True:
     
     #Search Whole Frame
     xyrcList, colList = Utilities.blobSearch(robotMaskListB, groundRobot)
-    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList)
+    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList, camList)
     
     #For Testing
     workingFrame = Robot.circleFound(workingFrameList[0], roboList)
