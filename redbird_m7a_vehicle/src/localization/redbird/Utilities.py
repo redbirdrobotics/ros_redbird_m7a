@@ -131,8 +131,8 @@ class Utilities():
 
             #Filter by Area
             object.filterByArea = True
-            object.minArea = 100
-            object.maxArea = 1500
+            object.minArea = 50
+            object.maxArea = 6000
 
             #Filter by Circularity
             object.filterByCircularity = False

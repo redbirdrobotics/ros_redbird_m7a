@@ -44,14 +44,12 @@ class Robot():
         return
 
     @staticmethod
-    def listUnfound(objList):
-        ret = False
-        listUnfound = []
-        lgthList = len(objList)
-        
-        for robot in objList:
-            if all(c == 0 for c in robot.coords):
-                listUnfound.append(robot.ident)            
+    def listUnfound(objList, foundList):
+
+        listUnfound = range(len(objList))
+        for num in range(len(foundList)):
+            listUnfound.remove(foundList[num])
+                   
         return listUnfound
 
     @staticmethod
@@ -79,12 +77,13 @@ class Robot():
         xN, yN = objQuad.mcoords
         h = objQuad.height
 
-        for robot in objRobotList:
-            if robot.found == True:
-                xAxis = objCamList[robot.cam].xAxis
-                yAxis = objCamList[robot.cam].yAxis
-                robot.coordConvert(xN, yN, xAxis, yAxis, h)
-        return
+        foundList = [index for index, robot in enumerate(objRobotList) if robot.found == True]
+
+        for robot in foundList:
+            xAxis = objCamList[objRobotList[robot].cam].xAxis
+            yAxis = objCamList[objRobotList[robot].cam].yAxis
+            objRobotList[robot].coordConvert(xN, yN, xAxis, yAxis, h)
+        return foundList
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
@@ -133,6 +132,7 @@ class Robot():
             return dataArray
         
         print dataArray.shape, "Robots Found"
+        print len(foundList), 'Robots exist'
 
         rFound = len(foundList)
         dataShape = dataArray.shape
@@ -154,7 +154,15 @@ class Robot():
                 iD = 0
 
             else:
+                print dataArray[iD,1:4], 'does not belong to Robot', objList[foundList[iR]].ident
                 iD += 1
+                
+                if (iD == dataShape[0]) and (iR < rFound):
+                    iR += 1
+                    iD = 0
+                    #print 'now checking robot', objList[foundList[iR]].ident
+                    
+            print 'loop vairables', iR, '<=', rFound, 'and', iD, '<', dataShape[0]
                 
         return dataArray
 
@@ -186,11 +194,9 @@ class Robot():
     #Case 0: If Robot has an ROI assigned to it.  
     
     @staticmethod
-    def ROIsearch(objList, maskList):
+    def ROIsearch(objList, maskList, foundList):
 
         address = 0
-        
-        foundList = [index for index, robot in enumerate(objList) if robot.found == True]
 
         if foundList == []:
             return maskList, foundList
@@ -217,6 +223,7 @@ class Robot():
                 x = int(obj[0].pt[0] + roiVals[2])
                 y = int(obj[0].pt[1] + roiVals[0])
                 r = int(obj[0].size/2)
+                print 'Robot', objList[rNum].ident, 'radius', r
 
                 if r < 35:
                     r += 35
@@ -247,72 +254,6 @@ class Robot():
                     objList[rNum].selfUpdate(0,0,0)
         
         return maskList, foundList
-                
-##        for robot in objList:
-##            
-##            if not robot.ROI == None: 
-##                cam = robot.cam
-##                color = robot.color
-##                roiVals = robot.ROI
-##                blob = robot.blob                
-##                ident = (cam, color)
-##                address = maskList.index(ident)
-##                
-##                if (type(address) == int):
-##                     ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
-##                     obj = blob.detect(ROI)
-##
-##                     if not obj == []:
-##                         robot.correctLostNum()
-##                         robot.found = True
-##                         print 'robot', robot.ident, 'found in ROI'
-##                                                 
-##                         x = int(obj[0].pt[0] + roiVals[2])
-##                         y = int(obj[0].pt[1] + roiVals[0])
-##                         r = int(obj[0].size/2)
-##                         
-##
-##                         if r < 35:
-##                             r += 35
-##    
-##                         robot.selfUpdate(x,y,r)
-##                         maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
-##                         
-##                     else:
-##                         print 'robot', robot.ident, 'not in ROI'
-##                         print "last seen at", robot.coords
-                        
-##                         lost = robot.incLostNum(5)
-##                         
-##                         if lost == True:
-##                             print 'lost'
-##                             robot.wipeRobot()
-##                         else:
-##                             print 'missing for', robot.lostNum, 'frames'
-##                             robot.selfUpdate(0,0,0)
-##        
-##        return maskList
-
-    
-    def getNewCoords(self, scalar):
-        vectors = self.getVectors()
-        vectors = vectors * scalar
-        coords = self.getVectCoords()
-        shape = coords.shape
-        columns = shape[1]
-        newCoords = [0,0,0,0]
-        for i in range(columns):
-            newCoords[i] = int(vectors[0,i]) + coords[0,i]
-        return newCoords
-    
-    def getBBOX(self):
-        scalar = self.getScalar()
-        oldCoords = self.getVectCoords()
-        newCoords = self.getNewCoords(scalar)
-        listCoords = np.vstack((oldCoords[0], newCoords))
-        pointset = Utilities.create_PointSet(listCoords)
-        BBOX = cv2.boundingRect(pointset)
-        return BBOX
 
 #_______________________________________________________#
     #VECTOR METHODS
@@ -432,17 +373,17 @@ class Robot():
         
         blobDataArray = np.array(blobDataList)
 
-        #Check to Make if Found Coords Corespond to a Lost Robot
+        #Check if Found Coords Corespond to a Lost Robot
         newBlobDataArray = Robot.checkDist(objList, blobDataArray, 30, foundList)
 
         #Empty Condition
         if newBlobDataArray == []:
-            print 'I am exiting this function'
             return
 
         print 'postfunction dataArray', newBlobDataArray
         blobDataShape = newBlobDataArray.shape
-        unfoundList = Robot.listUnfound(objList)
+        
+        unfoundList = Robot.listUnfound(objList, foundList)
         maxLen = len(unfoundList)
         dr = 0
         

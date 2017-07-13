@@ -51,7 +51,7 @@ hsvHoughMaskList = [goalVals]
 
 #BLOB
 greenVals = np.array([[70,81,78],[94,241,154]])
-redVals = np.array([[170,175,161],[180,192,182]])
+redVals = np.array([[165,150,150],[180,240,200]])
 whiteVals = np.array([[230],[255]])
 hsvBlobMaskList = [greenVals, redVals]
 greyBlobMaskList = []
@@ -67,11 +67,10 @@ while True:
     
     #Get Node Data
     Quad.quadUpdate(0, 0, 1.524)
-    Robot.listConversion(Quad, roboList, camList)
+    foundList = Robot.listConversion(Quad, roboList, camList)
 
     #Get New Frames
-    showingFrameList = Camera.getFrameList(camList)
-    workingFrameList = Utilities.copyFrameList(showingFrameList)
+    workingFrameList = Camera.getFrameList(camList)
     robotMaskList = Utilities.getMaskList(workingFrameList, hsvBlobMaskList, greyBlobMaskList)
     goalMaskList = Utilities.getMaskList(workingFrameList, hsvHoughMaskList, [])
     #Utilities.showFramePause(robotMaskList)
@@ -81,16 +80,16 @@ while True:
     goalLine.remove(robotMaskList, 15)
     
     #Search Robot ROIs
-    robotMaskListB, foundList = Robot.ROIsearch(roboList, robotMaskList)
+    robotMaskListB, foundList = Robot.ROIsearch(roboList, robotMaskList, foundList)
     
     #Search Whole Frame
     xyrcList, colList = Utilities.blobSearch(robotMaskListB, groundRobot)
     Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList)
     
     #For Testing
-    showingFrame = Robot.circleFound(showingFrameList[0], roboList)
-    showingFrame = goalLine.drawLine(showingFrame, 15)
-    esc = Camera.showFrame(showingFrame, "cam0")   
+    workingFrame = Robot.circleFound(workingFrameList[0], roboList)
+    workingFrame = goalLine.drawLine(workingFrame, 15)
+    esc = Camera.showFrame(workingFrame, "cam0")   
     if esc ==True:
         break
     
