@@ -25,7 +25,6 @@ class Target_Robot(Ground_Robot_Interface, object):
         while not (self._timer._PAUSED.is_set()):
             self.current_pos = (self._x, self._y , self._id)
             print(self.current_pos)
-            print(self._timer.get_pause())
 
             if(self.collision == True):
                 self._deltaX = self._deltaX * -1

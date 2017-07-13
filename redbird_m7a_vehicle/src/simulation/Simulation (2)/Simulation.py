@@ -30,13 +30,13 @@ class Simulation(object):
     def run(self):
         self._timer.run()
 
-        #for arduino in self.target_robots:
-        #    print("initing all of the ground robots")
-        #    arduino.run(self.target_robot)
+        for arduino in self.target_robots:
+            print("initing all of the ground robots")
+            arduino.run(self.target_robots)
 
-        for robot in self.obstacle_robots:
+        """for robot in self.obstacle_robots:
             print("initing the obstacle robots")
-            robot.run()
+            robot.run()"""
 
         print("trying to sleep")
 

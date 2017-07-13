@@ -15,6 +15,9 @@ class Simulation_Node:
         # Create map listener
         self._loc_sub = rospy.Subscriber('localization', Map, self.update_map)
 
+        #creating listener for when the timer is up on target robots
+        self._timing_sub = rospy.Subscriber('localization', Map, self.get_data_for_robots)
+
         # Create simulation object 
         self._sim = Simulation()
 
@@ -43,11 +46,10 @@ class Simulation_Node:
         for x in xrange(14):
             target_robots.append(GroundRobotPosition())
 
-        counter = 0
         # Enter main loop while ROS is running
         while not rospy.is_shutdown():
             # Loop through all simulated robots
-            for sim_robot in sim.get_robots():
+            for sim_robot in sim.get_Target_robots():
                 # Loop through all robot messages that need to be populated
                 for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
@@ -57,12 +59,19 @@ class Simulation_Node:
                         robot_msg.vec_x = sim_robot.deltaX
                         robot_msg.vec_y = sim_robot.deltaY
                         robot_msg.color = sim_robot.color
-
+            
+            #looping through the obstacle robots
             for sim_robot in sim.get_Obtacle_Robots():
+                #loop through rest of messages that need to be populated
                 for robot_msg in robot_msgs:
+                    #if the matches then populate the message
                     if robot_msg.id == sim_robot.get_id():
-                        robot 
-
+                        robot_msg.x = sim_robot.x
+                        robot_msg.x = sim_robot.x
+                        robot_msg.y = sim_robot.y
+                        robot_msg.vec_x = sim_robot.deltaX
+                        robot_msg.vec_y = sim_robot.deltaY
+                        robot_msg.color = sim_robot.color
             
             # Add robots to map
             map.ground_robots = robot_msgs
@@ -74,7 +83,7 @@ class Simulation_Node:
         # Loop through all robots in the localization topic
         for lRobot in msg.ground_robots:
             # Loop through all robots in the simulation
-            for sRobot in self._sim.get_robots():
+            for sRobot in self._sim.get_Target_robots():
                 # If the ids are the same, check the error
                 if sRobot.id == lRobot.id:
                     sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
@@ -84,6 +93,18 @@ class Simulation_Node:
         while not rospy.is_shutdown():
             rospy.loginfo("Simulation says hi!")
             time.sleep(10)
+
+    def get_data_for_robots(self):
+        #looping through simulated robots
+        for tRobot in self._sim.get_Target_robots():
+            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
+            while tRobot.timerUp:
+                #looping through localization robots
+                for lRobot in msg.ground_robots:
+                    #if the id matches update all data
+                    if (tRobot.id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, vec_y)
+
 
 if __name__ == '__main__':
     try:

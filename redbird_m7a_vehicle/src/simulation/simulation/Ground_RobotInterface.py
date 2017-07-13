@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Event
 from random import randint
 from math import tan, pow, sqrt
 from Sim_Timer import Sim_Timer
@@ -23,9 +23,15 @@ class Ground_Robot_Interface(Thread, object):
 
         self._deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
 
-        self.thread_cancelled = False
+        #creating the flags for the timing, collisions, and border detection respectively
+        self._timerUp = False
         self.collision = False
         self._boundary = False
+
+        #creating variables for the timing
+        self.start_timer = 0
+        self.end_timer = 0
+        self.deltaTime = 0
         
     def update_posX(self):
         pass
@@ -59,3 +65,12 @@ class Ground_Robot_Interface(Thread, object):
 
     def check_error(self, x, y, velocityX, velocityY):
         pass
+
+    def get_id(self):
+        return self._id
+
+    def get_y(self):
+        return self._y
+
+    def get_x(self):
+        return self._x
