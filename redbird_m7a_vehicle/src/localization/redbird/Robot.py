@@ -63,7 +63,7 @@ class Robot():
 #---------------------------------------------------#
 
     def coordConvert(self, xN, yN, xAxis, yAxis, height):
-        print 'Robot', self.ident, 'is at', self.coords
+        #print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]
@@ -131,8 +131,8 @@ class Robot():
         if foundList == []:
             return dataArray
         
-        print dataArray.shape, "Robots Found"
-        print len(foundList), 'Robots exist'
+        #print dataArray.shape, "Robots Found"
+        #print len(foundList), 'Robots exist'
 
         rFound = len(foundList)
         dataShape = dataArray.shape
@@ -145,7 +145,7 @@ class Robot():
             bX, bY, bR = dataArray[iD,1:4]
 
             if abs(rX - bX) <= buff or abs(rY - bY) <= buff:
-                print "Appending to Robot", objList[foundList[iR]].ident
+                #print "Appending to Robot", objList[foundList[iR]].ident
                 objList[foundList[iR]].lostNum = 0
                 objList[foundList[iR]].selfUpdate(bX, bY, bR)
                 dataArray = np.delete(dataArray, iD, 0)
@@ -154,7 +154,7 @@ class Robot():
                 iD = 0
 
             else:
-                print dataArray[iD,1:4], 'does not belong to Robot', objList[foundList[iR]].ident
+                #print dataArray[iD,1:4], 'does not belong to Robot', objList[foundList[iR]].ident
                 iD += 1
                 
                 if (iD == dataShape[0]) and (iR < rFound):
@@ -162,7 +162,7 @@ class Robot():
                     iD = 0
                     #print 'now checking robot', objList[foundList[iR]].ident
                     
-            print 'loop vairables', iR, '<=', rFound, 'and', iD, '<', dataShape[0]
+            #print 'loop vairables', iR, '<=', rFound, 'and', iD, '<', dataShape[0]
                 
         return dataArray
 
@@ -209,7 +209,7 @@ class Robot():
             address = maskList.index((objList[rNum].cam, objList[rNum].color))
             
             if not type(address) == int:
-                print 'incorrect address'
+                #print 'incorrect address'
                 return
             
             ROI = maskList[address + 1][roiVals[0]:roiVals[1],roiVals[2]:roiVals[3]]
@@ -218,12 +218,12 @@ class Robot():
             if not obj == []:
                 
                 objList[rNum].lostNum = 0
-                print "robot", objList[rNum].ident, "found in ROI"
+                #print "robot", objList[rNum].ident, "found in ROI"
 
                 x = int(obj[0].pt[0] + roiVals[2])
                 y = int(obj[0].pt[1] + roiVals[0])
                 r = int(obj[0].size/2)
-                print 'Robot', objList[rNum].ident, 'radius', r
+                #print 'Robot', objList[rNum].ident, 'radius', r
 
                 if r < 35:
                     r += 35
@@ -232,7 +232,7 @@ class Robot():
                 maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                 
             else:
-                print 'robot', objList[rNum].ident, 'not in ROI, last seen at', objList[rNum].coords
+                #print 'robot', objList[rNum].ident, 'not in ROI, last seen at', objList[rNum].coords
                 
 ##                #FOR TROUBLESHOOTING ONLY
 ##                cv2.imshow("ROI", ROI)
@@ -246,11 +246,11 @@ class Robot():
                 lost = objList[rNum].incLostNum(5)
                          
                 if lost == True:
-                    print 'lost'
+                    #print 'lost'
                     objList[rNum].wipeRobot()
                     foundList.remove(rNum)
                 else:
-                    print 'missing for', objList[rNum].lostNum, 'frames'
+                    #print 'missing for', objList[rNum].lostNum, 'frames'
                     objList[rNum].selfUpdate(0,0,0)
         
         return maskList, foundList
@@ -380,7 +380,7 @@ class Robot():
         if newBlobDataArray == []:
             return
 
-        print 'postfunction dataArray', newBlobDataArray
+        #print 'postfunction dataArray', newBlobDataArray
         blobDataShape = newBlobDataArray.shape
         
         unfoundList = Robot.listUnfound(objList, foundList)
@@ -397,7 +397,7 @@ class Robot():
         rows = []
         for r in range(blobDataShape[0]):
             rows.append(unfoundList[r])
-            print "Appending to robot" ,unfoundList[r]
+            #print "Appending to robot" ,unfoundList[r]
 
         for r in rows:
             
@@ -446,9 +446,9 @@ class Robot():
             if not r == 0:
                 image = cv2.circle(image, (x,y), r, (0,0,0), 1)
                 image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
-                image = cv2.putText(image, ("mx: %s Vx %s" % (mx, vX)), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
-                image = cv2.putText(image, ("my: %s Vy %s" % (my, vY)), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
-                image = cv2.line(image, (x,y), (x + vX, y + vY), (0,0,0), 5)
+                #image = cv2.putText(image, ("mx: %s Vx %s" % (mx, vX)), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                #image = cv2.putText(image, ("my: %s Vy %s" % (my, vY)), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                #image = cv2.line(image, (x,y), (x + vX, y + vY), (0,0,0), 5)
         return image
 
 
