@@ -3,6 +3,10 @@
 """Redbird Robotics GUI"""
 import wx
 import random
+import rospy
+import time
+import math
+from geometry_msgs.msg import PoseStamped, TwistStamped
 
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
@@ -12,7 +16,7 @@ class RedbirdFrame(wx.Frame):
         # This properly "destroys" the GUI when closed
         self.Bind(wx.EVT_CLOSE, self.destroyWindow)
 
-        # Redbird icone for title bar
+        # Redbird icon for title bar
         ico = wx.Icon('redbird.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(ico)
 
@@ -51,7 +55,7 @@ class RedbirdPanel(wx.Panel):
         title.SetForegroundColour('red')
         title.SetBackgroundColour('white')
         title.SetFont(titleFont)
-        gbs.Add(title, pos=(0, 0), span=(1, 5), flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_HORIZONTAL, border=5)
+        gbs.Add(title, pos=(0, 0), span=(1, 5), flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.ALIGN_CENTER_HORIZONTAL, border=10)
 
         # Top Buttons Panel
         topButtonsPanel = TopButtonsPanel(self)
@@ -69,8 +73,8 @@ class RedbirdPanel(wx.Panel):
         # These lines make the GradBagSizer resize windows properly
         gbs.AddGrowableCol(gbs.GetEffectiveColsCount() - 1)  # This took forever to figure out :/
         gbs.AddGrowableRow(gbs.GetEffectiveRowsCount() - 1)
-        print "rows:", gbs.GetEffectiveRowsCount()
-        print "columns:", gbs.GetEffectiveColsCount()
+#        print "rows:", gbs.GetEffectiveRowsCount()
+#        print "columns:", gbs.GetEffectiveColsCount()
         self.SetSizerAndFit(gbs)
 
         # For the background
@@ -78,6 +82,7 @@ class RedbirdPanel(wx.Panel):
         self.bmp = wx.Bitmap("redbirdlogo.png")
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.onEraseBackground)
 
+    # This properly updates the background when the size of the window changes
     def onEraseBackground(self, evt):
         dc = evt.GetDC()
 
@@ -162,28 +167,15 @@ class FlightInfoPanel(wx.Panel):
         super(FlightInfoPanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init FlightInfoPanel"
 
+	rospy.init_node("rcp", anonymous=True)
+        velocitySubscriber = rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, self.updateVelocity)
+	altitudeAndAttitudeSubscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped, self.updateAltitudeAndAttitude)
+
         self.SetBackgroundColour('white')
         self.SetFont(wx.Font(pointSize=14, family=wx.ROMAN, style=wx.NORMAL, weight=wx.FONTWEIGHT_NORMAL, underline=False))
         # Box Sizer to store Flight Info in the Flight Info Panel
         box = wx.GridBagSizer(5, 5)
-
-        # Set timers on each so they update continuously
-        self.velocityTimer = wx.Timer(self)
-        self.altitudeTimer = wx.Timer(self)
-        self.yawTimer = wx.Timer(self)
-        self.pitchTimer = wx.Timer(self)
-        self.rollTimer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.updateVelocity, self.velocityTimer)
-        self.Bind(wx.EVT_TIMER, self.updateAltitude, self.altitudeTimer)
-        self.Bind(wx.EVT_TIMER, self.updateYaw, self.yawTimer)
-        self.Bind(wx.EVT_TIMER, self.updatePitch, self.pitchTimer)
-        self.Bind(wx.EVT_TIMER, self.updateRoll, self.rollTimer)
-        self.velocityTimer.Start(1000)
-        self.altitudeTimer.Start(1000)
-        self.yawTimer.Start(1000)
-        self.pitchTimer.Start(1000)
-        self.rollTimer.Start(1000)
-
+        
         # Dividing lines to make the Flight Info Panel prettier
         line = wx.StaticLine(self)
         line2 = wx.StaticLine(self)
@@ -236,24 +228,40 @@ class FlightInfoPanel(wx.Panel):
 
         box.Add(line5, pos=(9, 0), span=(1, 2), flag=wx.EXPAND)
 
+        # Ensures proper sizing
         box.AddGrowableCol(box.GetEffectiveColsCount() - 1)
         box.AddGrowableRow(box.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(box)
 
-    def updateVelocity(self, event):
-        self.liveVelocity.SetLabel(str(random.randint(1, 40)) + " m/s")
+    # Reference http://wiki.ros.org/mavros for what each msg object is returning
+    def updateVelocity(self, msg):
+        # Calulates the magnitude of velocity
+        xVelocity = msg.twist.linear.x
+        yVelocity = msg.twist.linear.y
+        zVelocity = msg.twist.linear.z
+        velocity = math.sqrt(math.pow(xVelocity, 2) + math.pow(yVelocity, 2) + math.pow(zVelocity, 2))
+        wx.CallAfter(self.liveVelocity.SetLabel, str("%.3f" % velocity) + " m/s")
 
-    def updateAltitude(self, event):
-        self.liveAltitude.SetLabel(str(random.randint(1, 40)) + " meters")
+    def updateAltitudeAndAttitude(self, msg):
+        # Updates altitude
+        wx.CallAfter(self.liveAltitude.SetLabel, str("%.3f" % msg.pose.position.z) + " m")
 
-    def updateYaw(self, event):
-        self.liveYaw.SetLabel(str(random.randint(1, 40)) + " deg/sec")
+        # Updates attitude (yaw, pitch, and roll(
+        wx.CallAfter(self.liveYaw.SetLabel, str("%.3f" % msg.pose.orientation.z) + " deg")  # Yaw
+        wx.CallAfter(self.livePitch.SetLabel, str("%.3f" % msg.pose.orientation.y) + " deg")  # Pitch
+        wx.CallAfter(self.liveRoll.SetLabel, str("%.3f" % msg.pose.orientation.x) + " deg")  # Roll
 
-    def updatePitch(self, event):
-        self.livePitch.SetLabel(str(random.randint(1, 40)) + " degrees")
+#    def updateYaw(self, event):
+#        self.liveYaw.SetLabel(str(random.randint(1, 40)) + " degrees")
+#
+#    def updatePitch(self, event):
+#        self.livePitch.SetLabel(str(random.randint(1, 40)) + " degrees")
+#
+#    def updateRoll(self, event):
+#        self.liveRoll.SetLabel(str(random.randint(1, 40)) + " degrees")
 
-    def updateRoll(self, event):
-        self.liveRoll.SetLabel(str(random.randint(1, 40)) + " degrees")
+
+
 
 # Customizes the default wxPython App object
 class App(wx.App):

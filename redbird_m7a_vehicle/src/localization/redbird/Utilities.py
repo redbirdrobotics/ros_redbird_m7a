@@ -182,7 +182,3 @@ class Utilities():
                         detect = False
                         
         return arrayList, boolList
-
-
-
-

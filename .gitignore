@@ -2,4 +2,12 @@
 mavlink/
 mavros/
 .ros*
+<<<<<<< HEAD
 *.pyc
+=======
+.idea/*
+vimFiles/
+.vs/
+*.sqlite
+*.pyc
+>>>>>>> master

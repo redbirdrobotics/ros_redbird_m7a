@@ -1,0 +1,5 @@
+# Request
+bool kill
+---
+# Response
+std_msgs/Empty msg

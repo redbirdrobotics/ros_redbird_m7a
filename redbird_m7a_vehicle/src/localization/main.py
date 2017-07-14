@@ -10,7 +10,7 @@ from redbird import Landmark
 
 #CAMERAS
 #temp Height = 1.07
-cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 53.7))
+cam0 = Camera(0, (1280, 720), 60, (130, 90), (0, 53.7))
 cam0.create_angleAxis()
 ##cam1 = Camera(1, (1280, 720), 60, (130, 90), (120, 45))
 ##cam1.create_angleAxis()
@@ -58,7 +58,7 @@ greyBlobMaskList = []
 
 robotParams = cv2.SimpleBlobDetector_Params()
 Utilities.getParams(robotParams, 0)
-groundRobot = cv2.SimpleBlobDetector_create(robotParams)
+groundRobot = cv2.SimpleBlobDetector(robotParams)
 blobList = [groundRobot]
 
 #dataArray Format: cam(cam), coords(x,y), radius(r), vector(vx,vy), color(color) 
@@ -73,7 +73,6 @@ while True:
     workingFrameList = Camera.getFrameList(camList)
     robotMaskList = Utilities.getMaskList(workingFrameList, hsvBlobMaskList, greyBlobMaskList)
     goalMaskList = Utilities.getMaskList(workingFrameList, hsvHoughMaskList, [])
-    #Utilities.showFramePause(robotMaskList)
 
     #Search For Landmarks
     goalLine.detectGoalLine(goalMaskList)
@@ -84,10 +83,11 @@ while True:
     
     #Search Whole Frame
     xyrcList, colList = Utilities.blobSearch(robotMaskListB, groundRobot)
-    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList)
+    Robot.listUpdate(roboList, xyrcList, colList, hsvBlobMaskList, blobList, foundList, camList)
     
     #For Testing
     workingFrame = Robot.circleFound(workingFrameList[0], roboList)
+    #Utilities.showFramePause(workingFrameList[0])
     workingFrame = goalLine.drawLine(workingFrame, 15)
     esc = Camera.showFrame(workingFrame, "cam0")   
     if esc ==True:
