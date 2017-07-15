@@ -9,6 +9,7 @@ import math
 from geometry_msgs.msg import PoseStamped, TwistStamped
 import wx.lib.scrolledpanel
 import string
+import wx.grid
 
 
 # The frame contains the parent panels and its children so the app can interact with it
@@ -51,28 +52,41 @@ class RedbirdPanel(wx.Panel):
         # Add widgets here
         gbs = wx.GridBagSizer(5, 5)
 
-        # Title
-        title = wx.StaticText(self, label="Redbird Control Panel", style=wx.TRANSPARENT_WINDOW)
-        titleFont = wx.Font(18, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
-        title.SetForegroundColour('red')
-        title.SetBackgroundColour('white')
-        title.SetFont(titleFont)
-        gbs.Add(title, pos=(0, 0), span=(1, 5), flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.ALIGN_CENTER_HORIZONTAL,
-                border=10)
+        # # Title
+        # title = wx.StaticText(self, label="Redbird Control Panel", style=wx.TRANSPARENT_WINDOW)
+        # titleFont = wx.Font(18, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
+        # title.SetForegroundColour('red')
+        # title.SetBackgroundColour('white')
+        # title.SetFont(titleFont)
+        # gbs.Add(title, pos=(0, 0), span=(1, 5), flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.ALIGN_CENTER_HORIZONTAL,
+        #         border=10)
+
+	localizationGrid = wx.grid.Grid(self)
+	localizationGrid.CreateGrid(14, 4)
+	simulationGrid = wx.grid.Grid(self)		
+	simulationGrid.CreateGrid(14, 3)
+
+        # Draw Robot Positions Grid Panel
+        self.drawGridPanel = DrawGridPanel(self)
+        self.drawGridPanel.Bind(wx.EVT_PAINT, self.redrawGrid)
+
+	topInfoRow = wx.BoxSizer(wx.HORIZONTAL)
+
+	topInfoRow.Add(localizationGrid, 1, wx.ALL | wx.EXPAND, 1)
+	topInfoRow.Add(simulationGrid, 1, wx.ALL | wx.EXPAND, 1)
+	topInfoRow.Add(self.drawGridPanel, 1, wx.ALL | wx.EXPAND, 1)
+
+        gbs.Add(topInfoRow, pos=(0,0), span=(1,5), flag=wx.ALIGN_CENTER_HORIZONTAL)
+
 
         # Top Buttons Panel
-        topButtonsPanel = TopButtonsPanel(self)
-        gbs.Add(topButtonsPanel, pos=(2, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL)
+        buttonsPanel = ButtonsPanel(self)
+        gbs.Add(buttonsPanel, pos=(2, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Combined Panel includes FlightInfoPanel and RosLoggerPanel
         self.combinedPanel = CombinedPanel(self)
         gbs.Add(self.combinedPanel, pos=(4, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL)
 
-        # Draw Robot Positions Grid Panel
-
-        self.drawGridPanel = DrawGridPanel(self)
-        self.drawGridPanel.Bind(wx.EVT_PAINT, self.redrawGrid)
-        gbs.Add(self.drawGridPanel, pos=(6, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # This timer refreshes the robot position drawing
         self.drawGridTimer = wx.Timer(self)
@@ -101,26 +115,26 @@ class RedbirdPanel(wx.Panel):
     def redrawGrid(self, event):
         dc = wx.PaintDC(self.drawGridPanel)
         for i in range(20):
-            dc.DrawLine(0, i * 10, 200, i * 10)
-            dc.DrawLine(i * 10, 0, i * 10, 200)
-        dc.SetBrush(wx.Brush(wx.Colour(255, 0, 0)))
+            dc.DrawLine(0, i * 20, 400, i * 20)
+            dc.DrawLine(i * 20, 0, i * 20, 400)
 
+        dc.SetBrush(wx.Brush(wx.Colour(255, 0, 0)))
         for i in range(5):
             xRand = random.randint(0, 20)
             yRand = random.randint(0, 20)
-            dc.DrawRectangle(xRand * 10, yRand * 10, 10, 10)
+            dc.DrawRectangle(xRand * 20, yRand * 20, 20, 20)
 
         dc.SetBrush(wx.Brush(wx.Colour(0, 255, 0)))
         for i in range(5):
             xRand = random.randint(0, 20)
             yRand = random.randint(0, 20)
-            dc.DrawRectangle(xRand * 10, yRand * 10, 10, 10)
+            dc.DrawRectangle(xRand * 20, yRand * 20, 20, 20)
 
         dc.SetBrush(wx.Brush(wx.Colour(128, 0, 128)))
         for i in range(4):
             xRand = random.randint(0, 20)
             yRand = random.randint(0, 20)
-            dc.DrawRectangle(xRand * 10, yRand * 10, 10, 10)
+            dc.DrawRectangle(xRand * 20, yRand * 20, 20, 20)
 
     # This properly updates the background when the size of the window changes
     def onEraseBackground(self, evt):
@@ -143,16 +157,18 @@ class RedbirdPanel(wx.Panel):
     def killClicked(self, event):
         print "Clicked kill button"
 
+
+
 # This is the panel where the robot positions are drawn on
 class DrawGridPanel(wx.Panel):
-  def __init__(self, parent):
-    super(DrawGridPanel, self).__init__(parent, size=(200, 200))
-    print "init DrawGridPanel"
-
-class TopButtonsPanel(wx.Panel):
     def __init__(self, parent):
-        super(TopButtonsPanel, self).__init__(parent)  # , style=wx.SIMPLE_BORDER | wx.ALIGN_CENTER)
-        print "init topButtonsPanel"
+        super(DrawGridPanel, self).__init__(parent, size=(200, 200))
+        print "init DrawGridPanel"
+
+class ButtonsPanel(wx.Panel):
+    def __init__(self, parent):
+        super(ButtonsPanel, self).__init__(parent)  # , style=wx.SIMPLE_BORDER | wx.ALIGN_CENTER)
+        print "init buttonsPanel"
 
         self.SetBackgroundColour('white')
         buttonGBS = wx.GridBagSizer(5, 5)
@@ -206,7 +222,7 @@ class TopButtonsPanel(wx.Panel):
         selection = self.startDropDown.GetString(self.startDropDown.GetSelection())
         # Make sure the flight suggestion from the dropdown menu wasn't accidentally selected
         if selection != "---FLIGHT---":
-            print "You chose " + 
+            print "You chose " + selection
 
     # This method is called when the Start button is clicked
     def startClicked(self, event):
