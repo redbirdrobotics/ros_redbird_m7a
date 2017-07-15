@@ -74,7 +74,7 @@ class RedbirdPanel(wx.Panel):
 
 	topInfoRow.Add(localizationGrid, 1, wx.ALL | wx.EXPAND, 1)
 	topInfoRow.Add(simulationGrid, 1, wx.ALL | wx.EXPAND, 1)
-	topInfoRow.Add(self.drawGridPanel, 1, wx.ALL | wx.EXPAND, 1)
+	topInfoRow.Add(self.drawGridPanel, 1, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, 1)
 
         gbs.Add(topInfoRow, pos=(0,0), span=(1,5), flag=wx.ALIGN_CENTER_HORIZONTAL)
 
@@ -162,7 +162,7 @@ class RedbirdPanel(wx.Panel):
 # This is the panel where the robot positions are drawn on
 class DrawGridPanel(wx.Panel):
     def __init__(self, parent):
-        super(DrawGridPanel, self).__init__(parent, size=(200, 200))
+        super(DrawGridPanel, self).__init__(parent)#, size=(200, 200))
         print "init DrawGridPanel"
 
 class ButtonsPanel(wx.Panel):
