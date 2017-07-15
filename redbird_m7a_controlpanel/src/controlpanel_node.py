@@ -203,9 +203,9 @@ class TopButtonsPanel(wx.Panel):
 
     # This method is called when the user selects a flight script
     def chooseFlightScript(self, event):
-        choice = self.startDropDown.GetString(self.startDropDown.GetSelection())
+        selection = self.startDropDown.GetString(self.startDropDown.GetSelection())
         # Make sure the flight suggestion from the dropdown menu wasn't accidentally selected
-        if choice != "---FLIGHT---":
+        if selection != "---FLIGHT---":
             print "You chose " + 
 
     # This method is called when the Start button is clicked
@@ -226,6 +226,8 @@ class TopButtonsPanel(wx.Panel):
     def homeClicked(self, event):
         print "Clicked home button"
 
+# This panel is created is created so that the RosLoggerPanel and FlightInfoPanel 
+# can be centered together
 class CombinedPanel(wx.Panel):
     def __init__(self, parent):
         super(CombinedPanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
