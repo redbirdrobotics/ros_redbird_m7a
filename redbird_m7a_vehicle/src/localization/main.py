@@ -3,8 +3,10 @@ import numpy as np
 import time
 from redbird import Robot
 from redbird import Utilities
+
 from redbird import Camera
 from redbird import Landmark
+
 
 #INITIALIZERS
 

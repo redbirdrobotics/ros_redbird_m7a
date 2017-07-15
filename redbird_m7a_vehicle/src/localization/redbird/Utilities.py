@@ -13,15 +13,15 @@ class Utilities():
 
     @staticmethod
     def createHsvMask(img, minThresh, maxThresh):
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(img, cv2.cv.CV_BGR2HSV)
         mask = cv2.inRange(hsv, minThresh, maxThresh)
         count = cv2.countNonZero(mask)
         return count, mask
 
     @staticmethod
     def createGreyMask(img, minThresh, maxThresh):
-        BGR = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
-        grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        BGR = cv2.cvtColor(img, cv2.cv.CV_HSV2BGR)
+        grey = cv2.cvtColor(img, cv2.cv.CV_BGR2GRAY)
         mask = cv2.inRange(grey, minThresh, maxThresh)
         count = cv2.countNonZero(mask)
         return count, mask
