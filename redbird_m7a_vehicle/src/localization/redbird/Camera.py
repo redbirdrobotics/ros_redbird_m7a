@@ -19,9 +19,9 @@ class Camera():
         self.port = port
         self.feed = cv2.VideoCapture(port)
         ret, self.frame = self.feed.read()
-        self.hRes = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
-        self.vRes = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
-        self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
+        self.hRes = self.feed.set(3, hRes)
+        self.vRes = self.feed.set(4, vRes)
+        self.setFPS = self.feed.set(5, FPS)
         self.lensRange = np.radians(hRange), np.radians(vRange)
         self.orientation = np.radians(azimuth), np.radians(altitude)
         self.xAxis = np.zeros((1, hRes))
@@ -55,8 +55,8 @@ class Camera():
         return esc
         
     def getRes(self):
-        hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
-        vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        hRes = int(self.feed.get(3))
+        vRes = int(self.feed.get(4))
         return hRes, vRes
     
 #_______________________________________________________#

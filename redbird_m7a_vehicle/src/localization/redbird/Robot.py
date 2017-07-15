@@ -230,7 +230,7 @@ class Robot():
                     r += 35
 
                 objList[rNum].selfUpdate(x, y, r, objList[rNum].camProps)
-                maskList[address + 1] = cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
+                cv2.circle(maskList[address + 1], (x,y), r, (0,0,0), -1)
                 
             else:
                 #print 'robot', objList[rNum].ident, 'not in ROI, last seen at', objList[rNum].coords
@@ -330,7 +330,7 @@ class Robot():
             newYb = min(abs(int(oldYb + scvY)), vRes)
             newXa = min(abs(int(oldXa + scvX)), hRes)
             newXb = min(abs(int(oldXb + scvX)), hRes)
-            pointList = np.array([[oldXa+r, oldYa],[oldXb+r, oldYb],[newXa, newYa],[newXb, newYb]])
+            pointList = np.array([[[oldXa+r, oldYa],[oldXb+r, oldYb],[newXa, newYa],[newXb, newYb]]])
             bx, by, bw, bh = cv2.boundingRect(pointList)
             self.ROI = np.array([by, by+bh, bx, bx+bw])
             
@@ -446,9 +446,11 @@ class Robot():
             my = round(my, 2)
             
             if not r == 0:
-                image = cv2.circle(image, (x,y), r, (0,0,0), 1)
-                image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
+                cv2.circle(image, (x,y), r, (0,0,0), 1)
+                cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
                 #image = cv2.putText(image, ("mx: %s Vx %s" % (mx, vX)), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
                 #image = cv2.putText(image, ("my: %s Vy %s" % (my, vY)), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
                 #image = cv2.line(image, (x,y), (x + vX, y + vY), (0,0,0), 5)
         return image
+
+

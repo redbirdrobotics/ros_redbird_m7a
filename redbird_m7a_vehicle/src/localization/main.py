@@ -10,7 +10,7 @@ from redbird import Landmark
 
 #CAMERAS
 #temp Height = 1.07
-cam0 = Camera(0, (1280, 720), 60, (130, 90), (0, 53.7))
+cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 53.7))
 cam0.create_angleAxis()
 ##cam1 = Camera(1, (1280, 720), 60, (130, 90), (120, 45))
 ##cam1.create_angleAxis()
@@ -73,6 +73,7 @@ while True:
     workingFrameList = Camera.getFrameList(camList)
     robotMaskList = Utilities.getMaskList(workingFrameList, hsvBlobMaskList, greyBlobMaskList)
     goalMaskList = Utilities.getMaskList(workingFrameList, hsvHoughMaskList, [])
+    #Utilities.showFramePause(robotMaskList)
 
     #Search For Landmarks
     goalLine.detectGoalLine(goalMaskList)
@@ -87,7 +88,6 @@ while True:
     
     #For Testing
     workingFrame = Robot.circleFound(workingFrameList[0], roboList)
-    #Utilities.showFramePause(workingFrameList[0])
     workingFrame = goalLine.drawLine(workingFrame, 15)
     esc = Camera.showFrame(workingFrame, "cam0")   
     if esc ==True:

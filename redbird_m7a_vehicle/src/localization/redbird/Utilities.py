@@ -177,8 +177,12 @@ class Utilities():
                             
                         newArray = [cam,x,y,r,0,0,color]
                         arrayList.append(newArray)
-                        mask = cv2.circle(mask, (x,y), r+25, (0,0,0), -1)
+                        cv2.circle(mask, (x,y), r+25, (0,0,0), -1)
                     else:
                         detect = False
                         
         return arrayList, boolList
+
+
+
+
