@@ -64,7 +64,7 @@ class Simulation_Node:
             for sim_robot in sim.get_Obtacle_Robots():
                 #loop through rest of messages that need to be populated
                 for robot_msg in robot_msgs:
-                    #if the matches then populate the message
+                    #if the id matches then populate the message
                     if robot_msg.id == sim_robot.get_id():
                         robot_msg.x = sim_robot.x
                         robot_msg.x = sim_robot.x
@@ -80,19 +80,17 @@ class Simulation_Node:
             self._pub.publish(map)
 
     def update_map(self, msg):
-        # Loop through all robots in the localization topic
-        for lRobot in msg.ground_robots:
-            # Loop through all robots in the simulation
-            for sRobot in self._sim.get_Target_robots():
-                # If the ids are the same, check the error
-                if sRobot.id == lRobot.id:
-                    sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+         while not rospy.is_shutdown():
+            # Loop through all robots in the localization topic
+            for lRobot in msg.ground_robots:
+                # Loop through all robots in the simulation
+                for sRobot in self._sim.get_Target_robots():
+                    # If the ids are the same, check the error
+                    if sRobot.id == lRobot.id:
+                        sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
-        # Data has been updated, set ready flag
-        self._ready = True
-        while not rospy.is_shutdown():
-            rospy.loginfo("Simulation says hi!")
-            time.sleep(10)
+            # Data has been updated, set ready flag
+            self._ready = True
 
     def get_data_for_robots(self):
         #looping through simulated robots
