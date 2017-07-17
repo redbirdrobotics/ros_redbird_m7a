@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Event
 from random import randint
 from math import tan, pow, sqrt
 from Sim_Timer import Sim_Timer
@@ -15,60 +15,62 @@ class Ground_Robot_Interface(Thread, object):
         self._id = id
         self.color = color
         self._radius = 1.0 #m
+
+        #for obstacle robots travelling in a circle
         self._omega = 0
 
         self._deltaX = ((randint(-33, 33)) / 100 )
 
         self._deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
 
-        self.thread_cancelled = False
+        #creating the flags for the timing, collisions, and border detection respectively
+        self._timerUp = False
         self.collision = False
         self._boundary = False
+
+        #creating variables for the timing
+        self.start_timer = 0
+        self.end_timer = 0
+        self.deltaTime = 0
         
-    def get_coordinates(self):
-        return (self.x, self.y)
-
-    def get_id(self):
-        return self.ID 
-
-    def set_coordinates(self, x, y):
-        self._x = x
-        self._y = y
-
-    def get_angle(self):
-        pass
-
-    def run(self):
-        pass
-
-
-    def cancel(self):
-        pass
-
     def update_posX(self):
-        changeX = self._deltaX * iterations
-        self._x = changeX + self._x
-        return self._x
+        pass
 
     def update_posY(self):
-        changeY = self._deltaY * iterations
-        self._y = changeY + self._y
+        pass
+     
+    def update_movement(self):
+        pass
+
+    def check_collisions(self, target_robot, obstacle_robots):
+        pass
+
+    def button_pushed(self, robot):
+        pass
+
+    def run(self, target_robots, obstacle_robots):
+        pass
+    
+    def change_X_data(self, x):
+        pass
+
+    def change_Y_data(self, y):
+        pass
+
+    def change_VX_data(self, velocityX):
+        pass
+
+    def change_VY_data(self, velocityY):
+        pass
+
+    def check_error(self, x, y, velocityX, velocityY):
+        pass
+
+    def get_id(self):
+        return self._id
+
+    def get_y(self):
         return self._y
 
-    def update_movement(self):
-        self.current_pos = (self._x, self._y , self._id)
-        print(self.current_pos)
-
-        if(self.collision == True):
-            self.deltaX = self._deltaX * -1
-
-            self._deltaY = self.deltay * -1 
-
-            sleep(1)
-
-        else:
-            self.update_posX()
-            self.update_posY()
-
-    def check_collisions(self):
-        pass
+    def get_x(self):
+        return self._x

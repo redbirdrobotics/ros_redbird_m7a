@@ -6,7 +6,10 @@ class Sim_Timer(object):
 
     def __init__(self):
         self.counter = 0
+
+        #creating two events to control the program
         self._PAUSED = Event()
+        self._quit = Event()
 
     def run(self):
         #Creating the timing thread
@@ -14,6 +17,8 @@ class Sim_Timer(object):
 
         #setting the flag to false
         self._PAUSED.clear()
+
+        self._quit.clear()
 
         try:
             #starting the timer thread
@@ -25,15 +30,19 @@ class Sim_Timer(object):
 
     def update_time(self):
 
-        #only allowing for the flag to be false 
-        while not self._PAUSED.is_set():
+        #allows the program to be paused and resumed
+        while not (self._quit.is_set()):
 
-            #stopping for 1 second
-            sleep(1)
+            #only allowing for the flag to be false 
+            while not self._PAUSED.is_set():
 
-            #incrementing the timer by one and printing
-            self.counter += 1
-            print(self.get_current_timer())
+                #stopping for 1 second
+                sleep(1)
+
+                #incrementing the timer by one and printing
+                self.counter += 1
+                print(self.get_current_timer())
+                print(self._PAUSED._flag)
 
     def get_current_timer(self):
         return self.counter
@@ -41,7 +50,7 @@ class Sim_Timer(object):
     def pause(self):
         #setting the flag to true
         self._PAUSED.set()
-
+        
     def reset(self):
         self.counter = 0
 
@@ -51,6 +60,7 @@ class Sim_Timer(object):
     def resume(self):
         self._PAUSED.clear()
 
-    """def quit(self):
-        self.pause()
-        self._quit.set()"""
+    def quit(self):
+        self._PAUSED.set()
+
+        self._quit.set()

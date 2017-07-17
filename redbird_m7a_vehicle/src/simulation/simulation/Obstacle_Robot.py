@@ -1,4 +1,4 @@
-from Ground_RobotInterface import Ground_Robot_Interface
+from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer
 from math import sqrt, pow, cos, sin
 from time import sleep
@@ -6,15 +6,15 @@ from threading import Thread
 
 class Obstacle_Robot(Ground_Robot_Interface, object):
 
-    def __init__(self, x, y, id, color, timer):
+    def __init__(self, x, y, delta_x, delta_y, id, color, timer):
+        #allowing for the timer to be synched with program
+        self._timer = timer
+
         #getting class variables
-        return super().__init__(x, y, id, color)
+        return super().__init__(x, y, delta_x, delta_y, id, color)
 
         #the radius of travel for the obstacle robot
         self.radius = 1.5 #m
-
-        #allowing for the timer to be synched with program
-        self._timer = timer
         
         #finding the delta angle of travel
         self._omega = ( ( (sqrt( ( pow(self._deltaX, 2) + pow(self._deltaY, 2) ) ) ) / self.radius) * iterations)
@@ -35,9 +35,10 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
         #only allwing the code to work if the timer is not paused
         while not (self._timer._PAUSED.is_set()):
             #as long as the change in time is no less than 20 than the code will work
+            self.start_timer = self._timer.get_current_timer()
+
             while self.deltaTime <= 20:
                 #starting the timer
-                start_time = self._timer.get_current_timer()
 
                 #setting the currrent position and printing
                 self.current_pos = (self._x, self._y , self._id)
@@ -47,15 +48,15 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
                 self.update_posY()
 
                 #making sure the angle is doubled
-                self._omega = self._omega * 2
+                """self._omega = self._omega * 2
 
                 self._deltaX = cos(self._omega)
 
-                self._deltaY = sin(self._omega)
-
-                sleep(iterations)
+                self._deltaY = sin(self._omega)"""
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
+
+                sleep(iterations)
 
     def run(self):
         #creating the thread and making the target update movement
@@ -67,10 +68,10 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
             print("Thread could not start")
 
     def get_x(self):
-        return super().get_x()
+        return self._x
 
     def get_y(self):
-        return super().get_y()
+        return self._y
 
     def get_id(self):
-        return super().get_y()
+        return self._id

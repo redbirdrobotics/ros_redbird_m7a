@@ -105,6 +105,9 @@ class Simulation_Node:
                     if (tRobot.id == lRobot.id):
                         tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, vec_y)
 
+                        #resetting the timer flag
+                        tRobot.timerUp = False
+
 
 if __name__ == '__main__':
     try:
