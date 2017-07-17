@@ -5,13 +5,13 @@ from time import sleep
 from threading import Thread
 from math import fabs, sqrt, tan
 
-class Target_Robot(Ground_Robot_Interface, object):
+class Target_Robot(Ground_Robot_Interface):
     """description of class"""
 
     def __init__(self, x, y, delta_x, delta_y, id, color, timer): 
         self._timer = timer
 
-        return super().__init__(x, y, delta_x, delta_y, id, color)
+        return super(Target_Robot, self).__init__(x, y, delta_x, delta_y, id, color)
 
     def update_posX(self):
         changeX = self._deltaX * iterations
@@ -32,7 +32,7 @@ class Target_Robot(Ground_Robot_Interface, object):
 
                 while self.deltaTime <= 20:
                     self.current_pos = (self._x, self._y , self._deltaX, self._deltaY, self._id)
-                    print(self.current_pos)
+                    print self.current_pos
 
                     if(self.collision == True):
                         
@@ -52,8 +52,6 @@ class Target_Robot(Ground_Robot_Interface, object):
                         sleep(iterations)
 
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer
-
-                    print("delta time for obstacle robot " + str(self.deltaTime))
 
                 if(self.deltaTime == 20):
 

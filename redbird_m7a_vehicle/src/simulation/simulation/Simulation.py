@@ -30,12 +30,12 @@ class Simulation(object):
 
         #Runs all threads in the target robot array
         for arduino in self.target_robots:
-            print("initing all of the ground robots")
+            print 'initing all of the ground robots'
             arduino.run(self.obstacle_robots)
 
         #Runs all threads in the obstacle robot array
         for robot in self.obstacle_robots:
-            print("initing the obstacle robots")
+            print 'initing the obstacle robots'
             robot.run()
 
         #self.threading()
@@ -100,10 +100,10 @@ class Simulation(object):
         try:
             self._collision_thread.start()
 
-            print("Thread started")
+            print 'Thread started'
 
         except:
-            print("Thread not started")
+            print 'Thread not started'
 
     def button_pushed(self, robot, robot1):
         robot = Target_Robot

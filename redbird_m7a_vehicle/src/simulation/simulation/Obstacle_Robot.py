@@ -4,14 +4,14 @@ from math import sqrt, pow, cos, sin
 from time import sleep
 from threading import Thread
 
-class Obstacle_Robot(Ground_Robot_Interface, object):
+class Obstacle_Robot(Ground_Robot_Interface):
 
     def __init__(self, x, y, delta_x, delta_y, id, color, timer):
         #allowing for the timer to be synched with program
         self._timer = timer
 
         #getting class variables
-        return super().__init__(x, y, delta_x, delta_y, id, color)
+        return super(Obstacle_Robot, self).__init__(x, y, delta_x, delta_y, id, color)
 
         #the radius of travel for the obstacle robot
         self.radius = 1.5 #m
@@ -42,7 +42,7 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
 
                 #setting the currrent position and printing
                 self.current_pos = (self._x, self._y , self._id)
-                print(self.current_pos)
+                print self.current_pos
 
                 self.update_posX()
                 self.update_posY()
@@ -55,8 +55,6 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
                 self._deltaY = sin(self._omega)"""
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
-
-                print("delta time for obstacle robot is " + str(self.deltaTime))
 
                 sleep(iterations)
             
