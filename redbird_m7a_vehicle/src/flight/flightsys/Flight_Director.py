@@ -15,10 +15,9 @@ __email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Flight_Director(object):
-    def __init__(self, vehicle, controller):
+    def __init__(self, vehicle):
         # Store parameters
         self._vehicle = vehicle
-        self._controller = controller
         self.log_tag = "[FD] "
         self._queue_size = 10
 
@@ -105,7 +104,7 @@ class Flight_Director(object):
     def shutdown(self):
         """Performs shutdown actions to cleanly exit."""
         # Log shutdown
-        rospy.loginfo(self.log_tag + "Shutting down current flight...")
+        rospy.loginfo(self.log_tag + "Shutting down flight director...")
 
         # Kill flight if one exists
         if self._current_flight is not None:
@@ -113,12 +112,6 @@ class Flight_Director(object):
 
         # Disarm
         self._vehicle.disarm()
-
-        # Kill the controller
-        self._controller.event.set()
-
-        # Wait for the controller to die
-        self._controller.thread.join()
 
         # Log shutdown complete
         rospy.loginfo(self.log_tag + "Shutdown complete")
@@ -226,9 +219,6 @@ class Flight_Director(object):
 
                 # Disarm
                 self._current_flight.vehicle.disarm()
-
-                # Reset controller
-                self._current_flight.controller.reset()
 
                 # Set poison pill to kill thread
                 self._current_flight.event.set()

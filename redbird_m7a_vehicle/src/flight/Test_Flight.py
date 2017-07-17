@@ -13,14 +13,11 @@ __email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Test_Flight(flightsys.Flight, object):
-    def __init__(self, vehicle, controller):
+    def __init__(self, vehicle):
         # Call super constructor
-        super(Test_Flight, self).__init__(name='test_flight', log_tag='TEST FLIGHT', vehicle=vehicle, controller=controller)
+        super(Test_Flight, self).__init__(name='test_flight', log_tag='TEST FLIGHT', vehicle=vehicle)
 
     def flight(self):
-        # Arm the vehicle
-        self.vehicle.arm()
-
         # Takeoff
         self.takeoff(4.0)
 
@@ -39,6 +36,3 @@ class Test_Flight(flightsys.Flight, object):
 
         # Land
         self.land()
-
-        # Disarm
-        self.vehicle.disarm()

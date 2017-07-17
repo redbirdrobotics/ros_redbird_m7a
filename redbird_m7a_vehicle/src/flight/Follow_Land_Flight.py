@@ -13,21 +13,15 @@ __author__ = "Jonah Largen, Alex Bennett"
 
 
 class Follow_Land_Flight(flightsys.Flight, object):
-    def __init__(self, vehicle, controller):
+    def __init__(self, vehicle):
         # Call super constructor
-        super(Follow_Land_Flight, self).__init__(name='follow_land_flight', log_tag='FOLLOW/LAND', vehicle=vehicle, controller=controller)
+        super(Follow_Land_Flight, self).__init__(name='follow_land_flight', log_tag='FOLLOW/LAND', vehicle=vehicle)
 
         #vars
         self.x = 0.0
         self.y = 0.0
 
     def flight(self):
-        # Arm the vehicle
-        self.vehicle.arm()
-
-        # Wait a moment
-        self.sleep(2)
-
         # Set takeoff altitude
         self.takeoff(2.5)
 
@@ -57,7 +51,3 @@ class Follow_Land_Flight(flightsys.Flight, object):
 
         # Switch mode to land
         self.land()
-
-        # Disarm
-        self.vehicle.disarm()
-

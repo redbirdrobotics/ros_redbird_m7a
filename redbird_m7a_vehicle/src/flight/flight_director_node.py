@@ -20,15 +20,12 @@ if __name__ == '__main__':
         # Initialize vehicle
         vehicle = flightsys.Vehicle()
 
-        # Initialize flight controller
-        controller = flightsys.Controller(vehicle)
-
         # Initialize flight director
-        fd = flightsys.Flight_Director(vehicle, controller)
+        fd = flightsys.Flight_Director(vehicle)
 
         # Create and add flights
         for klass in flightsys.Flight.__subclasses__():
-            inst = klass(vehicle, controller)
+            inst = klass(vehicle)
             fd.add_flight(inst.name, inst)
 
         # Waiting for command
