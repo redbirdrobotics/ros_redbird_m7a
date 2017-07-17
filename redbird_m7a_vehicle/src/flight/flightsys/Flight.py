@@ -4,11 +4,16 @@
 
 import threading
 import rospy
+from enum import Enum
 from Vehicle import Vehicle
 from Controller import Controller, Control_Mode
 
 __author__ = "Alex Bennett"
 __email__ = "alex.eugene.bennett@gmail.com"
+
+
+class Flight_End_Reason(Enum):
+    INITIAL, NATURAL, KILLED = range(0, 3)
 
 
 class Flight(object):
@@ -28,6 +33,9 @@ class Flight(object):
 
         # Set parameters
         self.name = name
+        self.start_time = 0.0
+        self.end_time = 0.0
+        self.end_reason = Flight_End_Reason.INITIAL
         self.log_tag = "[" + log_tag + "] "
         self.vehicle = vehicle
         self.controller = controller
@@ -38,17 +46,40 @@ class Flight(object):
             # Reset controller
             self.controller.reset()
 
+            # Reset flight diagnositcs
+            self.start_time = 0.0
+            self.end_time = 0.0
+            self.end_reason = Flight_End_Reason.INITIAL
+
             # Flight starting
             rospy.loginfo(self.log_tag + "Flight starting")
 
+            # Set start time
+            self.start_time = rospy.get_time()
+
             # Start flight
             self.flight()
+
+            # Set end time
+            self.end_time = rospy.get_time()
+
+            # Set end type
+            self.end_reason = Flight_End_Reason.NATURAL
+
+            # Set poison
+            self.event.set()
 
             # Flight complete
             rospy.loginfo(self.log_tag + "Flight complete")
         except Exception as e:
             # Reset controller
             self.controller.reset()
+
+            # Record end time
+            self.end_time = rospy.get_time()
+
+            # Set end state
+            self.end_reason = Flight_End_Reason.KILLED
 
             # Log error
             rospy.logerr(self.log_tag + "%s" % str(e))
@@ -67,7 +98,7 @@ class Flight(object):
     def loginfo(self, msg):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Log
         rospy.loginfo(self.log_tag + msg)
@@ -75,7 +106,7 @@ class Flight(object):
     def logwarn(self, msg):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Log
         rospy.logwarn(self.log_tag + msg)
@@ -83,7 +114,7 @@ class Flight(object):
     def logerr(self, msg):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Log
         rospy.logerr(self.log_tag + msg)
@@ -91,7 +122,7 @@ class Flight(object):
     def fly_to_point(self, point):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Set target point
         self.controller.set_position(point)
@@ -105,7 +136,7 @@ class Flight(object):
     def fly_velocity(self, velocity, time=0.0):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Set target velocity and time
         self.controller.set_velocity(velocity, time)
@@ -119,7 +150,7 @@ class Flight(object):
     def takeoff(self, altitude=0.0):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Set takeoff altitude
         if altitude > 0.0:
@@ -134,7 +165,7 @@ class Flight(object):
     def land(self):
         # Disallow if poison pill has been set
         if self.event.is_set():
-            raise Exception("Thread killed")
+            raise Exception("Flight killed")
 
         # Switch mode to land
         self.controller.set_mode(Control_Mode.LAND)

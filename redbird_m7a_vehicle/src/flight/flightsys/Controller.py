@@ -6,7 +6,6 @@ import rospy
 import threading
 import math
 import utils
-import multiprocessing
 from enum import Enum
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from std_msgs.msg import Header
