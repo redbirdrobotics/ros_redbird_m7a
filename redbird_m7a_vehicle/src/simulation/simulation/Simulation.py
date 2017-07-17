@@ -17,22 +17,12 @@ class Simulation(object):
         self.obstacle_robots = []
 
         #Filling the target robot array with arbitrary values
-        """for robot in range(1, 2):
-            self.target_robots.append(Target_Robot(0, 0, robot, 1, self._timer))"""
+        for robot in range(1, 2):
+            self.target_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer))
 
         #Filling the obstacle robot array 
-        """for robot in range(11, 15):
-            print("appending the obstacle robots")
-             
-            self.obstacle_robots.append(Obstacle_Robot(0,0, robot, 0, self._timer))"""
-
-        arduino = Target_Robot(4, 0, -1, 1, 1, 0, self._timer)
-        self.target_robots.append(arduino)
-
-        arduino1 = Obstacle_Robot(0, 4, 0, 0, 11, 0, self._timer)
-        self.obstacle_robots.append(arduino1)
-
-        print(self._timer.get_pause())
+        for robot in range(11, 15):
+            self.obstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 0, self._timer))
 
     def run(self):
         #Running the timer (controls all threads) 
@@ -50,15 +40,7 @@ class Simulation(object):
 
         #self.threading()
 
-        sleep(20)
-
-        print(self._timer.get_pause())
-        
-        print("trying to pause the sim")
-
-        self._timer.pause()
-
-        print("Trying to quit the timer")
+        sleep(1200)
 
         self._timer.quit()
 
@@ -77,13 +59,13 @@ class Simulation(object):
 
             while min_num < max_num :
 
-                print("#looping through the array that is being input to the function")
+                #looping through the array that is being input to the function
                 for robot in range(1, max_num):
 
-                    print("#as long as the two id are not equal")
+                    #as long as the two id are not equal
                     if not (self.target_robots[min_num]._id == self.target_robots[robot]._id):
 
-                        print("#as long as the boundary flag is raised")
+                        #as long as the boundary flag is raised
                         if(self.target_robots[min_num]._boundary):
 
                             #stopping and deleting the thread
@@ -97,42 +79,17 @@ class Simulation(object):
                             self.target_robots[min_num]._boundary = True
 
                         else:
-                            print("testing the collision")
-                            dXX = self.target_robots[robot]._x - self.target_robots[min_num]._x
+                            dXX =  - self.target_robots[robot]._x - self.target_robots[min_num]._x
                             dYY = self.target_robots[robot]._y - self.target_robots[min_num]._y
 
                             dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                            if dCC <= 2*(self.target_robots[min_num]._radius):
-                                print("passed the final criteria")
+                            max_distance = sqrt(self.target_robots[min_num] + self.target_robots[robot])
 
-                                vector_i = self.target_robots[min_num]._x - self.target_robots[robot]._x
-                                vector_j = self.target_robots[min_num]._y - self.target_robots[robot]._y
+                            if dCC <= max_distance:
 
-                                if (vector_i == 0):
-                                    theta = 90
-                                else:
-                                    theta = tan(vector_j / vector_i)
+                                self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
 
-                                #Calculating the angle of velocity vector
-                                if(self.target_robots[min_num]._deltaX == 0):
-
-                                    if(self.target_robots[min_num]._deltaY < 0):
-                                        _theta = 180
-
-                                    _theta = 90
-
-                                else:
-                                    _theta = tan(self.target_robots[min_num]._deltaX/ self.target_robots[min_num]._deltaY)
-
-                                min_theta = _theta - 70
-                                max_theta = _theta + 70
-
-                                if(theta >= min_theta and theta <= max_theta):
-                                    self.target_robots[min_num].button_pushed = True
-
-                                self.target_robots[min_num].collision = True
-                
                 min_num += 1
 
                 sleep(iterations/2)
@@ -147,3 +104,56 @@ class Simulation(object):
 
         except:
             print("Thread not started")
+
+    def button_pushed(self, robot, robot1):
+        robot = Target_Robot
+        robot1 = Target_Robot
+
+        vector_i = robot._x - robot1._x
+        vector_j = robot._y - robot1._y
+
+        if (vector_i == 0):
+            theta = 90
+        else:
+            theta = tan(vector_j / vector_i)
+
+        #Calculating the angle of velocity vector
+        if(robot._deltaX == 0):
+
+            #making sure that there is not division by 0 and calculating angles where 
+            if(robot._deltaY < 0):
+                v_theta = 180
+
+            v_theta = 90
+
+        else:
+            v_theta = tan(robot._deltaY / robot._deltaX)
+
+        print(v_theta)
+
+        min_theta = v_theta - 70
+        max_theta = v_theta + 70
+
+        #Calculating the angle of velocity vector with respect to the other robot
+        if(robot1._deltaX == 0):
+
+            if(robot1._deltaY < 0):
+                v2_theta = 180
+
+            v2_theta = 90
+
+        else:
+            v2_theta = tan(robot1._deltaY / robot1._deltaX)
+
+        print(v2_theta)
+
+        min2_theta = v2_theta - 70
+        max2_theta = v2_theta + 70
+
+        if(theta >= min_theta and theta <= max_theta):
+            robot.collision = True
+
+        if(theta >= min2_theta and theta <= max2_theta):
+            robot1.collision = True
+
+        #this is necessary because now the Simulation is doing collision detection

@@ -28,106 +28,68 @@ class Target_Robot(Ground_Robot_Interface, object):
         while not (self._timer._quit.is_set()):
 
             while not (self._timer._PAUSED.is_set()):
-
-                #while self.deltaTime <= 20:
                 self.start_timer = self._timer.get_current_timer()
-                self.current_pos = (self._x, self._y , self._deltaX, self._deltaY, self._id)
-                print(self.current_pos)
 
-                if(self.collision):
-                    self._deltaX = self._deltaX * -1
+                while self.deltaTime <= 20:
+                    self.current_pos = (self._x, self._y , self._deltaX, self._deltaY, self._id)
+                    print(self.current_pos)
 
-                    self._deltaY = self._deltaY * -1 
+                    if(self.collision == True):
+                        
+                        self._deltaX = self._deltaX * -1
 
-                    sleep(iterations)
+                        self._deltaY = self._deltaY * -1 
 
-                else:
+                        self.collision = False
 
-                    self.update_posX()
-                    self.update_posY()
+                        sleep(iterations)
 
-                    sleep(iterations)
+                    else:
 
-                self.deltaTime = self._timer.get_current_timer() - self.start_timer
+                        self.update_posX()
+                        self.update_posY()
 
-                """if(self.deltaTime == 20):
+                        sleep(iterations)
+
+                    self.deltaTime = self._timer.get_current_timer() - self.start_timer
+
+                    print("delta time for obstacle robot " + str(self.deltaTime))
+
+                if(self.deltaTime == 20):
 
                     self.deltaTIme = 0
 
-                    self._timerUp = True"""
-        
-    """def check_collisions(self, target_robot):
-        min_num = 0
-        max_num = len(target_robot)
-
-        #arbitrary definition of target robots to be a list of objects
-        target_robot = [Target_Robot]
-        
-        #Only allowing for the PAUSED flag to be false
-        while not self._timer._PAUSED.is_set():
-
-            print("#looping through the array that is being input to the function")
-            for robot in target_robot:
-
-                print("#as long as the two id are not equal")
-                if not (self._id == robot.get_id()):
-
-                    print("#as long as the boundary flag is raised")
-                    if(self._boundary):
-
-                        #stopping and deleting the thread
-                        self._distanceThread._stop()
-
-                        self._distanceThread._delete()
-
-                        break
-
-                    elif(self._x >= 10 and self._y >= 10):
-                        self._boundary = True
-
-                    else:
-                        print("testing the collision")
-                        dXX = robot._x - self._x
-                        dYY = robot._y - self._y
-
-                        dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
-
-                        if dCC <= 2*radius :
-                            print("passed the final criteria")
-                            self.button_pushed(robot)
-
-                            self.collision = True
-
-            sleep(iterations"""
+                    self._timerUp = True
 
     def oR_check_collisions(self, obstacle_robots = [Obstacle_Robot]):
         #making the obstacle robots an array of Obstacle Robots (arbitrary definition)
 
-        #
+        #as long as the timer flag is not set
         while not self._timer._PAUSED.is_set():
 
-            print("#looping through the list of Obstacle Robots")
+            #looping through the list of Obstacle Robots
             for oRobot in obstacle_robots:
                 
-                print("#finding the distance from center to center")
+                #finding the distance from center to center
                 dXX = fabs(oRobot.get_x() - self._x)
                 dYY = fabs((oRobot.get_y()) - self._y)
                 dCC = sqrt((pow(dXX, 2)) + pow(dYY, 2))
 
-                print("#if the distance from center to center is the sum of the radii then find the angle of collision")
-                if dCC <= 2 * self._radius:
+                #creating the max distance the robots can be
+                max_distance = sqrt(pow((self._radius + oRobot._radius), 2))
 
-                    print("#creating two vectors between the x and y positions")
-                    vector_i = self._x - oRobot.get_x()
-                    vector_j = self._y - oRobot.get_y()
+                if dCC <= max_distance:
+
+                    #creating two vectors between the x and y positions
+                    vector_i = oRobot.get_x() - self._x
+                    vector_j = oRobot.get_y() - self._y
                     
-                    #determining the vector between the two vectors
-
+                    #determining the vector between the two robots and bounds checking the angle
                     if(vector_i == 0):
 
                         if(vector_j < 0):
 
-                            theta = 180
+                            theta = 270
 
                         theta = 90
 
@@ -149,32 +111,7 @@ class Target_Robot(Ground_Robot_Interface, object):
                     if(theta >= min_theta and theta <= max_theta):
                         self.collision = True
 
-            sleep(iterations)
-
-    """def button_pushed(self, robot):
-        robot = Target_Robot
-         
-        vector_i = self._x - robot._x
-        vector_j = self._x - robot._y
-
-        theta = tan(vector_j / vector_i)
-
-        #Calculating the angle of velocity vector
-        if(self._deltaX == 0):
-
-            if(self._deltaY < 0):
-                _theta = 180
-
-            _theta = 90
-
-        else:
-            _theta = tan(self._deltaX/ self._deltaY)
-
-        min_theta = _theta - 70
-        max_theta = _theta + 70
-
-        if(theta >= min_theta and theta <= max_theta):
-            self.button_pushed = True"""
+            sleep(iterations/2)
 
     def run(self, obstacle_robots):
         self._distanceThread = Thread(target = self.update_movement)
@@ -193,13 +130,13 @@ class Target_Robot(Ground_Robot_Interface, object):
 
             print("Thread failed!")
 
-        try:
-            self._or_collision_thread.start()
+        #try:
+        #    self._or_collision_thread.start()
 
-            print("Obstacle Robot collision detection started")
+        #    print("Obstacle Robot collision detection started")
 
-        except:
-            print("Thread failed!")
+        #except:
+        #    print("Thread failed!")
     
     def change_X_data(self, x):
         self._x = x

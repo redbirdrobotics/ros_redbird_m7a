@@ -42,7 +42,6 @@ class Sim_Timer(object):
                 #incrementing the timer by one and printing
                 self.counter += 1
                 print(self.get_current_timer())
-                print(self._PAUSED._flag)
 
     def get_current_timer(self):
         return self.counter

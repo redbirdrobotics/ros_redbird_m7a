@@ -56,7 +56,12 @@ class Obstacle_Robot(Ground_Robot_Interface, object):
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
+                print("delta time for obstacle robot is " + str(self.deltaTime))
+
                 sleep(iterations)
+            
+            #resetting the timer
+            self.deltaTime = 0
 
     def run(self):
         #creating the thread and making the target update movement
