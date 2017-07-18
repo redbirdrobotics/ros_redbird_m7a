@@ -6,6 +6,7 @@ from simulation import *
 
 class Simulation_Node:
     def __init__(self):
+
          # Initialize node
         rospy.init_node('simulation_node', anonymous=True)
 
@@ -40,7 +41,7 @@ class Simulation_Node:
         map = Map() 
     
         # Create target robot list
-        robot_msgs = []
+        robot_msgs = [3]
 
         # Create all GroundRobotPositions
         for x in xrange(14):
@@ -66,7 +67,6 @@ class Simulation_Node:
                 for robot_msg in robot_msgs:
                     #if the id matches then populate the message
                     if robot_msg.id == sim_robot.get_id():
-                        robot_msg.x = sim_robot.x
                         robot_msg.x = sim_robot.x
                         robot_msg.y = sim_robot.y
                         robot_msg.vec_x = sim_robot.deltaX

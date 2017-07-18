@@ -5,14 +5,13 @@ from time import sleep
 from threading import Thread
 
 class Obstacle_Robot(Ground_Robot_Interface):
-
     def __init__(self, x, y, delta_x, delta_y, id, color, timer):
         #allowing for the timer to be synched with program
         self._timer = timer
 
         #getting class variables
         return super(Obstacle_Robot, self).__init__(x, y, delta_x, delta_y, id, color)
-
+        
         #the radius of travel for the obstacle robot
         self.radius = 1.5 #m
         
@@ -20,10 +19,10 @@ class Obstacle_Robot(Ground_Robot_Interface):
         self._omega = ( ( (sqrt( ( pow(self._deltaX, 2) + pow(self._deltaY, 2) ) ) ) / self.radius) * iterations)
 
         #finding the change in x of travel
-        self._deltaX = cos(self._omega)
+        self._deltaX = cos(self._omega) * self.radius
 
         #finding the the change in y of travel
-        self._deltaY = sin(self._omega)
+        self._deltaY = sin(self._omega) * self.radius
 
     def update_posX(self):
         self._x = self._x + self._deltaX
@@ -48,11 +47,11 @@ class Obstacle_Robot(Ground_Robot_Interface):
                 self.update_posY()
 
                 #making sure the angle is doubled
-                """self._omega = self._omega * 2
+                self._omega = self._omega * 2
 
                 self._deltaX = cos(self._omega)
 
-                self._deltaY = sin(self._omega)"""
+                self._deltaY = sin(self._omega)
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
@@ -64,11 +63,15 @@ class Obstacle_Robot(Ground_Robot_Interface):
     def run(self):
         #creating the thread and making the target update movement
         self._ORThread = Thread(target = self.update_movement)
+
         try:
             self._ORThread.start()
-            print("Thread Started")
+
+            print "Thread Started"
+
         except:
-            print("Thread could not start")
+
+            print "Thread could not start"
 
     def get_x(self):
         return self._x

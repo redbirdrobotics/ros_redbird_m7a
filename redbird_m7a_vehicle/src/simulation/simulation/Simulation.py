@@ -13,12 +13,13 @@ class Simulation(object):
         self._timer = Sim_Timer()
 
         #creating the main array of both the ground and obstacle robots with arbitrary values 
-        self.target_robots = []
-        self.obstacle_robots = []
+        self.Rtarget_robots = []
+        self.Gtarget_robots = []
+        self.Wobstacle_robots = []
 
         #Filling the target robot array with arbitrary values
-        for robot in range(1, 2):
-            self.target_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer))
+        for robot in range(1, 5):
+            self.Rtarget_robots.append(Target_Robot(0, 0))
 
         #Filling the obstacle robot array 
         for robot in range(11, 15):
@@ -38,7 +39,7 @@ class Simulation(object):
             print 'initing the obstacle robots'
             robot.run()
 
-        #self.threading()
+        self.threading()
 
         sleep(1200)
 
@@ -74,11 +75,12 @@ class Simulation(object):
                             self.target_robots[min_num]._distanceThread._delete()
 
                             break
-
+                        #testing the if the robot has exited the boundary
                         elif(self.target_robots[min_num]._x >= 10 and self.target_robots[min_num]._y >= 10):
                             self.target_robots[min_num]._boundary = True
 
                         else:
+                            #Determining the distance from robot to robot
                             dXX =  - self.target_robots[robot]._x - self.target_robots[min_num]._x
                             dYY = self.target_robots[robot]._y - self.target_robots[min_num]._y
 
@@ -86,6 +88,7 @@ class Simulation(object):
 
                             max_distance = sqrt(self.target_robots[min_num] + self.target_robots[robot])
 
+                            #if the distance from center to center is less than the sum of the two radii
                             if dCC <= max_distance:
 
                                 self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
@@ -95,6 +98,8 @@ class Simulation(object):
                 sleep(iterations/2)
 
     def threading(self):
+        #starting and initializing the thread
+
         self._collision_thread = Thread(target = self.check_collision)
 
         try:
@@ -106,9 +111,11 @@ class Simulation(object):
             print 'Thread not started'
 
     def button_pushed(self, robot, robot1):
+        #arbitrary definition of the two inputs
         robot = Target_Robot
         robot1 = Target_Robot
 
+        #finding the distance vectors between each of the robots
         vector_i = robot._x - robot1._x
         vector_j = robot._y - robot1._y
 
@@ -117,10 +124,9 @@ class Simulation(object):
         else:
             theta = tan(vector_j / vector_i)
 
-        #Calculating the angle of velocity vector
+        #Calculating the angle of velocity vector and bounds checking
         if(robot._deltaX == 0):
 
-            #making sure that there is not division by 0 and calculating angles where 
             if(robot._deltaY < 0):
                 v_theta = 180
 
@@ -129,31 +135,18 @@ class Simulation(object):
         else:
             v_theta = tan(robot._deltaY / robot._deltaX)
 
-        print(v_theta)
-
-        min_theta = v_theta - 70
-        max_theta = v_theta + 70
+        #Finding the relative angle of where the button is pushed
+        min_theta = robot.get_theta() - 70
+        max_theta = robot.get_theta() + 70
 
         #Calculating the angle of velocity vector with respect to the other robot
-        if(robot1._deltaX == 0):
+        #this is necessary because now the Simulation is doing collision detection
 
-            if(robot1._deltaY < 0):
-                v2_theta = 180
-
-            v2_theta = 90
-
-        else:
-            v2_theta = tan(robot1._deltaY / robot1._deltaX)
-
-        print(v2_theta)
-
-        min2_theta = v2_theta - 70
-        max2_theta = v2_theta + 70
+        min2_theta = robot1.get_theta() - 70
+        max2_theta = robot1.get_theta() + 70
 
         if(theta >= min_theta and theta <= max_theta):
             robot.collision = True
 
         if(theta >= min2_theta and theta <= max2_theta):
             robot1.collision = True
-
-        #this is necessary because now the Simulation is doing collision detection

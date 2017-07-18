@@ -1,9 +1,11 @@
+from math import randint
+
 class Ground_Robot_Interface(object):
     """description of class"""
     global iterations
     iterations = 1
 
-    def __init__(self, x, y, delta_x, delta_y, id, color):
+    def __init__(self, x, y, id, color):
         self._x = x
         self._y = y
         self._id = id
@@ -15,9 +17,10 @@ class Ground_Robot_Interface(object):
         #for obstacle robots travelling in a circle
         self._omega = 0
 
-        self._deltaX = delta_x
+        #generating random velocities
+        self._deltaX = randint(-33, 33)/100
 
-        self._deltaY = delta_y
+        self._deltaY = sqrt( pow(0.33,2) - pow(self._deltaX, 2) )
 
         #creating the flags for the timing, collisions, and border detection respectively
         self._timerUp = False
@@ -61,3 +64,9 @@ class Ground_Robot_Interface(object):
 
     def check_error(self, x, y, velocityX, velocityY):
         pass
+
+    def new_direction(self):
+        #gets new direction when the timer flag is up
+        self._deltaX = randint(-33, 33) / 100
+
+        self._deltaY = sqrt( pow(0.33, 2) - pow(self._deltaX, 2))

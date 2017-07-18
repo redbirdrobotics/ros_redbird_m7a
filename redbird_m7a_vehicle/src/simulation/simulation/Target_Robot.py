@@ -8,11 +8,11 @@ from math import fabs, sqrt, tan
 class Target_Robot(Ground_Robot_Interface):
     """description of class"""
 
-    def __init__(self, x, y, delta_x, delta_y, id, color, timer): 
+    def __init__(self, x, y, id, color, timer): 
         self._timer = timer
 
-        return super(Target_Robot, self).__init__(x, y, delta_x, delta_y, id, color)
-
+        return super(Target_Robot, self).__init__(x, y, id, color)
+        
     def update_posX(self):
         changeX = self._deltaX * iterations
         self._x = changeX + self._x
@@ -25,14 +25,15 @@ class Target_Robot(Ground_Robot_Interface):
      
     def update_movement(self):
 
+        #adds the ability to pause and resume timer
         while not (self._timer._quit.is_set()):
 
+            #while the paused flag is not raised
             while not (self._timer._PAUSED.is_set()):
                 self.start_timer = self._timer.get_current_timer()
 
-                while self.deltaTime <= 20:
-                    self.current_pos = (self._x, self._y , self._deltaX, self._deltaY, self._id)
-                    print self.current_pos
+                #as long as the time elapsed is less than 20
+                while self.deltaTime < 20:
 
                     if(self.collision == True):
                         
@@ -42,22 +43,22 @@ class Target_Robot(Ground_Robot_Interface):
 
                         self.collision = False
 
-                        sleep(iterations)
-
                     else:
 
                         self.update_posX()
                         self.update_posY()
 
-                        sleep(iterations)
-
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer
+
+                    sleep(iterations)
 
                 if(self.deltaTime == 20):
 
                     self.deltaTIme = 0
 
                     self._timerUp = True
+
+                    super(Target_Robot, self).new_direction()
 
     def oR_check_collisions(self, obstacle_robots = [Obstacle_Robot]):
         #making the obstacle robots an array of Obstacle Robots (arbitrary definition)
@@ -69,7 +70,7 @@ class Target_Robot(Ground_Robot_Interface):
             for oRobot in obstacle_robots:
                 
                 #finding the distance from center to center
-                dXX = fabs(oRobot.get_x() - self._x)
+                dXX = fabs((oRobot.get_x()) - self._x)
                 dYY = fabs((oRobot.get_y()) - self._y)
                 dCC = sqrt((pow(dXX, 2)) + pow(dYY, 2))
 
@@ -95,16 +96,9 @@ class Target_Robot(Ground_Robot_Interface):
 
                         theta = tan(vector_j / vector_i)
 
-                    #Calculating the angle of velocity vector
-                    if(self._deltaX == 0):
-                         _theta = 90
-
-                    else:
-                        _theta = tan(self._deltaY/ self._deltaX)
-
                     #finding the relative angle needed for the robot's button to be pushed
-                    min_theta = _theta - 70
-                    max_theta = _theta + 70
+                    min_theta = self.get_theta() - 70
+                    max_theta = self.get_theta() + 70
 
                     if(theta >= min_theta and theta <= max_theta):
                         self.collision = True
@@ -128,13 +122,13 @@ class Target_Robot(Ground_Robot_Interface):
 
             print("Thread failed!")
 
-        #try:
-        #    self._or_collision_thread.start()
+        try:
+            self._or_collision_thread.start()
 
-        #    print("Obstacle Robot collision detection started")
+            print("Obstacle Robot collision detection started")
 
-        #except:
-        #    print("Thread failed!")
+        except:
+            print("Thread failed!")
     
     def change_X_data(self, x):
         self._x = x
@@ -189,3 +183,14 @@ class Target_Robot(Ground_Robot_Interface):
 
     def get_radius(self):
         return self._radius
+
+    def get_theta(self):
+        if(self._deltaX == 0):
+            if(self._deltaY < 0):
+                theta = 270
+
+            theta = 90
+        else:
+            theta = tan(self._deltaY / self._deltaX)
+
+        return theta
