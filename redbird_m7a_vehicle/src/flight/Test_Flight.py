@@ -6,7 +6,6 @@ import rospy
 import time
 import flightsys
 from flightsys import Controller, Control_Mode
-from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
 __author__ = "Alex Bennett"
 __email__ = "alex.eugene.bennett@gmail.com"

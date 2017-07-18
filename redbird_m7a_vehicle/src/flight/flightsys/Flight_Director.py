@@ -19,7 +19,7 @@ class Flight_Director(object):
         # Store parameters
         self._vehicle = vehicle
         self.log_tag = "[FD] "
-        self._queue_size = 10
+        self._queue_size = 50
 
         # Flight information
         self._current_flight = None
@@ -35,12 +35,12 @@ class Flight_Director(object):
         self._available_flights = []
 
         # Setup services
-        self._start_flight_srv = rospy.Service('/flight_director/start_flight', StartFlight, self.start_flight_service_handler)
-        self._get_flights_srv = rospy.Service('/flight_director/get_flights', GetFlights, self.get_flights_service_handler)
-        self._kill_flight_srv = rospy.Service('/flight_director/kill_flight', KillFlight, self.kill_flight_service_handler)
+        self._start_flight_srv = rospy.Service('/redbird/flight_director/start_flight', StartFlight, self.start_flight_service_handler)
+        self._get_flights_srv = rospy.Service('/redbird/flight_director/get_flights', GetFlights, self.get_flights_service_handler)
+        self._kill_flight_srv = rospy.Service('/redbird/flight_director/kill_flight', KillFlight, self.kill_flight_service_handler)
 
         # Setup publishers
-        self._flight_state_pub = rospy.Publisher('/flight_director/flight_state', FlightState, queue_size=self._queue_size)
+        self._flight_state_pub = rospy.Publisher('/redbird/flight_director/flight_state', FlightState, queue_size=self._queue_size)
 
         # Spawn flight state thread
         try:

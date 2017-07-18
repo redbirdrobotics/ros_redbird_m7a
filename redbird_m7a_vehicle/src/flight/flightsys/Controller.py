@@ -21,7 +21,7 @@ class Control_Mode(Enum):
 class Controller(object):
     def __init__(self, vehicle, event):
         # Define queue size
-        self._queue_size = 10
+        self._queue_size = 50
 
         # Create publishers
         self._vel_pub = rospy.Publisher('/mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size=self._queue_size)
@@ -225,11 +225,11 @@ class Controller(object):
         loops = 0
 
         while self.is_running() and self._mode == Control_Mode.LAND:
-            # Break if the number of loops has exceeded the required amount and the magnitude of movement is less than 0.1
-            if loops >= 10 and \
+            # Break if the number of loops has exceeded the required amount and the magnitude of movement is less than the desired threshold
+            if loops >= 25 and \
                 abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + \
                 math.pow(self._vehicle.get_velocity_y(), 2) + \
-                math.pow(self._vehicle.get_velocity_z(), 2))) < 0.1:
+                math.pow(self._vehicle.get_velocity_z(), 2))) < 0.15:
                 # Disarm
                 self._vehicle.disarm()
 
@@ -266,7 +266,7 @@ class Controller(object):
             msg = TwistStamped(header = Header(stamp=rospy.get_rostime()))
             msg.twist.linear.x = 0
             msg.twist.linear.y = 0
-            msg.twist.linear.z = 0.5
+            msg.twist.linear.z = 0.15
 
             # Publish message
             self._vel_pub.publish(msg)

@@ -7,10 +7,9 @@ import mavros
 import flightsys
 from Test_Flight import Test_Flight
 from Follow_Land_Flight import Follow_Land_Flight
+from Takeoff_Land import Takeoff_Land
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
-
 
 if __name__ == '__main__':
     # Initialize node
