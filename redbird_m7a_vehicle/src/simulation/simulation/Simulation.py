@@ -87,7 +87,7 @@ class Simulation(object):
 
                         else:
                             #Determining the distance from robot to robot
-                            dXX =  - self.target_robots[robot]._x - self.target_robots[min_num]._x
+                            dXX = self.target_robots[robot]._x - self.target_robots[min_num]._x
                             dYY = self.target_robots[robot]._y - self.target_robots[min_num]._y
 
                             dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
