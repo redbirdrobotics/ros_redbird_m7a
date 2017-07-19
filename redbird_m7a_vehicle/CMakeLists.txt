@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenCV 3 REQUIRED
 	NO_MODULE
-	PATHS /home/redbird/opencv/build
+	PATHS ~/opencv/build
 	NO_DEFAULT_PATH
 )
 
