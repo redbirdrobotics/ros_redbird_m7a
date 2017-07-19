@@ -81,6 +81,7 @@ class Simulation(object):
                             self.target_robots[min_num]._distanceThread._delete()
 
                             break
+
                         #testing the if the robot has exited the boundary
                         elif(self.target_robots[min_num]._x >= 10 and self.target_robots[min_num]._y >= 10):
                             self.target_robots[min_num]._boundary = True
@@ -92,7 +93,7 @@ class Simulation(object):
 
                             dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                            max_distance = sqrt(self.target_robots[min_num] + self.target_robots[robot])
+                            max_distance = (self.target_robots[min_num]._radius + self.target_robots[robot]._radius)
 
                             #if the distance from center to center is less than the sum of the two radii
                             if dCC <= max_distance:

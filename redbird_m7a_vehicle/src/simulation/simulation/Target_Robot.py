@@ -75,7 +75,7 @@ class Target_Robot(Ground_Robot_Interface):
                 dCC = sqrt((pow(dXX, 2)) + pow(dYY, 2))
 
                 #creating the max distance the robots can be
-                max_distance = sqrt(pow((self._radius + oRobot._radius), 2))
+                max_distance = (self._radius + oRobot._radius)
 
                 if dCC <= max_distance:
 
