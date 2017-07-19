@@ -45,7 +45,7 @@ class Target_Robot(Ground_Robot_Interface):
 
                     else:
 
-                        self.update_posX()
+                        self.update_posX() 
                         self.update_posY()
 
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer

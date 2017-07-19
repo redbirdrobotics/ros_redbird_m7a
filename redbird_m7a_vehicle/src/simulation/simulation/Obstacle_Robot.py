@@ -5,12 +5,12 @@ from time import sleep
 from threading import Thread
 
 class Obstacle_Robot(Ground_Robot_Interface):
-    def __init__(self, x, y, delta_x, delta_y, id, color, timer):
+    def __init__(self, x, y, id, color, timer):
         #allowing for the timer to be synched with program
         self._timer = timer
 
         #getting class variables
-        return super(Obstacle_Robot, self).__init__(x, y, delta_x, delta_y, id, color)
+        return super(Obstacle_Robot, self).__init__(x, y, id, color)
         
         #the radius of travel for the obstacle robot
         self.radius = 1.5 #m
@@ -81,3 +81,36 @@ class Obstacle_Robot(Ground_Robot_Interface):
 
     def get_id(self):
         return self._id
+
+    def change_X_data(self, x):
+        self._x = x
+
+    def change_Y_data(self, y):
+        self._y = y
+
+    def change_VX_data(self, velocityX):
+        self._deltaX = velocityX
+
+    def change_VY_data(self, velocityY):
+        self._deltaY = velocityY
+
+    def check_error(self, x, y, velocityX, velocityY):
+        pErrorX = ((self._x - x) /  x)
+        
+        if not (pErrorX <= 0.001):
+            self.change_X_data(x)
+
+        pErrorY = ((self._y - y) /  y) 
+
+        if not (pErrorY <= 0.001):
+            self.change_Y_data(y)
+
+        pErrorVX = ((self._deltaX - velocityX) / velocityX)
+
+        if not (pErrorVX <= 0.001):
+            self.change_VX_data(velocityX)
+
+        pErrorVY = ((self._deltaY - velocityY) / velocityY)
+
+        if not (pErrorVY<= 0.001):
+            self.change_VY_data(velocityY)

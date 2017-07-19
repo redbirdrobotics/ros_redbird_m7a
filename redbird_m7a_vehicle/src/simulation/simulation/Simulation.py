@@ -17,13 +17,16 @@ class Simulation(object):
         self.Gtarget_robots = []
         self.Wobstacle_robots = []
 
-        #Filling the target robot array with arbitrary values
+        #Filling the target robot array with arbitrary values with respect 
         for robot in range(1, 5):
-            self.Rtarget_robots.append(Target_Robot(0, 0))
+            self.Rtarget_robots.append(Target_Robot(0, 0, robot, 0, self._timer))
+
+        for robot in range(1, 5):
+            self.Gtarget_robots.append(Target_Robot(0, 0, robot, 1, self._timer))
 
         #Filling the obstacle robot array 
         for robot in range(11, 15):
-            self.obstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 0, self._timer))
+            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
 
     def run(self):
         #Running the timer (controls all threads) 
@@ -45,11 +48,14 @@ class Simulation(object):
 
         self._timer.quit()
 
-    def get_Target_robots(self):
-        return self.target_robots
+    def get_G_Target_robots(self):
+        return self.Gtarget_robots
+
+    def get_R_Target_robots(self):
+        return self.Rtarget_robots
 
     def get_Obstacle_Robots(self):
-        return self.obstacle_robots
+        return self.Wobstacle_robots
 
     def check_collision(self):
         #Only allowing for the PAUSED flag to be false

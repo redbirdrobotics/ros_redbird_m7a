@@ -50,7 +50,19 @@ class Simulation_Node:
         # Enter main loop while ROS is running
         while not rospy.is_shutdown():
             # Loop through all simulated robots
-            for sim_robot in sim.get_Target_robots():
+            for sim_robot in sim.get_G_Target_robots():
+                # Loop through all robot messages that need to be populated
+                for robot_msg in robot_msgs: 
+                    # If the robot message id matches the simulated robot id, update data
+                    if robot_msg.id == sim_robot.get_id():
+                        robot_msg.x = sim_robot.x
+                        robot_msg.y = sim_robot.y
+                        robot_msg.vec_x = sim_robot.deltaX
+                        robot_msg.vec_y = sim_robot.deltaY
+                        robot_msg.color = sim_robot.color
+
+            # Loop through all simulated robots
+            for sim_robot in sim.get_R_Target_robots():
                 # Loop through all robot messages that need to be populated
                 for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
@@ -80,23 +92,47 @@ class Simulation_Node:
             self._pub.publish(map)
 
     def update_map(self, msg):
-         while not rospy.is_shutdown():
-            # Loop through all robots in the localization topic
-            for lRobot in msg.ground_robots:
-                # Loop through all robots in the simulation
-                for sRobot in self._sim.get_Target_robots():
+        # Loop through all robots in the localization topic
+        for lRobot in msg.ground_robots:
+            # Loop through all robots in the simulation
+            if(lRobot.color == 0):
+
+                for sRobot in self._sim.get_R_Target_robots():
                     # If the ids are the same, check the error
                     if sRobot.id == lRobot.id:
                         sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
-            # Data has been updated, set ready flag
-            self._ready = True
+            if(lRobot.color == 1):
+                for sRobot in self._sim.get_R_Target_robots():
+                    # If the ids are the same, check the error
+                    if sRobot.id == lRobot.id:
+                        sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+
+            if(lRobot.color == 2):
+                for sRobot in self._sim.get_Obstacle_Robots():
+                    if sRobot.id == lRobot.id:
+                        sRobot.checkError(lRobot.x, lRobot.y, lRobot.vec_y, lRobot.vec_y)
+
+        # Data has been updated, set ready flag
+        self._ready = True
 
     def get_data_for_robots(self):
         #looping through simulated robots
-        for tRobot in self._sim.get_Target_robots():
+        for tRobot in self._sim.get_R_Target_robots():
             #advancing only if the timerUp flag is true (which is raised when the 20s is up)
-            while tRobot.timerUp:
+            if (tRobot.timerUp == True):
+                #looping through localization robots
+                for lRobot in msg.ground_robots:
+                    #if the id matches update all data
+                    if (tRobot.id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, vec_y)
+
+                        #resetting the timer flag
+                        tRobot.timerUp = False
+
+        for tRobot in self._sim.get_G_Target_robots():
+            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
+            if (tRobot.timerUp == True):
                 #looping through localization robots
                 for lRobot in msg.ground_robots:
                     #if the id matches update all data
