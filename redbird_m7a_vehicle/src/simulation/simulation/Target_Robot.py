@@ -103,7 +103,7 @@ class Target_Robot(Ground_Robot_Interface):
                     if(theta >= min_theta and theta <= max_theta):
                         self.collision = True
 
-            sleep(iterations/2)
+                sleep(iterations/2)
 
     def run(self, obstacle_robots):
         self._distanceThread = Thread(target = self.update_movement)
@@ -184,13 +184,6 @@ class Target_Robot(Ground_Robot_Interface):
     def get_radius(self):
         return self._radius
 
-    def get_theta(self):
-        if(self._deltaX == 0):
-            if(self._deltaY < 0):
-                theta = 270
+    def collision_detection(self, ground_robots):
 
-            theta = 90
-        else:
-            theta = tan(self._deltaY / self._deltaX)
-
-        return theta
+        return super(Target_Robot, self).run(ground_robots)

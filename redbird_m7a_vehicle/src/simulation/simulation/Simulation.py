@@ -39,7 +39,7 @@ class Simulation(object):
         #Runs all threads in the target robot array
         for arduino in self.target_robots:
             print 'initing all of the ground robots'
-            arduino.run(self.obstacle_robots)
+            arduino.run(self.Wobstacle_robots)
 
         #Runs all threads in the obstacle robot array
         for robot in self.obstacle_robots:
@@ -48,7 +48,7 @@ class Simulation(object):
 
         self.threading()
 
-        sleep(1200)
+        sleep(10)
 
         self._timer.quit()
 

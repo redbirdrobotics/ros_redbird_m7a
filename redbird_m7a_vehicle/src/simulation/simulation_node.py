@@ -54,36 +54,36 @@ class Simulation_Node:
                 # Loop through all robot messages that need to be populated
                 for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
-                    if robot_msg.id == sim_robot.get_id():
-                        robot_msg.x = sim_robot.x
-                        robot_msg.y = sim_robot.y
-                        robot_msg.vec_x = sim_robot.deltaX
-                        robot_msg.vec_y = sim_robot.deltaY
-                        robot_msg.color = sim_robot.color
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
 
             # Loop through all simulated robots
             for sim_robot in sim.get_R_Target_robots():
                 # Loop through all robot messages that need to be populated
                 for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
-                    if robot_msg.id == sim_robot.get_id():
-                        robot_msg.x = sim_robot.x
-                        robot_msg.y = sim_robot.y
-                        robot_msg.vec_x = sim_robot.deltaX
-                        robot_msg.vec_y = sim_robot.deltaY
-                        robot_msg.color = sim_robot.color
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
             
             #looping through the obstacle robots
             for sim_robot in sim.get_Obtacle_Robots():
                 #loop through rest of messages that need to be populated
                 for robot_msg in robot_msgs:
                     #if the id matches then populate the message
-                    if robot_msg.id == sim_robot.get_id():
-                        robot_msg.x = sim_robot.x
-                        robot_msg.y = sim_robot.y
-                        robot_msg.vec_x = sim_robot.deltaX
-                        robot_msg.vec_y = sim_robot.deltaY
-                        robot_msg.color = sim_robot.color
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
             
             # Add robots to map
             map.ground_robots = robot_msgs
@@ -99,19 +99,21 @@ class Simulation_Node:
 
                 for sRobot in self._sim.get_R_Target_robots():
                     # If the ids are the same, check the error
-                    if sRobot.id == lRobot.id:
-                        sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
             if(lRobot.color == 1):
-                for sRobot in self._sim.get_R_Target_robots():
+
+                for sRobot in self._sim.get_G_Target_robots():
                     # If the ids are the same, check the error
-                    if sRobot.id == lRobot.id:
-                        sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
             if(lRobot.color == 2):
+
                 for sRobot in self._sim.get_Obstacle_Robots():
-                    if sRobot.id == lRobot.id:
-                        sRobot.checkError(lRobot.x, lRobot.y, lRobot.vec_y, lRobot.vec_y)
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lRobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
 
         # Data has been updated, set ready flag
         self._ready = True
@@ -120,27 +122,27 @@ class Simulation_Node:
         #looping through simulated robots
         for tRobot in self._sim.get_R_Target_robots():
             #advancing only if the timerUp flag is true (which is raised when the 20s is up)
-            if (tRobot.timerUp == True):
+            if (tRobot._timerUp == True):
                 #looping through localization robots
                 for lRobot in msg.ground_robots:
                     #if the id matches update all data
-                    if (tRobot.id == lRobot.id):
-                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, vec_y)
+                    if (tRobot._id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
 
                         #resetting the timer flag
-                        tRobot.timerUp = False
+                        tRobot._timerUp = False
 
         for tRobot in self._sim.get_G_Target_robots():
             #advancing only if the timerUp flag is true (which is raised when the 20s is up)
-            if (tRobot.timerUp == True):
+            if (tRobot._timerUp == True):
                 #looping through localization robots
                 for lRobot in msg.ground_robots:
                     #if the id matches update all data
-                    if (tRobot.id == lRobot.id):
-                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, vec_y)
+                    if (tRobot._id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
 
                         #resetting the timer flag
-                        tRobot.timerUp = False
+                        tRobot._timerUp = False
 
 
 if __name__ == '__main__':

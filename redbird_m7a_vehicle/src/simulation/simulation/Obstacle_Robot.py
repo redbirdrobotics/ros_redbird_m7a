@@ -18,16 +18,16 @@ class Obstacle_Robot(Ground_Robot_Interface):
         #finding the delta angle of travel
         self._omega = ( ( (sqrt( ( pow(self._deltaX, 2) + pow(self._deltaY, 2) ) ) ) / self.radius) * iterations)
 
+    def update_posX(self):
         #finding the change in x of travel
         self._deltaX = cos(self._omega) * self.radius
 
-        #finding the the change in y of travel
-        self._deltaY = sin(self._omega) * self.radius
-
-    def update_posX(self):
         self._x = self._x + self._deltaX
 
     def update_posY(self):
+        #finding the the change in y of travel
+        self._deltaY = sin(self._omega) * self.radius
+
         self._y = self._y + self._deltaY
 
     def update_movement(self):
@@ -47,11 +47,7 @@ class Obstacle_Robot(Ground_Robot_Interface):
                 self.update_posY()
 
                 #making sure the angle is doubled
-                self._omega = self._omega * 2
-
-                self._deltaX = cos(self._omega)
-
-                self._deltaY = sin(self._omega)
+                self._omega = self._omega * 2 
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
