@@ -150,7 +150,6 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
         	for (int i = 0; i <= foundList.size(); i ++)
         	{
         		ROIvals = foundList[i]->ROI
-        		
         	}
         }
  

@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
+#include "opencv2/opencv.hpp"
 #include "RedRobot.h"
 
-
+using namespace cv;
 using namespace std;
 
 RedRobot RRa(0,2);
@@ -22,7 +23,9 @@ int RRlistSize = RRlist + sizeof(RRlist)/sizeof(RedRobot)
 
 std::vector<RedRobot*> unfoundList;
 std::vector<RedRobot*> foundList;
-std::vector<int> data;
+std::vector<vector<int>> data;
+
+
 
 int main()
 {
