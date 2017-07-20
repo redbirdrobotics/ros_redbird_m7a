@@ -71,3 +71,5 @@ class Ground_Robot_Interface(object):
         self._deltaX = randint(-33, 33) / 100
 
         self._deltaY = sqrt( pow(0.33, 2) - pow(self._deltaX, 2))
+
+    

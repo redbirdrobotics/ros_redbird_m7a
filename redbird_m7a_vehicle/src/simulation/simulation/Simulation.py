@@ -16,16 +16,20 @@ class Simulation(object):
         self.Rtarget_robots = []
         self.Gtarget_robots = []
         self.Wobstacle_robots = []
+        self.target_robots = []
 
-        #Filling the target robot array with arbitrary values with respect 
+        #Filling the target robot array with arbitrary values
         for robot in range(1, 5):
             self.Rtarget_robots.append(Target_Robot(0, 0, robot, 0, self._timer))
 
         for robot in range(1, 5):
             self.Gtarget_robots.append(Target_Robot(0, 0, robot, 1, self._timer))
 
+        self.target_robots.extend(self.Rtarget_robots)
+        self.target_robots.extend(self.Gtarget_robots)
+
         #Filling the obstacle robot array 
-        for robot in range(11, 15):
+        for robot in range(1, 4):
             self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
 
     def run(self):
@@ -70,52 +74,44 @@ class Simulation(object):
                 for robot in range(1, max_num):
 
                     #as long as the two id are not equal
-                    if not (self.target_robots[min_num]._id == self.target_robots[robot]._id):
+                    if (self.target_robots[min_num]._color == self.target_robots[robot]._color):
 
-                        #as long as the boundary flag is raised
-                        if(self.target_robots[min_num]._boundary):
+                        if not (self.target_robots[min_num]._id == self.target_robots[robots]._id):
+                            self.check_calculations(min_num, robot)
 
-                            #stopping and deleting the thread
-                            self.target_robots[min_num]._distanceThread._stop()
+                    else:
+                        self.check_calculations(min_num, robot)
+        
+    def check_calculations(self, min_num, robot):
+        #as long as the boundary flag is raised
+        if(self.target_robots[min_num]._boundary):
 
-                            self.target_robots[min_num]._distanceThread._delete()
+            #stopping and deleting the thread
+            self.target_robots[min_num]._distanceThread._stop()
 
-                            break
+            self.target_robots[min_num]._distanceThread._delete()
 
-                        #testing the if the robot has exited the boundary
-                        elif(self.target_robots[min_num]._x >= 10 and self.target_robots[min_num]._y >= 10):
-                            self.target_robots[min_num]._boundary = True
+        #testing the if the robot has exited the boundary
+        elif(self.target_robots[min_num]._x >= 10 and self.target_robots[min_num]._y >= 10):
+            self.target_robots[min_num]._boundary = True
 
-                        else:
-                            #Determining the distance from robot to robot
-                            dXX = self.target_robots[robot]._x - self.target_robots[min_num]._x
-                            dYY = self.target_robots[robot]._y - self.target_robots[min_num]._y
+        else:
+            #Determining the distance from robot to robot
+            dXX = self.target_robots[robot]._x - self.target_robots[min_num]._x
+            dYY = self.target_robots[robot]._y - self.target_robots[min_num]._y
 
-                            dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
+            dCC = sqrt((pow(dXX, 2) + pow(dYY, 2)))
 
-                            max_distance = (self.target_robots[min_num]._radius + self.target_robots[robot]._radius)
+            max_distance = (self.target_robots[min_num]._radius + self.target_robots[robot]._radius)
 
-                            #if the distance from center to center is less than the sum of the two radii
-                            if dCC <= max_distance:
+            #if the distance from center to center is less than the sum of the two radii
+            if dCC <= max_distance:
 
-                                self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
+                self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
 
                 min_num += 1
 
                 sleep(iterations/2)
-
-    def threading(self):
-        #starting and initializing the thread
-
-        self._collision_thread = Thread(target = self.check_collision)
-
-        try:
-            self._collision_thread.start()
-
-            print 'Thread started'
-
-        except:
-            print 'Thread not started'
 
     def button_pushed(self, robot, robot1):
         #arbitrary definition of the two inputs
@@ -157,3 +153,16 @@ class Simulation(object):
 
         if(theta >= min2_theta and theta <= max2_theta):
             robot1.collision = True
+
+    def threading(self):
+        #starting and initializing the thread
+
+        self._collision_thread = Thread(target = self.check_collision)
+
+        try:
+            self._collision_thread.start()
+
+            print 'Thread started'
+
+        except:
+            print 'Thread not started'
