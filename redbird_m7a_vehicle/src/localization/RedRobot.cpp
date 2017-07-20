@@ -99,11 +99,61 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
         {
         	if foundList.empty()
         	{
-        		return
+        		return;
         	}
 
-        	foundLen = foundList.size()
+        	foundSize = foundList.size()
+        	dataSize = data.size()
+        	incF = 0;
+        	incD  = 0;
 
+        	while ((incF < foundSize) && (incD < dataSize))
+        	{
+        		coords = foundList[incF]->coords;
+        		Fx = coords[0];
+        		Fy = coords[1];
+        		Bx = data[incD][0];
+        		By = data[incD][1];
+        		Br = data[incD][2];
+
+        		if (abs(Fx - Bx) <= rad || abs(Fy - By) <= rad)
+        		{
+        			foundList[incF]->framesLost = 0;
+        			//function selfUpdate
+        			data[incD].erase(data.begin() + incD);
+        			dataSize = data.size();
+        			incF ++;
+        			incD ++;
+        		}
+
+        		else
+        		{
+        			incD ++;
+
+        			if ((incD == dataSize) && (incF < foundSize))
+        			{
+        				incF++;
+        				incD = 0;
+        			}
+        		}
+        	}
+        	return;
+
+
+        void ROIsearch(vector <RedRobot*> foundList[], vector <Image> imgList)
+        {
+        	if (foundList.empty()
+        	{
+        		return;
+        	}
+
+        	for (int i = 0; i <= foundList.size(); i ++)
+        	{
+        		ROIvals = foundList[i]->ROI
+        		
+        	}
+        }
+ 
         }
 
 	private:
