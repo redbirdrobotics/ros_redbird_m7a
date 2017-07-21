@@ -12,18 +12,18 @@ __author__ = "Alex Bennett"
 __email__ = "alex.eugene.bennett@gmail.com"
 
 
-class Test_Flight(flightsys.Flight, object):
+class JonahFlight1(flightsys.Flight, object):
     def __init__(self, vehicle):
         # Call super constructor
-        super(Test_Flight, self).__init__(name='test_flight', log_tag='TEST FLIGHT', vehicle=vehicle)
+        super(JonahFlight1, self).__init__(name='jonahflight', log_tag='JONAH', vehicle=vehicle)
 
     def flight(self):
-    
+
         x = 0.0
         y = 0.0
         z = 2.5
         rotations = 4;
-        
+
         # Takeoff
         self.takeoff(z)
 
@@ -33,11 +33,11 @@ class Test_Flight(flightsys.Flight, object):
 
         # Fly to point
         self.fly_to_point((x, y, z))
-        
+
         #Generate random position [pretend robot position in future]
         x = random.uniform(-10.0, 10.0)
         y = random.uniform(-10.0, 10.0)
-        
+
         # Hold
         self.loginfo("Altitude goal met! Holding for 3 seconds...")
         self.sleep(3.0)
@@ -45,7 +45,7 @@ class Test_Flight(flightsys.Flight, object):
         # Fly to point [ground]
         z = 0.5
         self.fly_to_point((x, y, z))
-        
+
         # Rotate robot
         while (rotations > 0):
             self.fly_to_point((x, y, z + 0.25))

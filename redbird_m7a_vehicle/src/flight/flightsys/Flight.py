@@ -27,7 +27,7 @@ class Flight(object):
         self.thread = threading.Thread()
 
         # Call super
-        self.event = threading.Event()
+        self.shutdown_flag = threading.Event()
 
         # Create empty controller
         self.controller = None
@@ -44,18 +44,26 @@ class Flight(object):
         """Runs the flight inside of a try-except block."""
         try:
             # Create controller
-            self.controller = flightsys.Controller(self.vehicle, self.event)
+            self.controller = flightsys.Controller(self.vehicle, self.shutdown_flag)
 
             # Reset flight diagnositcs
             self.start_time = 0.0
             self.end_time = 0.0
             self.end_reason = Flight_End_Reason.INITIAL
 
+            # Arm the vehicle
+            self.vehicle.arm()
+
             # Flight starting
             rospy.loginfo(self.log_tag + "Flight ready. Waiting for OFFBOARD...")
 
-            while self.vehicle.get_mode() != 'OFFBOARD' and not self.event.is_set() and not rospy.is_shutdown():
+            # Wait for offboard
+            while self.vehicle.get_mode() != 'OFFBOARD' and not self.shutdown_flag.is_set() and not rospy.is_shutdown():
                 pass
+
+            # Wait a few seconds
+            rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight in 2 seconds...")
+            self.sleep(2)
 
             # Set start time
             self.start_time = rospy.get_time()
@@ -73,10 +81,10 @@ class Flight(object):
             rospy.loginfo(self.log_tag + "Flight complete")
 
             # Set poison
-            self.event.set()
+            self.shutdown_flag.set()
         except Exception as e:
             # Set poison
-            self.event.set()
+            self.shutdown_flag.set()
 
             # Record end time
             self.end_time = rospy.get_time()
@@ -93,14 +101,14 @@ class Flight(object):
         raise NotImplementedError("The start method has not been properly overridden by the flight implementation!")
 
     def is_running(self):
-        return not rospy.is_shutdown() and not self.event.is_set() and self.vehicle.get_mode() == 'OFFBOARD'
+        return not rospy.is_shutdown() and not self.shutdown_flag.is_set() and self.vehicle.is_armed() and self.vehicle.get_mode() == 'OFFBOARD'
 
     def sleep(self, time):
-        self.event.wait(time)
+        self.shutdown_flag.wait(time)
 
     def loginfo(self, msg):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Log
@@ -108,7 +116,7 @@ class Flight(object):
 
     def logwarn(self, msg):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Log
@@ -116,7 +124,7 @@ class Flight(object):
 
     def logerr(self, msg):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Log
@@ -124,7 +132,7 @@ class Flight(object):
 
     def fly_to_point(self, point):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Set target point
@@ -138,7 +146,7 @@ class Flight(object):
 
     def fly_velocity(self, velocity, time=0.0):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Set target velocity and time
@@ -152,7 +160,7 @@ class Flight(object):
 
     def takeoff(self, altitude=0.0):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Set takeoff altitude
@@ -167,7 +175,7 @@ class Flight(object):
 
     def land(self):
         # Disallow if poison pill has been set or ROS is shutdown
-        if self.event.is_set() or rospy.is_shutdown():
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Switch mode to land

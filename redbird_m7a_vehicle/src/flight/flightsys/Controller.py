@@ -19,7 +19,7 @@ class Control_Mode(Enum):
 
 
 class Controller(object):
-    def __init__(self, vehicle, event):
+    def __init__(self, vehicle, shutdown_flag):
         # Define queue size
         self._queue_size = 50
 
@@ -32,7 +32,7 @@ class Controller(object):
         self._vehicle = vehicle
 
         # Threading event
-        self.event = event
+        self.shutdown_flag = shutdown_flag
 
         # Setup variables
         self._log_tag = "[FC] "
@@ -43,23 +43,23 @@ class Controller(object):
         self._previous_mode = Control_Mode.INITIAL
 
         # Set rospy rate
-        self._rate = rospy.Rate(20)
+        self._rate = rospy.Rate(10)
 
         # Start thread
         try:
             # Create thread object
-            self.thread = threading.Thread(target=self.loop, args=())
+            self.thread = threading.Thread(target=self.loop)
 
             # Start thread
             self.thread.start()
 
             # Allow thread to start
-            self.event.wait(1)
-        except:
-            rospy.logerr("Unable to start flight control thread")
+            rospy.sleep(1)
+        except Exception as e:
+            rospy.logerr("Unable to start flight control thread: %s" % str(e))
 
     def is_running(self):
-        return not rospy.is_shutdown() and not self.event.is_set() and self._vehicle.get_mode() == 'OFFBOARD'
+        return not rospy.is_shutdown() and not self.shutdown_flag.is_set() and self._vehicle.get_mode() == 'OFFBOARD'
 
     def set_mode(self, mode):
         """Sets the vehicle mode to one of those available in the Control_Mode class.
@@ -165,7 +165,7 @@ class Controller(object):
         """This is the main loop that processes flight modes and enters the appropriate control loop."""
         try:
             # Enter loop indefinitely
-            while not self.event.is_set() and not rospy.is_shutdown():
+            while not self.shutdown_flag.is_set() and not rospy.is_shutdown():
                 if self._mode == Control_Mode.INITIAL:
                     # Wait for direction
                     self.initial_loop()
@@ -226,10 +226,10 @@ class Controller(object):
 
         while self.is_running() and self._mode == Control_Mode.LAND:
             # Break if the number of loops has exceeded the required amount and the magnitude of movement is less than the desired threshold
-            if loops >= 25 and \
+            if loops >= 15 and \
                 abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + \
                 math.pow(self._vehicle.get_velocity_y(), 2) + \
-                math.pow(self._vehicle.get_velocity_z(), 2))) < 0.15:
+                math.pow(self._vehicle.get_velocity_z(), 2))) < 0.10:
                 # Disarm
                 self._vehicle.disarm()
 
@@ -251,7 +251,7 @@ class Controller(object):
             loops += 1
 
         # Only perform if controller is still running
-        if not self.event.is_set():
+        if not self.shutdown_flag.is_set():
             # Set mode to INITIAL
             self.set_mode(Control_Mode.INITIAL)
 
@@ -260,13 +260,14 @@ class Controller(object):
         while self.is_running() and self._mode == Control_Mode.TAKEOFF:
             # Break if within allowed deviation of target altitude
             if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), allowed_range=0.1):
+                print 'is near'
                 break
 
             # Build and publish message
             msg = TwistStamped(header = Header(stamp=rospy.get_rostime()))
             msg.twist.linear.x = 0
             msg.twist.linear.y = 0
-            msg.twist.linear.z = 0.15
+            msg.twist.linear.z = 0.5
 
             # Publish message
             self._vel_pub.publish(msg)
@@ -275,7 +276,7 @@ class Controller(object):
             self._rate.sleep()
 
         # Only perform if controller is still running
-        if not self.event.is_set():
+        if not self.shutdown_flag.is_set():
             # Set mode to HOLD
             self.set_mode(Control_Mode.HOLD)
 
@@ -299,7 +300,7 @@ class Controller(object):
             self._rate.sleep()
 
         # Only perform if controller is still running
-        if not self.event.is_set():
+        if not self.shutdown_flag.is_set():
             # Set mode to HOLD
             self.set_mode(Control_Mode.HOLD)
 
@@ -327,7 +328,7 @@ class Controller(object):
             self._rate.sleep()
 
         # Only perform if controller is still running
-        if not self.event.is_set():
+        if not self.shutdown_flag.is_set():
             # Set mode to HOLD
             self.set_mode(Control_Mode.INITIAL)
 

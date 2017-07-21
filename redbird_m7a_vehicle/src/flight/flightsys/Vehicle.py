@@ -58,9 +58,6 @@ class Vehicle(object):
         # Set mode
         self._set_mode_serv(custom_mode=mode)
 
-        # Allow a moment for change to propogate
-        # rospy.sleep(0.1)
-
     def is_connected(self):
         return self._state_topic.connected
 

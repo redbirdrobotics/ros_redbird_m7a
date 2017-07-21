@@ -13,8 +13,8 @@ from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 class Test_Flight2(flightsys.Flight, object):
     def __init__(self, vehicle):
         # Call super constructor
-        super(Test_Flight2, self).__init__(name='test_flight2', log_tag='[TEST FLIGHT 2]', vehicle=vehicle)
-        
+        super(Test_Flight2, self).__init__(name='test_flight2', log_tag='TEST FLIGHT 2', vehicle=vehicle)
+
         #vars
         this.x = 0
         this.y = 0
@@ -46,7 +46,7 @@ class Test_Flight2(flightsys.Flight, object):
             # Hold
             rospy.loginfo(self._log_tag + "Altitude met, holding for 1.0 seconds")
             rospy.sleep(1)
-            
+
             x = 0
             while (x < 5):
                 target_point = (self.x, self.y, 2.5)
@@ -57,9 +57,9 @@ class Test_Flight2(flightsys.Flight, object):
                 # Wait for position to be reached
                 while not rospy.is_shutdown() and self._c.get_mode() == Control_Mode.POSITION:
                     pass
-                
+
                 x+=1
-            
+
             # landing logic
             alt = 2.5
             counter = 1
@@ -87,7 +87,7 @@ class Test_Flight2(flightsys.Flight, object):
             # Disarm
             rospy.loginfo(self._log_tag + "Disarming")
             self._v.disarm()
-            
+
         except KeyboardInterrupt:
             pass
 
