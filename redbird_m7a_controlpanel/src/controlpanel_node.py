@@ -11,7 +11,7 @@ import wx.lib.scrolledpanel
 import string
 import wx.grid
 
-maxWidth = 0
+maxWidth = 0 # Use maxWidth to use in the full length Ros Logger Panel
 
 # The frame contains the parent panels and its children so the app can interact with it
 class RedbirdFrame(wx.Frame):
@@ -61,15 +61,7 @@ class RedbirdPanel(wx.Panel):
         # Add widgets here
         gbs = wx.GridBagSizer(5, 5)
 
-        # # Title
-        # title = wx.StaticText(self, label="Redbird Control Panel", style=wx.TRANSPARENT_WINDOW)
-        # titleFont = wx.Font(18, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
-        # title.SetForegroundColour('red')
-        # title.SetBackgroundColour('white')
-        # title.SetFont(titleFont)
-        # gbs.Add(title, pos=(0, 0), span=(1, 5), flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.ALIGN_CENTER_HORIZONTAL,
-        #         border=10)
-
+        # BEGIN MIDDLE INFO ROW
         # Localization Info
         self.localizationGrid = wx.grid.Grid(self)
         self.localizationGrid.CreateGrid(14, 3)
@@ -83,9 +75,8 @@ class RedbirdPanel(wx.Panel):
         self.simulationGrid.SetColLabelValue(0, "Color")
         self.simulationGrid.SetColLabelValue(1, "Confidence")
 
-        self.SetFound(2)
+        # self.SetFound(2, "True")
 
-        self.localizationGrid.SetCellValue(0, 0, "WORK")
         self.localizationGrid.AutoSize()
         self.simulationGrid.AutoSize()
 
@@ -102,6 +93,9 @@ class RedbirdPanel(wx.Panel):
 
         gbs.Add(topInfoRow, pos=(0, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL)
 
+        # END TOP INFO ROW
+
+        # BEGIN MIDDLE INFO ROW
         middleInfoRow = wx.BoxSizer(wx.HORIZONTAL)
 
         self.vehicle_state_panel = VehicleStatePanel(self)
@@ -112,8 +106,9 @@ class RedbirdPanel(wx.Panel):
         middleInfoRow.Add(self.buttons_panel, flag=wx.ALL, border=1)
 
         gbs.Add(middleInfoRow, pos= (1,0), span=(1,5), flag=wx.ALIGN_CENTER_HORIZONTAL)
+        # END MIDDLE INFO ROW
 
-        # Ros Logger takes up all of bottom
+        # Ros Logger takes up all of bottom (third) row
         self.ros_logger_panel = RosLoggerPanel(self)
         gbs.Add(self.ros_logger_panel, pos=(2, 0), span=(1, 5), flag=wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
 
@@ -134,8 +129,61 @@ class RedbirdPanel(wx.Panel):
         self.bmp = wx.Bitmap("redbirdlogo.png")
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.onEraseBackground)
 
-    def SetFound(self, row):
-        self.localizationGrid.SetCellValue(row, 0, "True")
+        # CHANGE THIS TIMER TO ADD THE CORRECT FOUND FUNCTIONALITY========================================================
+        # This timer sets changes the found column
+        self.found_log_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.SetFound, self.found_log_timer)
+        self.found_log_timer.Start(1000)
+
+        # CHANGE THIS TIMER TO ADD THE CORRECT COLOR FUNCTIONALITY========================================================
+        # This timer changes the color column
+        self.color_log_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.SetColor, self.color_log_timer)
+        self.color_log_timer.Start(1000)
+
+        # CHANGE THIS TIMER TO ADD THE CORRECT POSITION FUNCTIONALITY========================================================
+        # This timer changes the position column
+        self.position_log_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.SetPosition, self.position_log_timer)
+        self.position_log_timer.Start(1000)
+
+        # CHANGE THIS TIMER TO ADD THE CORRECT CONFIDENCE FUNCTIONALITY========================================================
+        # This timer changes the confidence column
+        self.confidence_log_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.SetConfidence, self.confidence_log_timer)
+        self.confidence_log_timer.Start(1000)
+
+    # This sets the element in the found column to either true or false
+    def SetFound(self, event): # row, tOrFString): UNCOMMENT THIS TO INCLUDE ROW AND TRUE/FALSE STRING
+        randomRow = random.randint(0,13)
+        randomInt = random.randint(1,2)
+        if randomInt == 1:
+            randomTrueOrFalse = "True"
+        else:
+            randomTrueOrFalse = "False"
+        self.localizationGrid.SetCellValue(randomRow, 0, randomTrueOrFalse)
+
+    # This sets the element in the color column to either green or red
+    def SetColor(self, event):  # row, tOrFString): UNCOMMENT THIS TO INCLUDE ROW AND TRUE/FALSE STRING
+        randomInt = random.randint(1, 2)
+        randomRow = random.randint(0, 13)
+        if randomInt == 1:
+            color = "Green"
+        else:
+            color = "Red"
+        self.localizationGrid.SetCellValue(randomRow, 1, color)
+        self.simulationGrid.SetCellValue(randomRow, 0, color)
+
+    # This sets the element in the confidence column
+    def SetConfidence(self, event):  # row, tOrFString): UNCOMMENT THIS TO INCLUDE ROW AND TRUE/FALSE STRING
+        randomConfidence = random.randint(0, 100)
+        randomRow = random.randint(0, 13)
+        self.simulationGrid.SetCellValue(randomRow, 1, str(randomConfidence) + "%")
+
+    def SetPosition(self, event):  # row, tOrFString): UNCOMMENT THIS TO INCLUDE ROW AND TRUE/FALSE STRING
+        randomPos = random.randint(0, 200)
+        randomRow = random.randint(0, 13)
+        self.localizationGrid.SetCellValue(randomRow, 2, str(randomPos))
 
     def refreshWindow(self, event):
         self.drawGridPanel.Refresh()
@@ -219,24 +267,20 @@ class ButtonsPanel(wx.Panel):
         self.startDropDown.Bind(wx.EVT_CHOICE, self.chooseFlightScript)
         # startButton.Bind(wx.EVT_BUTTON, self.startClicked)
 
-        # Stop Button
-        stopButton = wx.Button(self, id=-1, label="Stop/Land")
-        buttonGBS.Add(stopButton, pos=(1, 0), span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
-        stopButton.Bind(wx.EVT_BUTTON, self.stopClicked)
+        # Start Button
+        startButton = wx.Button(self, id=-1, label="Start")
+        buttonGBS.Add(startButton, pos=(1, 0), span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
+        startButton.Bind(wx.EVT_BUTTON, self.startClicked)
 
-        # Land Button
-        landButton = wx.Button(self, id=-1, label="Land")
+        # Stop/Land Button
+        landButton = wx.Button(self, id=-1, label="Stop/Land")
         buttonGBS.Add(landButton, pos=(2, 0), span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
         landButton.Bind(wx.EVT_BUTTON, self.landClicked)
 
-        # Hold Button
-        holdButton = wx.Button(self, id=-1, label="Hold")
-        buttonGBS.Add(holdButton, pos=(3, 0),  span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
-        holdButton.Bind(wx.EVT_BUTTON, self.landClicked)
 
         # Kill Button
         button = wx.Button(self, id=-1, label="Kill")
-        buttonGBS.Add(button, pos=(4, 0), span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
+        buttonGBS.Add(button, pos=(3, 0), span=(1, 5), flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, border=1)
         button.Bind(wx.EVT_BUTTON, self.killClicked)
 
 
@@ -276,6 +320,8 @@ class VehicleStatePanel(wx.Panel):
     def __init__(self, parent):
         super(VehicleStatePanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init VehicleStatePanel"
+
+        # UNCOMMENT THIS TO GET THE VEHICLE STATE DATA====================================================================
         # rospy.init_node("rcp", anonymous=True)
         # velocitySubscriber = rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, self.updateVelocity)
         # altitudeAndAttitudeSubscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped,
@@ -362,16 +408,19 @@ class VehicleStatePanel(wx.Panel):
         wx.CallAfter(self.livePitch.SetLabel, str("%.3f" % msg.pose.orientation.y) + " deg")  # Pitch
         wx.CallAfter(self.liveRoll.SetLabel, str("%.3f" % msg.pose.orientation.x) + " deg")  # Roll
 
-# ============================================================================================
 
 class FlightStatePanel(wx.Panel):
     def __init__(self, parent):
         super(FlightStatePanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init FlightStatePanel"
+
+        # UNCOMMENT THIS AND CORRECT THE MAVROS SUBSCRIBER INFO TO GET FLIGHT STATE DATA
         # rospy.init_node("rcp", anonymous=True)
-        # velocitySubscriber = rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, self.updateVelocity)
-        # altitudeAndAttitudeSubscriber = rospy.Subscriber("/mavros/local_position/pose", PoseStamped,
+        # timeElapsedSubscriber = rospy.Subscriber("/mavros/USE PROPER MAVROS SUBSCRIBER HERE", TwistStamped, self.updateTimeElapsed)
+        # altitudeAndAttitudeSubscriber = rospy.Subscriber("/mavros/USE PROPER MAVROS SUBSCRIBER HERE", PoseStamped,
         #                                                  self.updateAltitudeAndAttitude)
+
+
 
         self.SetBackgroundColour('white')
         self.SetFont(
@@ -382,9 +431,6 @@ class FlightStatePanel(wx.Panel):
         # Dividing lines to make the Flight Info Panel prettier
         line = wx.StaticLine(self)
         line2 = wx.StaticLine(self)
-        # line3 = wx.StaticLine(self)
-        # line4 = wx.StaticLine(self)
-        # line5 = wx.StaticLine(self)
 
         # Current Flight
         self.currentFlightLabel = wx.StaticText(self, label="Current Flight")
@@ -416,48 +462,36 @@ class FlightStatePanel(wx.Panel):
         box.AddGrowableRow(box.GetEffectiveRowsCount() - 1)
         self.SetSizerAndFit(box)
 
+    # FIX THESE UPDATE FUNCTIONS TO CORRECTLY SET THE LABEL===============================================================
     # # Reference http://wiki.ros.org/mavros for what each msg object is returning
-    # def updateVelocity(self, msg):
-    #     # Calculates the magnitude of velocity
-    #     xVelocity = msg.twist.linear.x
-    #     yVelocity = msg.twist.linear.y
-    #     zVelocity = msg.twist.linear.z
-    #     velocity = math.sqrt(math.pow(xVelocity, 2) + math.pow(yVelocity, 2) + math.pow(zVelocity, 2))
-    #     wx.CallAfter(self.liveVelocity.SetLabel, str("%.3f" % velocity) + " m/s")
+    # def updateTimeElapsed(self, msg):
+    #     # Updates Time elapsed
+    #     wx.CallAfter(self.liveTimeElapsed.SetLabel, str("%.3f" % velocity) + " m/s") #==================================
     #
-    # def updateAltitudeAndAttitude(self, msg):
+    # def updateBatteryState(self, msg):
     #     # Updates altitude
-    #     wx.CallAfter(self.liveAltitude.SetLabel, str("%.3f" % msg.pose.position.z) + " m")
+    #     wx.CallAfter(self.liveBatteryState.SetLabel, str("%.3f" % msg.pose.position.z) + " m") #=======================
     #
-    #     # Updates attitude (yaw, pitch, and roll(
-    #     wx.CallAfter(self.liveYaw.SetLabel, str("%.3f" % msg.pose.orientation.z) + " deg")  # Yaw
-    #     wx.CallAfter(self.livePitch.SetLabel, str("%.3f" % msg.pose.orientation.y) + " deg")  # Pitch
-    #     wx.CallAfter(self.liveRoll.SetLabel, str("%.3f" % msg.pose.orientation.x) + " deg")  # Roll
 
 
-
-
-
-
-# ============================================================================================
 
 class RosLoggerPanel(wx.Panel):
     def __init__(self, parent):
         super(RosLoggerPanel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         print "init RosLoggerPanel"
-        global maxWidth
-        print "maxWidth == " + str(maxWidth)
+        global maxWidth # use global maxWidth so the text control can span the whole width
         self.t3 = wx.TextCtrl(self, size= (maxWidth, 170), style=wx.TE_MULTILINE | wx.EXPAND)
 
-        # Timers
+        # Timer
         self.log_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.addLog, self.log_timer)
         self.log_timer.Start(1000)
 
+    # APPEND LOG INFO TO SELF.T3.APPENDTEXT AS A STRING===================================================================
     def addLog(self, evt):
         digits = "".join([random.choice(string.digits) for i in xrange(8)])
         chars = "".join([random.choice(string.letters) for i in xrange(15)])
-        self.t3.AppendText("\nLOG: " + digits + chars + "MOOO")
+        self.t3.AppendText("\nLOG: " + digits + chars + "========ENTER ACTUAL LOG DATA AS A STRING HERE") #=================
 
 
 # Customizes the default wxPython App object
