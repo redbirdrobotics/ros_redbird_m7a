@@ -10,7 +10,7 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
 		std::vector<int> unfound ( 0.begin(), sizeof(r[]).end() );
 
 		// Remove all data from instance
-        void wipeRobot()
+        static void wipeRobot()
         {
         	found = False;
         	cam = NULL;
@@ -24,7 +24,7 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
         }
 
         // Populate lists with pointers to Robots that have been found/unfound
-        void listByFound(RedRobot* rr[], int rrSize, vector<RedRobot*> foundList[], vector<RedRobot*> unfoundList[])
+        void listByFound(RedRobot** rr, int rrSize, vector<RedRobot*>& foundList, vector<RedRobot*>& unfoundList)
         {
         	int incF = 0;
         	int incU = 0;
@@ -139,20 +139,30 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
         	}
         	return;
 
-
-        void ROIsearch(vector <RedRobot*> foundList[], vector <Image> imgList)
+ 
+       void ROIsearch(vector <RedRobot*>& foundList, vector <Mat>& imgList, vector <KeyPoint>& keypoints, SimpleBlobDetector* det_p)
         {
-        	if (foundList.empty()
+        	if (foundList.empty())
         	{
         		return;
         	}
 
         	for (int i = 0; i <= foundList.size(); i ++)
         	{
-        		ROIvals = foundList[i]->ROI
+        		int* ROIvals = foundList[i]->ROI;
+        		int* cam = foundList[i]->cam;
+
+        		Rect rect = Rect(ROIvals[0], ROIvals[1], ROIvals[2], ROIvals[3]);
+        		Mat ROI = imgList[cam](rect);
+
+        		det_p->detect(ROI, keypoints);
+
+        		if (!keypoints.empty())
+        		{
+        			foundList[i]->
+        		}
+
         	}
-        }
- 
         }
 
 	private:
@@ -164,5 +174,4 @@ RedRobot::RedRobot(int num, int col) : ident(num), color(col)
 	    int coords[2] = {0,0};
 	    int vector[2] = {0,0};
 	    int mcoords[2] = {0,0};
-
 }

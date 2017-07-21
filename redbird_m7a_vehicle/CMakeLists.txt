@@ -153,6 +153,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(camera_node src/localization/camera_node.cpp)
 add_executable(test_receiver src/localization/test_receiver.cpp)
+add_executable(redrobot_node src/localization/redrobot_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -170,6 +171,7 @@ add_executable(test_receiver src/localization/test_receiver.cpp)
 # )
 target_link_libraries(camera_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(test_receiver ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(redrobot_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
