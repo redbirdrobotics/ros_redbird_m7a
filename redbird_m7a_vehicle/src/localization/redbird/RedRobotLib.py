@@ -55,10 +55,13 @@ class RedRobot():
         return
 
     @staticmethod
-    def listcvt2meters(xA, yA, h, foundList, imgList):
+    def listcvt2meters(xA, yA, h, foundList, camList):
+        if not foundList:
+            return
+        
         for robot in foundList:
-            xAxis = imgList[robot.cam].xAxis
-            yAxis = imgList[robot.cam].yAxis
+            xAxis = camList[robot.cam].xAxis
+            yAxis = camList[robot.cam].yAxis
             robot.cv2meters(xA, yA, h, xAxis, yAxis)
         return
 
@@ -290,9 +293,9 @@ class Utilities():
         return mask
         
     @staticmethod
-    def getMaskList(frameList, maskValsList, maskList):
+    def getMaskList(frameList, maskVals, maskList):
         for frame in frameList:
-            hsvMask = Utilities.createHSVMask(frame, maskVal[0], maskVal[1])
+            hsvMask = Utilities.createHSVMask(frame, maskVals[0], maskVals[1])
             maskList.append(hsvMask)
         return
 
@@ -413,13 +416,12 @@ class Camera():
         return frame
     
     @staticmethod
-    def getFrameList(camList):
-        frameList = []
+    def getFrameList(camList, frameList):
         length = len(camList)
         for c in range(length):
             ret, frame = camList[c].feed.read()
             frameList.append(frame)
-        return frameList
+        return
     
     @staticmethod
     def showFrame(frame, str):
