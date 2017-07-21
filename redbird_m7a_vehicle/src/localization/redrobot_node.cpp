@@ -40,10 +40,11 @@ int main(int argc, char** argv)
 	std::vector<RedRobot*> unfoundList;
 	std::vector<RedRobot*> foundList;
 	std::vector<vector<int>> data;
-
+	std::vector<KeyPoint> keypoints;
 
 	//Blob Detector
 	SimpleBlobDetector detector;
+	SimpleBlobdetector* det_p = &detector
 
 	SimpleBlobDetector::Params params;
 
