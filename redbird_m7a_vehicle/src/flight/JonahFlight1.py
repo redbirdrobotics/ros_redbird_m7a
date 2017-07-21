@@ -19,12 +19,12 @@ class JonahFlight1(flightsys.Flight, object):
         super(JonahFlight1, self).__init__(name='jonah_flight1', log_tag='Jonah Flight 1', vehicle=vehicle)
 
     def flight(self):
-    
+
         x = 0.0
         y = 0.0
         z = 2.5
         rotations = 5;
-        
+
         # Takeoff
         self.takeoff(z-2.0)
 
@@ -42,7 +42,7 @@ class JonahFlight1(flightsys.Flight, object):
         
         # Fly to point
         self.fly_to_point((x, y, z), 0.2)
-        
+
         # Hold
         self.loginfo("Altitude goal met! Holding for 3 seconds...")
         self.sleep(3.0)

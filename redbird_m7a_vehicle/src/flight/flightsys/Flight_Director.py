@@ -70,7 +70,7 @@ class Flight_Director(object):
             previous_flight_info = FlightInformation()
 
             # Add data
-            if self._current_flight is not None and not self._current_flight.event.is_set():
+            if self._current_flight is not None and not self._current_flight.shutdown_flag.is_set():
                 msg.is_flying = True
             else:
                 msg.is_flying = False
@@ -108,7 +108,7 @@ class Flight_Director(object):
 
         # Kill flight if one exists
         if self._current_flight is not None:
-            self._current_flight.event.set()
+            self._current_flight.shutdown_flag.set()
 
         # Disarm
         self._vehicle.disarm()
@@ -170,7 +170,10 @@ class Flight_Director(object):
                 self._current_flight.thread = threading.Thread(target=self._current_flight.run)
 
                 # Reset event
-                self._current_flight.event.clear()
+                self._current_flight.shutdown_flag.clear()
+
+                # Set to daemon
+                self._current_flight.thread.daemon = True
 
                 # Start the flight
                 self._current_flight.thread.start()
@@ -221,7 +224,7 @@ class Flight_Director(object):
                 self._current_flight.vehicle.disarm()
 
                 # Set poison pill to kill thread
-                self._current_flight.event.set()
+                self._current_flight.shutdown_flag.set()
 
                 # Set the end state
                 self._current_flight.end_reason = Flight_End_Reason.KILLED
