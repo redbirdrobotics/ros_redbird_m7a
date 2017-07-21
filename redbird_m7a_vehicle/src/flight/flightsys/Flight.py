@@ -130,13 +130,13 @@ class Flight(object):
         # Log
         rospy.logerr(self.log_tag + msg)
 
-    def fly_to_point(self, point):
+    def fly_to_point(self, point, allowed_error):
         # Disallow if poison pill has been set or ROS is shutdown
         if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Set target point
-        self.controller.set_position(point)
+        self.controller.set_position(point, allowed_error)
 
         # Set mode
         self.controller.set_mode(flightsys.Control_Mode.POSITION)

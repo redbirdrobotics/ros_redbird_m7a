@@ -39,6 +39,7 @@ class Controller(object):
         self._takeoff_altitude = 2.0
         self._target_velocity = (0.0, 0.0, 0.0)
         self._target_position = (0.0, 0.0, 0.0)
+        self._allowed_error = 0.25
         self._mode = Control_Mode.INITIAL
         self._previous_mode = Control_Mode.INITIAL
 
@@ -113,7 +114,7 @@ class Controller(object):
         rospy.loginfo(self._log_tag + "Target velocity set to %0.2f, %0.2f, %0.2f m/s" % self._target_velocity)
         if self._travel_time > 0: rospy.loginfo(self._log_tag + "Travel time set to %0.2f sec" % self._travel_time)
 
-    def set_position(self, pos):
+    def set_position(self, pos, allowed_error=0.25):
         """Sets the desired position for the vehicle.
 
         The position is in the form of a tuple representing the X, Y, and Z coordinates (in m).
@@ -132,9 +133,11 @@ class Controller(object):
 
         # Set the position setpoint
         self._target_position = pos
+        self._allowed_error = allowed_error
 
         # Log info
         rospy.loginfo(self._log_tag + "Target position set to %0.2f, %0.2f, %0.2f m" % self._target_position)
+        
 
     def set_takeoff_altitude(self, alt):
         """Sets the desired altitude to reach when taking off.s
@@ -259,8 +262,7 @@ class Controller(object):
         """Loops in Control_Mode.TAKEOFF until either the mode is switched or the target altitude has been reached."""
         while self.is_running() and self._mode == Control_Mode.TAKEOFF:
             # Break if within allowed deviation of target altitude
-            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), allowed_range=0.1):
-                print 'is near'
+            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), 0.1):
                 break
 
             # Build and publish message
@@ -284,7 +286,7 @@ class Controller(object):
         """Loops in Control_Mode.POSITION until either the mode is switched or the target has been reached."""
         while self.is_running() and self._mode == Control_Mode.POSITION:
             # Break if within allowed deviation of target
-            if utils.is_near(self._vehicle.get_position(), self._target_position):
+            if utils.is_near(self._vehicle.get_position(), self._target_position, self._allowed_error):
                 break
 
             # Build target position message
