@@ -14,11 +14,17 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   redbird_m7a_msgs
+  cv_bridge
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(OpenCV 3 REQUIRED
+	NO_MODULE
+	PATHS ~/opencv/build
+	NO_DEFAULT_PATH
+)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -108,7 +114,15 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES redbird_m7a_vehicle
-   CATKIN_DEPENDS mavros mavros_extras roscpp rospy std_msgs redbird_m7a_msgs
+	CATKIN_DEPENDS
+	mavros
+	mavros_extras
+	roscpp
+	rospy
+	std_msgs
+	redbird_m7a_msgs
+	image_transport
+	cv_bridge
 #  DEPENDS system_lib
 )
 
@@ -121,6 +135,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -136,7 +151,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/redbird_m7a_node.cpp)
+add_executable(camera_node src/localization/camera_node.cpp)
+add_executable(test_receiver src/localization/test_receiver.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,12 +162,14 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(camera_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(test_receiver ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
