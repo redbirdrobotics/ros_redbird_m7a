@@ -183,7 +183,3 @@ class Target_Robot(Ground_Robot_Interface):
 
     def get_radius(self):
         return self._radius
-
-    def collision_detection(self, ground_robots):
-
-        return super(Target_Robot, self).run(ground_robots)

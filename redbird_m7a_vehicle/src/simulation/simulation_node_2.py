@@ -7,7 +7,7 @@ from simulation import *
 class Simulation_Node:
     def __init__(self):
 
-         # Initialize node
+        # Initialize node
         rospy.init_node('simulation_node', anonymous=True)
 
         # Create publisher

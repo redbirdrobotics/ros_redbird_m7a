@@ -58,8 +58,6 @@ class Target_Robot(Ground_Robot_Interface):
 
                     self._timerUp = True
 
-                    super(Target_Robot, self).new_direction()
-
     def oR_check_collisions(self, obstacle_robots = [Obstacle_Robot]):
         #making the obstacle robots an array of Obstacle Robots (arbitrary definition)
 
@@ -183,7 +181,3 @@ class Target_Robot(Ground_Robot_Interface):
 
     def get_radius(self):
         return self._radius
-
-    def collision_detection(self, ground_robots):
-
-        return super(Target_Robot, self).run(ground_robots)

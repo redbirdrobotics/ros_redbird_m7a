@@ -42,13 +42,13 @@ class Simulation(object):
             arduino.run(self.Wobstacle_robots)
 
         #Runs all threads in the obstacle robot array
-        for robot in self.obstacle_robots:
+        for robot in self.Wobstacle_robots:
             print 'initing the obstacle robots'
             robot.run()
 
         self.threading()
 
-        sleep(10)
+        sleep(2000)
 
         self._timer.quit()
 
