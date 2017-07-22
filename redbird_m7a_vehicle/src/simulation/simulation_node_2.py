@@ -84,7 +84,12 @@ if __name__ == '__main__':
         # Create simulation node object
         sim_n = Simulation_Node()
         
+        rate = rospy.Rate(50)
+
         # Start simulation data publisher
-        sim_n.publish_data()
+        while not rospy.is_shutdown():
+            sim_n.publish_data()
+            rate.sleep()
+
     except rospy.ROSInterruptException:
         pass
