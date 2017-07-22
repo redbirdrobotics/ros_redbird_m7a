@@ -21,7 +21,7 @@ class Takeoff_Land(flightsys.Flight, object):
     def flight(self):
         # Takeoff
         self.loginfo("Taking off!")
-        self.takeoff(4.0)
+        self.takeoff(2.0)
 
         # Hold
         self.loginfo("Altitude goal met! Holding for 5 seconds...")
