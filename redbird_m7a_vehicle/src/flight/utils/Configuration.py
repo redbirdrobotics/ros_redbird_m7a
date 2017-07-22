@@ -20,5 +20,3 @@ class Configuration(object):
 
     def get_yaml(self):
         return self._config_yaml
-
-

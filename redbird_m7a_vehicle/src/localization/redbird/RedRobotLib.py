@@ -50,8 +50,8 @@ class RedRobot():
                     iF += 1
                 else:
                     iF += 1
-                    
-            iU = 0      
+
+            iU = 0
             for robot in unfoundList:
                 if robot.found == True:
                     foundList.append(unfoundList.pop(iU))
@@ -60,7 +60,7 @@ class RedRobot():
                     iU += 1
         print 'found:', len(foundList), 'unfound', len(unfoundList)
         return
-                                    
+
 #_______________________________________________________#
     #COORDINATE CONVERSION
 #---------------------------------------------------#
@@ -79,7 +79,7 @@ class RedRobot():
     def listcvt2meters(xA, yA, h, foundList, camList):
         if not foundList:
             return
-        
+
         for robot in foundList:
             xAxis = camList[robot.cam].xAxis
             yAxis = camList[robot.cam].yAxis
@@ -166,7 +166,7 @@ class RedRobot():
 
                 if bR < 35:
                     bR += 35
-                    
+
                 robot.selfUpdate(bX, bY, bR)
                 imgList[robot.cam] = cv2.circle(imgList[robot.cam], (bX, bY), bR, (0,0,0), -1)
 
@@ -198,13 +198,13 @@ class RedRobot():
 
     #SELF UPDATE
     #--------------#
-    #Logic:    
+    #Logic:
     #Case 0: If robot was not missing from previous frames:
     #   Create a new Vector and ROI from new coordinates and radius
-    
+
     #Case 1: If robot was missing from previous frames and has a vector:
     #   Use old data to extend ROI to include more area in direction of vector
-    
+
     #Case 2: If robot was was missing from previous frames and vector was not able to be established:
     #   Expand ROI in all directions
 
@@ -252,7 +252,7 @@ class RedRobot():
     #Check to see if any coordinates in dataList are within radius of a missing robot
     #Concatenate found blobs to match number of unfound robots.
     #Pass information in to those robot instances
-    
+
     #Arguments:
     #foundList: list of found robot instances
 
@@ -261,7 +261,7 @@ class RedRobot():
     #dataList: list of found blob data
 
     #camList: list of camera instances
-    
+
     @staticmethod
     def listUpdate(foundList, unfoundList, dataList, camList):
 
@@ -306,7 +306,7 @@ class RedRobot():
 ##############################################################
 ####################### Utilities Class #########################
 ##############################################################
-    
+
 class Utilities():
 
     @staticmethod
@@ -324,7 +324,7 @@ class Utilities():
         mask = cv2.inRange(hsv, minThresh, maxThresh)
         count = cv2.countNonZero(mask)
         return mask
-        
+
     @staticmethod
     def getMaskList(frameList, maskVals, maskList):
         Utilities.emptyList(maskList)
@@ -346,13 +346,13 @@ class Utilities():
             mx, my = robot.mcoords
             mx = round(mx, 2)
             my = round(my, 2)
-            
+
             image = cv2.circle(image, (x,y), r, (0,0,0), 1)
             image = cv2.putText(image, ("%s"% robot.ident), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
             #image = cv2.putText(image, ("mx: %s Vx %s" % (mx, vX)), (x-10, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
             #image = cv2.putText(image, ("my: %s Vy %s" % (my, vY)), (x-10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, 255, 2)
             #image = cv2.line(image, (x,y), (x + vX, y + vY), (0,0,0), 5)
-        return image    
+        return image
 
 #_______________________________________________________#
     #Detector
@@ -363,7 +363,7 @@ class Utilities():
 
         #Ground Robot Parameters
         if detectorType == 0:
-            
+
             #Thresholds
             object.minThreshold = 0
             object.maxThreshold = 256
@@ -395,17 +395,17 @@ class Utilities():
         if not unfoundList:
             print 'skip blob search no unfound'
             return
-        
+
         Utilities.emptyList(dataList)
         cam = 0
         detect = True
-        
+
         while detect == True:
             keypoints = detector.detect(maskList[cam])
 
             if not keypoints:
                 cam +=1
-                
+
                 if cam > (len(maskList) - 1):
                     detect = False
                     print 'No blobs detected'
@@ -436,38 +436,43 @@ class Camera():
     #azimuth: AZIMUTHAL ANGLE IN DEGREES, 0 IS FACING FORWARD RELATIVE TO DRONE ORIENTATION PROGRESSING CLOCKWISE
     #altitude: ALTITUDINAL ANGLE IN DEGREE, 0 IS FACING DOWNWARD RELATIVE TO DRONE ORIENTATION PROGRESSING UP
     def __init__(self, port, (hRes, vRes), FPS, (hRange, vRange), (azimuth, altitude)):
-        self.port = port
-        self.feed = cv2.VideoCapture(port)
-        ret, self.frame = self.feed.read()
-        self.hResinit = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
-        self.vResinit = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
-        self.hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
+        # self.port = port
+        # self.feed = cv2.VideoCapture(port)
+        #ret, self.frame = self.feed.read()
+        #self.hResinit = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
+        #self.vResinit = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
+        #self.hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
+        #self.vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        #self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
         self.lensRange = np.radians(hRange), np.radians(vRange)
         self.orientation = np.radians(azimuth), np.radians(altitude)
         self.xAxis = np.zeros((1, hRes))
         self.yAxis = np.zeros((1, vRes))
+
+        #ROS
+        self.hRes = 1280
+        self.vRes = 720
+
         self.createAxis()
         return
 
-    def detach(self):
-        self.feed.release()
-        return
+    # def detach(self):
+    #     self.feed.release()
+    #     return
 
-    def getFrame(self):
-        ret, frame = self.feed.read()       
-        return frame
-    
-    @staticmethod
-    def getFrameList(camList, frameList):
-        Utilities.emptyList(frameList)
-        length = len(camList)
-        for c in range(length):
-            ret, frame = camList[c].feed.read()
-            frameList.append(frame)
-        return
-    
+    # def getFrame(self):
+    #     ret, frame = self.feed.read()
+    #     return frame
+
+    # @staticmethod
+    # def getFrameList(camList, frameList):
+    #     Utilities.emptyList(frameList)
+    #     length = len(camList)
+    #     for c in range(length):
+    #         ret, frame = camList[c].feed.read()
+    #         frameList.append(frame)
+    #     return
+
     @staticmethod
     def showFrame(frame, str):
         cv2.imshow(str, frame)
@@ -476,18 +481,23 @@ class Camera():
         if k == 27:
             esc = True
         return esc
-        
-    def getRes(self):
-        hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
-        vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        return hRes, vRes
-    
+
+    # def getRes(self):
+        # hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
+        # vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        # return hRes, vRes
+
 #_______________________________________________________#
-    #Pixel Mapping 
+    #Pixel Mapping
 #---------------------------------------------------#
 
     def createAxis(self):
-        hRes, vRes = self.getRes()
+        #hRes, vRes = self.getRes()
+
+        #ROS
+        hRes = self.hRes
+        vRes = self.vRes
+
         hRange, vRange = self.lensRange
         hResMid = int(hRes/2)
         vResMid = int(vRes/2)
@@ -496,14 +506,14 @@ class Camera():
         az, al = self.orientation
 
         #Create X & Y Axis of Angle Map
-        
+
         #X AXIS
         self.xAxis = np.linspace((-hRangeMid + az), (hRangeMid + az), hRes)
-        
+
         #Y AXIS
         self.yAxis = np.linspace((vRangeMid + al), (-vRangeMid + al), vRes)
-        return        
-        
+        return
 
-    
-    
+
+
+
