@@ -6,6 +6,7 @@ from simulation import *
 
 class Simulation_Node:
     def __init__(self):
+
          # Initialize node
         rospy.init_node('simulation_node', anonymous=True)
 
@@ -14,6 +15,9 @@ class Simulation_Node:
 
         # Create map listener
         self._loc_sub = rospy.Subscriber('localization', Map, self.update_map)
+
+        #creating listener for when the timer is up on target robots
+        self._timing_sub = rospy.Subscriber('localization', Map, self.get_data_for_robots)
 
         # Create simulation object 
         self._sim = Simulation()
@@ -37,7 +41,7 @@ class Simulation_Node:
         map = Map() 
     
         # Create target robot list
-        robot_msgs = []
+        robot_msgs = [3]
 
         # Create all GroundRobotPositions
         for x in xrange(14):
@@ -46,16 +50,40 @@ class Simulation_Node:
         # Enter main loop while ROS is running
         while not rospy.is_shutdown():
             # Loop through all simulated robots
-            for sim_robot in sim.get_robots():
+            for sim_robot in sim.get_G_Target_robots():
                 # Loop through all robot messages that need to be populated
-                for robot_msg in robot_msgs:
+                for robot_msg in robot_msgs: 
                     # If the robot message id matches the simulated robot id, update data
-                    if robot_msg.id == sim_robot.get_id():
-                        robot_msg.x = sim_robot.x
-                        robot_msg.y = sim_robot.y
-                        robot_msg.vec_x = sim_robot.deltaX
-                        robot_msg.vec_y = sim_robot.deltaY
-                        robot_msg.color = sim_robot.color
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
+
+            # Loop through all simulated robots
+            for sim_robot in sim.get_R_Target_robots():
+                # Loop through all robot messages that need to be populated
+                for robot_msg in robot_msgs: 
+                    # If the robot message id matches the simulated robot id, update data
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
+            
+            #looping through the obstacle robots
+            for sim_robot in sim.get_Obtacle_Robots():
+                #loop through rest of messages that need to be populated
+                for robot_msg in robot_msgs:
+                    #if the id matches then populate the message
+                    if robot_msg.id == sim_robot._id:
+                        robot_msg.x = sim_robot._x
+                        robot_msg.y = sim_robot._y
+                        robot_msg.vec_x = sim_robot._deltaX
+                        robot_msg.vec_y = sim_robot._deltaY
+                        robot_msg.color = sim_robot._color
             
             # Add robots to map
             map.ground_robots = robot_msgs
@@ -67,26 +95,62 @@ class Simulation_Node:
         # Loop through all robots in the localization topic
         for lRobot in msg.ground_robots:
             # Loop through all robots in the simulation
-            for sRobot in self._sim.get_robots():
-                # If the ids are the same, check the error
-                if sRobot.id == lRobot.id:
-                    sRobot.checkError(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+            if(lRobot.color == 0):
 
-<<<<<<< HEAD
+                for sRobot in self._sim.get_R_Target_robots():
+                    # If the ids are the same, check the error
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+
+            if(lRobot.color == 1):
+
+                for sRobot in self._sim.get_G_Target_robots():
+                    # If the ids are the same, check the error
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+
+            if(lRobot.color == 2):
+
+                for sRobot in self._sim.get_Obstacle_Robots():
+                    if sRobot._id == lRobot.id:
+                        sRobot.check_error(lRobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+
         # Data has been updated, set ready flag
         self._ready = True
-=======
-    while not rospy.is_shutdown():
-        rospy.loginfo("Simulation says hi!")
-        time.sleep(10)
->>>>>>> master
+
+    def get_data_for_robots(self):
+        #looping through simulated robots
+        for tRobot in self._sim.get_R_Target_robots():
+            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
+            if (tRobot._timerUp == True):
+                #looping through localization robots
+                for lRobot in msg.ground_robots:
+                    #if the id matches update all data
+                    if (tRobot._id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
+
+                        #resetting the timer flag
+                        tRobot._timerUp = False
+
+        for tRobot in self._sim.get_G_Target_robots():
+            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
+            if (tRobot._timerUp == True):
+                #looping through localization robots
+                for lRobot in msg.ground_robots:
+                    #if the id matches update all data
+                    if (tRobot._id == lRobot.id):
+                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
+
+                        #resetting the timer flag
+                        tRobot._timerUp = False
+
 
 if __name__ == '__main__':
     try:
         # Create simulation node object
-        sim = Simulation_Node()
+        sim_n = Simulation_Node()
         
         # Start simulation data publisher
-        sim.publish_data()
+        sim_n.publish_data()
     except rospy.ROSInterruptException:
         pass
