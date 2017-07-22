@@ -72,7 +72,7 @@ class Simulation(object):
                     #as long as the two id are not equal
                     if (self.target_robots[min_num]._color == self.target_robots[robot]._color):
 
-                        if not (self.target_robots[min_num]._id == self.target_robots[robots]._id):
+                        if not (self.target_robots[min_num]._id == self.target_robots[robot]._id):
                             self.check_calculations(min_num, robot)
 
                     else:
