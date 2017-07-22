@@ -1,0 +1,5 @@
+# Request
+std_msgs/Empty msg
+---
+# Response
+string[] flights
