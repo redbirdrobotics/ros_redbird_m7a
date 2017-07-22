@@ -4,6 +4,9 @@ def alterList(alist):
     return
 
 alist = []
+bList = [5]
 
 alterList(alist)
 print alist
+del bList[0:1]
+print bList

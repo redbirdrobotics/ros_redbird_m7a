@@ -7,6 +7,7 @@ class RedRobot():
         self.ident = num
         self.found = False
         self.cam = None
+        self.camProps = (0,0)
         self.camAxis = (0,0)
         self.coords = (0,0)
         self.radius = 0
@@ -21,9 +22,10 @@ class RedRobot():
 #---------------------------------------------------#
 
     def wipeRobot(self):
-        self.ident = num
+        self.ident = None
         self.found = False
         self.cam = None
+        self.camProps = (0,0)
         self.coords = (0,0)
         self.radius = 0
         self.ROI = (0,0,0,0)
@@ -34,18 +36,37 @@ class RedRobot():
 
     @staticmethod
     def sortFound(objList, foundList, unfoundList):
-        for robot in objList:
-            if robot.found == True:
-                foundList.append(robot)
-            else:
-                unfoundList.append(robot)
+        if not foundList and not unfoundList:
+            for robot in objList:
+                if robot.found == True:
+                    foundList.append(robot)
+                else:
+                    unfoundList.append(robot)
+        else:
+            iF = 0
+            for robot in foundList:
+                if robot.found == False:
+                    unfoundList.append(foundList.pop(iF))
+                    iF += 1
+                else:
+                    iF += 1
+                    
+            iU = 0      
+            for robot in unfoundList:
+                if robot.found == True:
+                    foundList.append(unfoundList.pop(iU))
+                    iU += 1
+                else:
+                    iU += 1
+        print 'found:', len(foundList), 'unfound', len(unfoundList)
         return
+                                    
 #_______________________________________________________#
     #COORDINATE CONVERSION
 #---------------------------------------------------#
 
     def cvt2meters(self, xA, yA, height, xAxis, yAxis):
-        print 'Robot', self.ident, 'is at', self.coords
+        #print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]
@@ -62,14 +83,14 @@ class RedRobot():
         for robot in foundList:
             xAxis = camList[robot.cam].xAxis
             yAxis = camList[robot.cam].yAxis
-            robot.cv2meters(xA, yA, h, xAxis, yAxis)
+            robot.cvt2meters(xA, yA, h, xAxis, yAxis)
         return
 
 #_______________________________________________________#
     #LOST NUMBER METHODS
 #---------------------------------------------------#
 
-    def IncLostNum(self, maxFrames):
+    def incLostNum(self, maxFrames):
         self.lostNum += 1
         if self.lostNum == maxFrames:
             return True
@@ -84,6 +105,7 @@ class RedRobot():
     #ROI METHODS
 #---------------------------------------------------#
 
+    @staticmethod
     def checkDist(foundList, dataList, rad):
         if not foundList:
             return
@@ -93,14 +115,14 @@ class RedRobot():
         iR = 0
         iD = 0
 
-        while (iR < maxFound) and (iD < maxData[0]):
+        while (iR < maxFound) and (iD < maxData):
 
-            rX, rY = foundList.coords
-            cam, bX, bY, bR, vX, vY = datalist[iD]
+            rX, rY = foundList[iR].coords
+            cam, bX, bY, bR, vX, vY = dataList[iD]
 
             if abs(rX - bX) <= rad or abs(rY - bY) <= rad:
-                foundList.lostNum = 0
-                foundList.selfUpdate(bX, bY, bR)
+                foundList[iR].lostNum = 0
+                foundList[iR].selfUpdate(bX, bY, bR)
                 del dataList[iD]
                 maxData = len(dataList)
                 iR += 1
@@ -115,7 +137,7 @@ class RedRobot():
         return
 
     def createROI(self, x, y, r):
-        if (x-r == 0) or (y-r == 0):
+        if (x-r <= 0) or (y-r <= 0):
             self.ROI = (0, y+r, 0, x+r)
         else:
             self.ROI = (y-r, y+r, x-r, x+r)
@@ -131,28 +153,31 @@ class RedRobot():
         for robot in foundList:
 
             rX,rY,rW,rH = robot.ROI
-
-            ROI = imgList[robot.cam][y:w,x:h]
+            ROI = imgList[robot.cam][rY:rH,rX:rW]
             keypoints = detector.detect(ROI)
 
             if keypoints:
 
-                self.lostNum = 0
+                print 'Robot', robot.ident, 'found in ROI'
+                robot.lostNum = 0
                 bX = int(keypoints[0].pt[0] + rW)
                 bY = int(keypoints[0].pt[1] + rX)
                 bR = int(keypoints[0].size/2)
 
                 if bR < 35:
                     bR += 35
-
+                    
                 robot.selfUpdate(bX, bY, bR)
                 imgList[robot.cam] = cv2.circle(imgList[robot.cam], (bX, bY), bR, (0,0,0), -1)
 
             else:
-                if robot.incLostNum(5):
+                print 'Robot', robot.ident, 'not found in ROI'
+                lost = robot.incLostNum(5)
+                if lost == True:
+                    print 'lost'
                     robot.wipeRobot()
-                    foundList.remove(robot)
                 else:
+                    print 'missing for', robot.lostNum
                     robot.selfUpdate(0,0,0)
         return
 
@@ -187,15 +212,16 @@ class RedRobot():
     #x & y: coordinates of found blob
     #r: Radius of found blob
 
-    def selfUpdate(self, x,y,r,):
+    def selfUpdate(self, x, y, r):
 
         if self.lostNum == 0:
+            self.createROI(x, y, r)
             self.createVect(x,y)
             self.coords = (x,y)
             self.radius = r
 
         elif ((self.lostNum != 0) and (self.vector != (0,0))):
-            hRes, vRes = robot.camProps
+            hRes, vRes = self.camProps
             rY, rH, rX, rW = self.ROI
             vX, vY = self.vector
             scalar = self.cvt2scalar()
@@ -206,15 +232,16 @@ class RedRobot():
             newX = min(abs(int(rX + scvX)), hRes)
             newW = min(abs(int(rW + scvX)), hRes)
             pointList = np.array([[rX, rY],[rW, rH],[newX, newY],[newW, newH]])
-            bX, bY, bW, bH = cv2.boundingRect(pointlist)
+            bX, bY, bW, bH = cv2.boundingRect(pointList)
             self.ROI = (bY, bY+bH, bX, bX+bW)
 
         else:
+            hRes, vRes = self.camProps
             rY, rH, rX, rW = self.ROI
-            newY = min(abs(rY - 30), vRes)
-            newH = min(abs(rH + 30), vRes)
-            newX = min(abs(rX - 30), hRes)
-            newW = min(abs(rW + 30), hRes)
+            newY = max(rY - 30, 0)
+            newH = min(rH + 30, vRes)
+            newX = max(rX - 30, 0)
+            newW = min(rW + 30, hRes)
             self.ROI = (newY, newH, newX, newW)
         return
 
@@ -236,9 +263,9 @@ class RedRobot():
     #camList: list of camera instances
     
     @staticmethod
-    def listupdate(foundList, unfoundList, dataList, camList):
+    def listUpdate(foundList, unfoundList, dataList, camList):
 
-        if not dataList:
+        if not dataList or not unfoundList:
             return
 
         RedRobot.checkDist(foundList, dataList, 30)
@@ -247,7 +274,7 @@ class RedRobot():
             return
 
         maxData = len(dataList)
-        maxUnfound = len(unfound)
+        maxUnfound = len(unfoundList)
 
         if maxData > maxUnfound:
             del dataList[maxUnfound:maxData]
@@ -256,6 +283,7 @@ class RedRobot():
         for i in range(maxData):
 
             cam, x, y, r, vX, vY = dataList[i]
+            print 'Updating unfoundRobot', i, 'With data'
 
             #Update Found Status
             unfoundList[i].found = True
@@ -281,6 +309,11 @@ class RedRobot():
     
 class Utilities():
 
+    @staticmethod
+    def emptyList(anyList):
+        maxElem = len(anyList)
+        del anyList[0:maxElem]
+
 #_______________________________________________________#
     #Mask
 #---------------------------------------------------#
@@ -294,6 +327,7 @@ class Utilities():
         
     @staticmethod
     def getMaskList(frameList, maskVals, maskList):
+        Utilities.emptyList(maskList)
         for frame in frameList:
             hsvMask = Utilities.createHSVMask(frame, maskVals[0], maskVals[1])
             maskList.append(hsvMask)
@@ -356,7 +390,13 @@ class Utilities():
         return
 
     @staticmethod
-    def blobSearch(maskList, detector, dataList):
+    def blobSearch(maskList, detector, dataList, unfoundList):
+
+        if not unfoundList:
+            print 'skip blob search no unfound'
+            return
+        
+        Utilities.emptyList(dataList)
         cam = 0
         detect = True
         
@@ -365,9 +405,10 @@ class Utilities():
 
             if not keypoints:
                 cam +=1
-                detect = False
                 
-                if cam > (len(camList) - 1):
+                if cam > (len(maskList) - 1):
+                    detect = False
+                    print 'No blobs detected'
                     return
 
             else:
@@ -377,7 +418,7 @@ class Utilities():
 
                 if r<35:
                     r+= 35
-
+                print'Found Blob at ', x,y,r
                 dataList.append([cam,x,y,r,0,0])
                 maskList[cam] = cv2.circle(maskList[cam], (x,y), r, (0,0,0), -1)
         return
@@ -398,13 +439,16 @@ class Camera():
         self.port = port
         self.feed = cv2.VideoCapture(port)
         ret, self.frame = self.feed.read()
-        self.hRes = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
-        self.vRes = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
+        self.hResinit = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
+        self.vResinit = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
+        self.hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
         self.lensRange = np.radians(hRange), np.radians(vRange)
         self.orientation = np.radians(azimuth), np.radians(altitude)
         self.xAxis = np.zeros((1, hRes))
         self.yAxis = np.zeros((1, vRes))
+        self.createAxis()
         return
 
     def detach(self):
@@ -417,6 +461,7 @@ class Camera():
     
     @staticmethod
     def getFrameList(camList, frameList):
+        Utilities.emptyList(frameList)
         length = len(camList)
         for c in range(length):
             ret, frame = camList[c].feed.read()
@@ -443,7 +488,7 @@ class Camera():
 
     def createAxis(self):
         hRes, vRes = self.getRes()
-        hRange, vRange = self.lenRange
+        hRange, vRange = self.lensRange
         hResMid = int(hRes/2)
         vResMid = int(vRes/2)
         hRangeMid = int(hRange/2)
@@ -453,10 +498,10 @@ class Camera():
         #Create X & Y Axis of Angle Map
         
         #X AXIS
-        self.xAxis = np.linspace((-hRange_Mid + az), (hRange_Mid + az), hRes)
+        self.xAxis = np.linspace((-hRangeMid + az), (hRangeMid + az), hRes)
         
         #Y AXIS
-        self.yAxis = np.linspace((vRange_Mid + al), (-vRange_Mid + al), vRes)
+        self.yAxis = np.linspace((vRangeMid + al), (-vRangeMid + al), vRes)
         return        
         
 
