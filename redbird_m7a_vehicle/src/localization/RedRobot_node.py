@@ -5,12 +5,15 @@ import numpy as np
 from redbird import *
 #from RedRobotLib import*
 from sensor_msgs.msg import Image
+#from redbird_m7a_msgs import FlightState.msg
 from cv_bridge import CvBridge, CvBridgeError
 
 class Red_Localization(object):
     def __init__(self):
         # Create subscriber
         self._sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
+        #self._sub = rospy.Subscriber('/redbird/mavros', String, self.flightdata_callback)
+        #self._sub = rospy.Subscriber('/redbird/localization/landmark'), String, self.landmark_callback)
 
         # Create blank image
         self._image = None
@@ -51,11 +54,22 @@ class Red_Localization(object):
         except CvBridgeError as e:
             print e
 
+    #def flightdata_callback(self, msg):
+        #try:
+            #Get Yaw, Pitch Roll, altitude.
+
+    #def landmark_callback(self, msg):
+        #try:
+            #Get Red Goal line endpoints
+
     def run(self):
         while not rospy.is_shutdown():
             try:
                 if self._image is None:
                     continue
+                    print 'no frame'
+
+                print 'working'
 
                 ###### Function that would get current position of quad
                 RedRobot.listcvt2meters(0, 0, 1.524, self.foundList, self.camList)
@@ -73,11 +87,13 @@ class Red_Localization(object):
                 # Search ROI
                 RedRobot.ROIsearch(self.foundList, self.maskList, self.detector)
                 RedRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                RedRobot.listFound(self.robotList)
 
                 # Search Whole Frame
                 Utilities.blobSearch(self.maskList, self.detector, self.dataList, self.unfoundList)
                 RedRobot.listUpdate(self.foundList, self.unfoundList, self.dataList, self.camList)
                 RedRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                RedRobot.listFound(self.robotList)
 
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
@@ -86,6 +102,7 @@ class Red_Localization(object):
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
                     break
+                    
             except Exception as e:
                 rospy.logwarn("Error: %s", str(e))
                 break
