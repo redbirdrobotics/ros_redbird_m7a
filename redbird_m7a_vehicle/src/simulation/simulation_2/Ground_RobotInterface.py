@@ -1,6 +1,6 @@
 from random import randint
 from math import pow, sqrt, tan
-from threading import Thread 
+from threading import Thread
 
 class Ground_Robot_Interface(object):
     """description of class"""
@@ -33,13 +33,13 @@ class Ground_Robot_Interface(object):
         self.start_timer = 0
         self.end_timer = 0
         self.deltaTime = 0
-        
+
     def update_posX(self):
         pass
 
     def update_posY(self):
         pass
-     
+
     def update_movement(self):
         pass
 
@@ -48,7 +48,7 @@ class Ground_Robot_Interface(object):
 
     def run(self, target_robots, obstacle_robots):
         pass
-    
+
     def change_X_data(self, x):
         pass
 
@@ -79,11 +79,10 @@ class Ground_Robot_Interface(object):
     def new_direction(self):
         #gets new direction when the timer flag is up
         self._deltaX = randint(-33.0, 33.0) / 100.0
-
         self._deltaY = sqrt( pow(0.33, 2) - pow(self._deltaX, 2))
 
     #def check_collisions(self, ground_robots):
-    #    #defining an arbitrary array of ground_robots 
+    #    #defining an arbitrary array of ground_robots
     #    ground_robots = [Ground_Robot_Interface]
 
     #    while not self._timer._PAUSED.is_set():
@@ -104,7 +103,7 @@ class Ground_Robot_Interface(object):
 
     #def check_calculations(self, robot):
     #    #defining the robot as an arbitrary value
-    #    #this method will make it so target and obstacle 
+    #    #this method will make it so target and obstacle
     #    #robots can use this method
 
     #    robot = Ground_Robot_Interface
