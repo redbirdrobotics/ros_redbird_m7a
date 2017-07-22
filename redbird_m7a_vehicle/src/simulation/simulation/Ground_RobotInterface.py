@@ -21,8 +21,10 @@ class Ground_Robot_Interface(object):
 
         #generating random velocities
         self._deltaX = ( randint(-33, 33) ) / 100
+        
+        print self._deltaX
 
-        self._deltaY = sqrt(((pow(0.33, 2)) - (pow(self._deltaX, 2))))
+        self._deltaY = sqrt( ( (pow(0.33, 2)) - ( pow(self._deltaX, 2) ) ) )
 
         #creating the flags for the timing, collisions, and border detection respectively
         self._timerUp = False
@@ -65,6 +67,7 @@ class Ground_Robot_Interface(object):
         pass
 
     def get_theta(self):
+
         if(self._deltaX == 0):
             if(self._deltaY < 0):
                 theta = 270
