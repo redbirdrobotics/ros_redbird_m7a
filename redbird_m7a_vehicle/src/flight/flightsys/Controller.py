@@ -294,6 +294,10 @@ class Controller(object):
                     msg.twist.linear.z *= 0.935
 
             if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), 0.1):
+                time = rospy.get_time()
+                while (rospy.get_time() - time < 3) and self.is_running():
+                    msg.twist.linear.z = 0
+                    self._vel_pub.publish(msg)
                 break
 
             # Update message header
