@@ -12,7 +12,7 @@ class Simulation(object):
     def __init__(self):
         self._timer = Sim_Timer()
 
-        #creating the main array of both the ground and obstacle robots with arbitrary values 
+        #creating the main array of both the ground and obstacle robots with arbitrary values
         self.Rtarget_robots = []
         self.Gtarget_robots = []
         self.Wobstacle_robots = []
@@ -28,12 +28,12 @@ class Simulation(object):
         self.target_robots.extend(self.Rtarget_robots)
         self.target_robots.extend(self.Gtarget_robots)
 
-        #Filling the obstacle robot array 
+        #Filling the obstacle robot array
         for robot in range(1, 4):
             self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
 
     def run(self):
-        #Running the timer (controls all threads) 
+        #Running the timer (controls all threads)
         self._timer.run()
 
         #Runs all threads in the target robot array
@@ -42,7 +42,7 @@ class Simulation(object):
             arduino.run(self.Wobstacle_robots)
 
         #Runs all threads in the obstacle robot array
-        for robot in self.obstacle_robots:
+        for robot in self.Wobstacle_robots:
             print 'initing the obstacle robots'
             robot.run()
 
@@ -81,7 +81,7 @@ class Simulation(object):
 
                     else:
                         self.check_calculations(min_num, robot)
-        
+
     def check_calculations(self, min_num, robot):
         #as long as the boundary flag is raised
         if(self.target_robots[min_num]._boundary):
