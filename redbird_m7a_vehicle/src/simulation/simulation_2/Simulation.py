@@ -29,7 +29,7 @@ class Simulation(object):
         self.target_robots.extend(self.Gtarget_robots)
 
         #Filling the obstacle robot array
-        for robot in range(1, 4):
+        for robot in range(1, 5):
             self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
 
     def run(self):
@@ -109,9 +109,9 @@ class Simulation(object):
                 self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
 
     def button_pushed(self, robot, robot1):
-        #arbitrary definition of the two inputs
-        robot = Target_Robot
-        robot1 = Target_Robot
+        # #arbitrary definition of the two inputs
+        # robot = Target_Robot
+        # robot1 = Target_Robot
 
         #finding the distance vectors between each of the robots
         vector_i = robot._x - robot1._x

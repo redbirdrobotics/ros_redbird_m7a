@@ -11,10 +11,10 @@ class Obstacle_Robot(Ground_Robot_Interface):
 
         #getting class variables
         return super(Obstacle_Robot, self).__init__(x, y, id, color)
-        
+
         #the radius of travel for the obstacle robot
         self.radius = 1.5 #m
-        
+
         #finding the delta angle of travel
         self._omega = ( ( (sqrt( ( pow(self._deltaX, 2) + pow(self._deltaY, 2) ) ) ) / self.radius) * iterations)
 
@@ -47,12 +47,12 @@ class Obstacle_Robot(Ground_Robot_Interface):
                 self.update_posY()
 
                 #making sure the angle is doubled
-                self._omega = self._omega * 2 
+                self._omega = self._omega * 2
 
                 self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
                 sleep(iterations)
-            
+
             #resetting the timer
             self.deltaTime = 0
 
@@ -92,11 +92,11 @@ class Obstacle_Robot(Ground_Robot_Interface):
 
     def check_error(self, x, y, velocityX, velocityY):
         pErrorX = ((self._x - x) /  x)
-        
+
         if not (pErrorX <= 0.001):
             self.change_X_data(x)
 
-        pErrorY = ((self._y - y) /  y) 
+        pErrorY = ((self._y - y) /  y)
 
         if not (pErrorY <= 0.001):
             self.change_Y_data(y)
