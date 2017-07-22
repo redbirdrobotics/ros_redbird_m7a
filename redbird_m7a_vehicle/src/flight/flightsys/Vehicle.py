@@ -18,7 +18,7 @@ class Vehicle(object):
         self._state_topic = State()
         self._local_position_topic = PoseStamped()
         self._local_velocity_topic = TwistStamped()
-        self._log_tag = "[VHCL] "
+        self._log_tag = "[VEHICLE] "
 
         # Wait for service startup
         rospy.wait_for_service('/mavros/set_mode')
@@ -38,13 +38,19 @@ class Vehicle(object):
     ###############################
 
     def arm(self):
-        self._arm_serv(True)
-        rospy.sleep(0.5)
-        rospy.loginfo(self._log_tag + "Vehicle armed")
+        if self.get_mode() == 'OFFBOARD':
+            self._arm_serv(True)
+            rospy.sleep(0.5)
+            rospy.loginfo(self._log_tag + "Vehicle armed")
+        else:
+            rospy.logwarn(self._log_tag + "Arm rejected, not in OFFBOARD")
 
-    def disarm(self):
-        self._arm_serv(False)
-        rospy.loginfo(self._log_tag + "Vehicle disarmed")
+    def disarm(self, force=False):
+        if self.get_mode() == 'OFFBOARD' or force:
+            self._arm_serv(False)
+            rospy.loginfo(self._log_tag + "Vehicle armed")
+        else:
+            rospy.logwarn(self._log_tag + "Disarm rejected, not in OFFBOARD")
 
     def set_mode(self, mode):
         # Log if unique mode change

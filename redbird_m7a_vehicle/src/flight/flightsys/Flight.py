@@ -55,9 +55,6 @@ class Flight(object):
             self.end_time = 0.0
             self.end_reason = Flight_End_Reason.INITIAL
 
-            # Arm the vehicle
-            self.vehicle.arm()
-
             # Flight starting
             rospy.loginfo(self.log_tag + "Flight ready. Waiting for OFFBOARD...")
 
@@ -66,6 +63,11 @@ class Flight(object):
                 pass
 
             rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight...")
+
+            self.sleep(1)
+
+            # Arm the vehicle
+            self.vehicle.arm()
 
             # Set start time
             self.start_time = rospy.get_time()
