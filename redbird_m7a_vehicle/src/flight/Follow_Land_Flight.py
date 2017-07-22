@@ -13,9 +13,12 @@ __author__ = "Jonah Largen, Alex Bennett"
 
 
 class Follow_Land_Flight(flightsys.Flight, object):
-    def __init__(self, vehicle):
+    NAME = 'follow_land_flight'
+    LOG_TAG = 'f&l'
+
+    def __init__(self):
         # Call super constructor
-        super(Follow_Land_Flight, self).__init__(name='follow_land_flight', log_tag='FOLLOW/LAND', vehicle=vehicle)
+        super(Follow_Land_Flight, self).__init__(name=self.NAME, log_tag=self.LOG_TAG)
 
         #vars
         self.x = 0.0

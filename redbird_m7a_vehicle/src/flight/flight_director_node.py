@@ -17,15 +17,12 @@ if __name__ == '__main__':
     rospy.init_node('flight_director', disable_signals=True)
 
     try:
-        # Initialize vehicle
-        vehicle = flightsys.Vehicle()
-
         # Initialize flight director
-        fd = flightsys.Flight_Director(vehicle)
+        fd = flightsys.Flight_Director()
 
         # Create and add flights
         for klass in flightsys.Flight.__subclasses__():
-            inst = klass(vehicle)
+            inst = klass()
             fd.add_flight(inst.name, inst)
 
         # Waiting for command

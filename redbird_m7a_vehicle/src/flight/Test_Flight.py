@@ -8,13 +8,15 @@ import flightsys
 from flightsys import Controller, Control_Mode
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Test_Flight(flightsys.Flight, object):
-    def __init__(self, vehicle):
+    NAME = 'test_flight'
+    LOG_TAG = 'tf'
+
+    def __init__(self):
         # Call super constructor
-        super(Test_Flight, self).__init__(name='test_flight', log_tag='TEST FLIGHT', vehicle=vehicle)
+        super(Test_Flight, self).__init__(name=self.NAME, log_tag=self.LOG_TAG)
 
     def flight(self):
         # Takeoff

@@ -4,20 +4,21 @@
 
 import rospy
 import threading
+import flightsys
 from Queue import Queue
 from std_msgs.msg import Empty, Header
 from redbird_m7a_msgs.msg import FlightState, FlightInformation
 from redbird_m7a_msgs.srv import *
-from Flight import Flight, Flight_End_Reason
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Flight_Director(object):
-    def __init__(self, vehicle):
+    def __init__(self):
+        # Create vehicle interface
+        self._vehicle = flightsys.Vehicle()
+
         # Store parameters
-        self._vehicle = vehicle
         self.log_tag = "[FD] "
         self._queue_size = 50
 
@@ -64,42 +65,46 @@ class Flight_Director(object):
     def flight_state_thread(self):
         """Continually publishes the current flight state."""
         while not rospy.is_shutdown():
-            # Create message
-            msg = FlightState(header = Header(stamp=rospy.get_rostime()))
-            current_flight_info = FlightInformation()
-            previous_flight_info = FlightInformation()
+            try:
+                # Create message
+                msg = FlightState(header = Header(stamp=rospy.get_rostime()))
+                current_flight_info = FlightInformation()
+                previous_flight_info = FlightInformation()
 
-            # Add data
-            if self._current_flight is not None and not self._current_flight.shutdown_flag.is_set():
-                msg.is_flying = True
-            else:
-                msg.is_flying = False
+                # Add data
+                if self._current_flight is not None and not self._current_flight.shutdown_flag.is_set():
+                    msg.is_flying = True
+                else:
+                    msg.is_flying = False
 
-            # Current flight information
-            if self._current_flight is not None:
-                current_flight_info.name = self._current_flight.name
-                current_flight_info.start_time = self._current_flight.start_time
-                current_flight_info.end_time = self._current_flight.end_time
-                current_flight_info.end_reason = str(self._current_flight.end_reason)
+                # Current flight information
+                if self._current_flight is not None:
+                    current_flight_info.name = self._current_flight.name
+                    current_flight_info.start_time = self._current_flight.start_time
+                    current_flight_info.end_time = self._current_flight.end_time
+                    current_flight_info.end_reason = str(self._current_flight.end_reason)
 
-                # Add to message
-                msg.current_flight = current_flight_info
+                    # Add to message
+                    msg.current_flight = current_flight_info
 
-            # Previous flight information
-            if self._previous_flight is not None:
-                previous_flight_info.name = self._previous_flight.name
-                previous_flight_info.start_time = self._previous_flight.start_time
-                previous_flight_info.end_time = self._previous_flight.end_time
-                previous_flight_info.end_reason = str(self._previous_flight.end_reason)
+                # Previous flight information
+                if self._previous_flight is not None:
+                    previous_flight_info.name = self._previous_flight.name
+                    previous_flight_info.start_time = self._previous_flight.start_time
+                    previous_flight_info.end_time = self._previous_flight.end_time
+                    previous_flight_info.end_reason = str(self._previous_flight.end_reason)
 
-                # Add to message
-                msg.previous_flight = previous_flight_info
+                    # Add to message
+                    msg.previous_flight = previous_flight_info
 
-            # Publish
-            self._flight_state_pub.publish(msg)
+                # Publish
+                if not rospy.is_shutdown():
+                    self._flight_state_pub.publish(msg)
 
-            # Sleep to keep desired rate
-            self._rate.sleep()
+                # Sleep to keep desired rate
+                self._rate.sleep()
+            except:
+                pass
 
     def shutdown(self):
         """Performs shutdown actions to cleanly exit."""
@@ -128,7 +133,7 @@ class Flight_Director(object):
             flight (function): Instance of the flight object.
         """
         # Verify parameter data types
-        if type(name) is not str or not isinstance(flight, Flight):
+        if type(name) is not str or not isinstance(flight, flightsys.Flight):
             raise TypeError('Specified parameter data type is incorrect')
 
         # Append to list
@@ -227,7 +232,7 @@ class Flight_Director(object):
                 self._current_flight.shutdown_flag.set()
 
                 # Set the end state
-                self._current_flight.end_reason = Flight_End_Reason.KILLED
+                self._current_flight.end_reason = flightsys.Flight_End_Reason.KILLED
 
                 # Join and wait for termination
                 self._current_flight.thread.join()

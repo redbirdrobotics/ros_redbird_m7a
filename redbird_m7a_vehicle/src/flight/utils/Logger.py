@@ -6,7 +6,6 @@ from datetime import datetime
 from enum import Enum
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Colors(Enum):

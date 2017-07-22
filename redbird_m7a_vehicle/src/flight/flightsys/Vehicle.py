@@ -10,14 +10,10 @@ from mavros_msgs.msg import State
 from geometry_msgs.msg import PoseStamped, TwistStamped
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Vehicle(object):
     def __init__(self):
-        # Set rate
-        self._rate = rospy.Rate(10)
-
         # Initialize variables
         self._state_topic = State()
         self._local_position_topic = PoseStamped()

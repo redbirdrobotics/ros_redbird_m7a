@@ -5,7 +5,6 @@
 import yaml
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Configuration(object):

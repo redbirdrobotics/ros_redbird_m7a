@@ -8,7 +8,6 @@ from enum import Enum
 import flightsys
 
 __author__ = "Alex Bennett"
-__email__ = "alex.eugene.bennett@gmail.com"
 
 
 class Flight_End_Reason(Enum):
@@ -16,10 +15,12 @@ class Flight_End_Reason(Enum):
 
 
 class Flight(object):
-    def __init__(self, name, log_tag, vehicle):
+    def __init__(self, name, log_tag):
+        # Call super
+        super(Flight, self).__init__()
+
         # Check parameter data types
-        if not isinstance(vehicle, flightsys.Vehicle) \
-            or type(name) is not str \
+        if type(name) is not str \
             or type(log_tag) is not str:
             raise TypeError("Invalid parameter data type(s)")
 
@@ -29,7 +30,8 @@ class Flight(object):
         # Call super
         self.shutdown_flag = threading.Event()
 
-        # Create empty controller
+        # Create empty vehicle and controller
+        self.vehicle = None
         self.controller = None
 
         # Set parameters
@@ -38,13 +40,15 @@ class Flight(object):
         self.end_time = 0.0
         self.end_reason = Flight_End_Reason.INITIAL
         self.log_tag = "[" + log_tag + "] "
-        self.vehicle = vehicle
 
     def run(self):
         """Runs the flight inside of a try-except block."""
         try:
+            # Create vehicle
+            self.vehicle = flightsys.Vehicle()
+
             # Create controller
-            self.controller = flightsys.Controller(self.vehicle, self.shutdown_flag)
+            self.controller = flightsys.Controller(self.shutdown_flag)
 
             # Reset flight diagnositcs
             self.start_time = 0.0
@@ -58,17 +62,16 @@ class Flight(object):
             rospy.loginfo(self.log_tag + "Flight ready. Waiting for OFFBOARD...")
 
             # Wait for offboard
-            while self.vehicle.get_mode() != 'OFFBOARD' and not self.shutdown_flag.is_set() and not rospy.is_shutdown():
+            while not self.is_running():
                 pass
 
-            # Wait a few seconds
-            rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight in 2 seconds...")
-            self.sleep(2)
+            rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight...")
 
             # Set start time
             self.start_time = rospy.get_time()
 
             # Start flight
+            rospy.loginfo(self.log_tag + "Starting flight!")
             self.flight()
 
             # Set end time
@@ -101,7 +104,7 @@ class Flight(object):
         raise NotImplementedError("The start method has not been properly overridden by the flight implementation!")
 
     def is_running(self):
-        return not rospy.is_shutdown() and not self.shutdown_flag.is_set() and self.vehicle.is_armed() and self.vehicle.get_mode() == 'OFFBOARD'
+        return not rospy.is_shutdown() and not self.shutdown_flag.is_set() and self.vehicle.get_mode() == 'OFFBOARD'
 
     def sleep(self, time):
         self.shutdown_flag.wait(time)
@@ -130,7 +133,7 @@ class Flight(object):
         # Log
         rospy.logerr(self.log_tag + msg)
 
-    def fly_to_point(self, point, allowed_error):
+    def fly_to_point(self, point, allowed_error=0.25):
         # Disallow if poison pill has been set or ROS is shutdown
         if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")

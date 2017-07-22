@@ -11,17 +11,25 @@ __author__ = "Alex Bennett"
 
 
 class Takeoff_Land(flightsys.Flight, object):
-    def __init__(self, vehicle):
+    NAME = 'takeoff_land_flight'
+    LOG_TAG = 't&l'
+
+    def __init__(self):
         # Call super constructor
-        super(Takeoff_Land, self).__init__(name='takeoff_land_flight', log_tag='TEST #1', vehicle=vehicle)
+        super(Takeoff_Land, self).__init__(name=self.NAME, log_tag=self.LOG_TAG)
 
     def flight(self):
         # Takeoff
-        self.takeoff(1.5)
+        self.loginfo("Taking off!")
+        self.takeoff(2.0)
 
         # Hold
         self.loginfo("Altitude goal met! Holding for 5 seconds...")
-        self.sleep(2.0)
+        self.sleep(5.0)
 
         # Land
+        self.loginfo("Landing...")
         self.land()
+
+        #Done
+        self.loginfo("Done!")

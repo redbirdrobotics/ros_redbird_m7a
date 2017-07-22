@@ -11,9 +11,12 @@ from redbird_m7a_msgs.msg import Map, GroundRobotPosition
 
 
 class Test_Flight2(flightsys.Flight, object):
+    NAME = 'test_flight2'
+    LOG_TAG = 'tf2'
+
     def __init__(self, vehicle):
         # Call super constructor
-        super(Test_Flight2, self).__init__(name='test_flight2', log_tag='TEST FLIGHT 2', vehicle=vehicle)
+        super(Test_Flight2, self).__init__(name=self.NAME, log_tag=self.LOG_TAG)
 
         #vars
         this.x = 0
