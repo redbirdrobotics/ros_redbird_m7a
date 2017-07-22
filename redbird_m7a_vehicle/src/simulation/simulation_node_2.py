@@ -13,22 +13,8 @@ class Simulation_Node:
         # Create publisher
         self._pub = rospy.Publisher('simulation', Map, queue_size=10)
 
-        # Create map listener
-        self._loc_sub = rospy.Subscriber('localization', Map, self.update_map)
-
-        #creating listener for when the timer is up on target robots
-        self._timing_sub = rospy.Subscriber('localization', Map, self.get_data_for_robots)
-
         # Create simulation object 
         self._sim = Simulation()
-
-        # Log waiting for ready flag
-        rospy.loginfo("Waiting for initial information from localization...")
-
-        # Wait for data to be populated from localization info
-        self._ready = False
-        while not self._ready:
-           pass
        
         # Start simulation
         self._sim.run()
@@ -91,58 +77,6 @@ class Simulation_Node:
             # Publish the map
             self._pub.publish(map)
 
-    def update_map(self, msg):
-        # Loop through all robots in the localization topic
-        for lRobot in msg.ground_robots:
-            # Loop through all robots in the simulation
-            if(lRobot.color == 0):
-
-                for sRobot in self._sim.get_R_Target_robots():
-                    # If the ids are the same, check the error
-                    if sRobot._id == lRobot.id:
-                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
-
-            if(lRobot.color == 1):
-
-                for sRobot in self._sim.get_G_Target_robots():
-                    # If the ids are the same, check the error
-                    if sRobot._id == lRobot.id:
-                        sRobot.check_error(lrobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
-
-            if(lRobot.color == 2):
-
-                for sRobot in self._sim.get_Obstacle_Robots():
-                    if sRobot._id == lRobot.id:
-                        sRobot.check_error(lRobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
-
-        # Data has been updated, set ready flag
-        self._ready = True
-
-    def get_data_for_robots(self):
-        #looping through simulated robots
-        for tRobot in self._sim.get_R_Target_robots():
-            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
-            if (tRobot._timerUp == True):
-                #looping through localization robots
-                for lRobot in msg.ground_robots:
-                    #if the id matches update all data
-                    if (tRobot._id == lRobot.id):
-                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
-
-                        #resetting the timer flag
-                        tRobot._timerUp = False
-
-        for tRobot in self._sim.get_G_Target_robots():
-            #advancing only if the timerUp flag is true (which is raised when the 20s is up)
-            if (tRobot._timerUp == True):
-                #looping through localization robots
-                for lRobot in msg.ground_robots:
-                    #if the id matches update all data
-                    if (tRobot._id == lRobot.id):
-                        tRobot.update_data(lRobot.x, lRobot.y, lRobot.vec_x, lrobot.vec_y)
-
-                        #resetting the timer flag
-                        tRobot._timerUp = False
 
 
 if __name__ == '__main__':
