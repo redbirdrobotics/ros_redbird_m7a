@@ -2,7 +2,7 @@
 import rospy
 import time
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
-from simulation import *
+from simulation_2 import *
 
 class Simulation_Node:
     def __init__(self):
