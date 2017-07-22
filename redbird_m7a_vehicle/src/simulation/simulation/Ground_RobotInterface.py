@@ -20,7 +20,7 @@ class Ground_Robot_Interface(object):
         self._omega = 0
 
         #generating random velocities
-        self._deltaX = ( randint(-33.0, 33.0) ) / float(100)
+        self._deltaX = ( randint(-33.0, 33.0) ) / float(100.0)
         
         print self._deltaX
 
