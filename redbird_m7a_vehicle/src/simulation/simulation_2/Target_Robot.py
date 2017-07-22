@@ -1,7 +1,7 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer
 from Obstacle_Robot import Obstacle_Robot
-from time import sleep
+import rospy
 from threading import Thread
 from math import fabs, sqrt, tan
 
@@ -50,7 +50,7 @@ class Target_Robot(Ground_Robot_Interface):
 
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
-                    sleep(iterations)
+                    rospy.sleep(iterations)
 
                 if(self.deltaTime == 20):
 
@@ -103,7 +103,7 @@ class Target_Robot(Ground_Robot_Interface):
                     if(theta >= min_theta and theta <= max_theta):
                         self.collision = True
 
-                sleep(iterations/2)
+                rospy.sleep(iterations)
 
     def run(self, obstacle_robots):
         self._distanceThread = Thread(target = self.update_movement)

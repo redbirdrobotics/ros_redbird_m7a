@@ -1,10 +1,10 @@
 from Sim_Timer import Sim_Timer
 from Target_Robot import Target_Robot
 from Obstacle_Robot import Obstacle_Robot
-from time import sleep
 from threading import Thread
 from Ground_RobotInterface import iterations
 from math import sqrt, pow, tan
+import rospy
 
 class Simulation(object):
     """description of class"""
@@ -48,10 +48,6 @@ class Simulation(object):
 
         self.threading()
 
-        sleep(2000)
-
-        self._timer.quit()
-
     def get_G_Target_robots(self):
         return self.Gtarget_robots
 
@@ -81,6 +77,10 @@ class Simulation(object):
 
                     else:
                         self.check_calculations(min_num, robot)
+
+                min_num +=1
+
+                rospy.sleep(iterations)
         
     def check_calculations(self, min_num, robot):
         #as long as the boundary flag is raised
@@ -108,10 +108,6 @@ class Simulation(object):
             if dCC <= max_distance:
 
                 self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
-
-                min_num += 1
-
-                sleep(iterations/2)
 
     def button_pushed(self, robot, robot1):
         #arbitrary definition of the two inputs
