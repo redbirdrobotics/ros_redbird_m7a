@@ -23,7 +23,7 @@ class Landmark_Localization(object):
 	self._cv_bridge = CvBridge()
 
 	# Camera Instances
-	self.cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 45))
+	self.cam0 = Camera(0, (1280, 720),(130, 90), (0, 45))
 	#self.cam1 = Camera(2, (1280, 720), 60, (130, 90), (180, 45))
 	self.camList = [self.cam0]
 
@@ -70,11 +70,11 @@ def run(self):
 			# Get Quad Data
 			self.quadData[self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
 
-			#Get Mask Lists
+			# Get Mask Lists
 			self.redgoal.getMaskList(self.frameList, self.redMaskList)
 			self.greengoal.getMaskList(self.frameList, self.greenMaskList)
 
-			#Search Masks
+			# Search Masks
 			self.redgoal.detectGoalLine(self.redMaskList)
 			self.greengoal.detectGoalLine(self.greenList)
 
@@ -82,10 +82,28 @@ def run(self):
 			self.redgoal.cv2meters(self.quadData, self.camList)
 			self.greengoal.cv2meters(self.quadData, self.camList)
 
+			# Publish to Node
+
+			#Show Frame, Only for Testing
+			Camera.showFrame(self.image, 'GoalFrame')
+
+		except Exception as e:
+			rospy.logwarn("Error: %s", str(e))
+			break
+
+if __name__ == '__main__':
+	try:
+        # Setup ROS
+        rospy.init_node('landmark_localization')
+
+        # Create object
+        localization = landmark_Localization()
+
+        # Run
+        localization.run()
+    except rospy.ROSException:
+        pass
 
 
-    #Publish to Node
-
-    #Show Frame
     
 
