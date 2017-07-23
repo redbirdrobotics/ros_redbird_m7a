@@ -10,7 +10,7 @@ from cv_bridge import CvBridge, CvbridgeError
 class Landmark_Localization(object):
 	def__init__(self):
 	# Create subscriber
-	self.camera_sub = rospy.Subscriber('/redbird/localization/camera/image',Image, self.image_callback)
+	self.camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
 	self._position_sub = rospy.Subscriber('mavros/local_position/pose', PoseStamped, self.local_position_callback)
 
 	#Createblank image
@@ -36,15 +36,24 @@ class Landmark_Localization(object):
 	self.redMaskList = []
 	self.greenMaskList = []
 
-
 def image_callback(self, msg):
 	try:
 		self.image = self._cv_bridge.imgmsg_to_cv2(msg, "bgr8")
 	except CvbridgeError as e:
 		print e
 
-def flightdata_callback(self,msg):
-	self._position_info = msg
+def flightdata_callback(self, msg):
+	self.quadX = self._local_position_topic.pose.position.x
+	self.quadY = self._local_position_topic.pose.position.y
+	self.quadH = self._local_position_topic.pose.position.z
+
+	quaternion = (self._local_position_topic.pose.orientation.x, self._local_position_topic.pose.orientation.y, self._local_position_topic.pose.orientation.z)
+	euler = tf.transformation.euler_from_quaternion(quaternion)
+
+	self.quadRoll = euler[0]
+	self.quadPitch = euler[1]
+	self.quadYaw = euler[2]
+	return
 
 def run(self):
 	while not rospy.is_shutdown():
@@ -58,19 +67,22 @@ def run(self):
 			# Get Frame List
 			self.frameList = [self.image]
 
+			# Get Quad Data
+			self.quadData[self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
+
 			#Get Mask Lists
 			self.redgoal.getMaskList(self.frameList, self.redMaskList)
 			self.greengoal.getMaskList(self.frameList, self.greenMaskList)
 
 			#Search Masks
-			
+			self.redgoal.detectGoalLine(self.redMaskList)
+			self.greengoal.detectGoalLine(self.greenList)
+
+			# Convert to meters
+			self.redgoal.cv2meters(self.quadData, self.camList)
+			self.greengoal.cv2meters(self.quadData, self.camList)
 
 
-
-
-    #Get Frame List
-    
-    #Search for Landmarks
 
     #Publish to Node
 
