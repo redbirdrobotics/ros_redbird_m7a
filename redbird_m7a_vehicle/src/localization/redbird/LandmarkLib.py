@@ -3,12 +3,24 @@ import numpy as np
 
 class LandmarkLib():
 
-    def __init__(self):
+    def __init__(self, valArray):
+        self.minThresh = valArray[0]
+        self.maxThresh = valArray[1]
         self.cam = None
-        self.goalVals = (1, 180, 100)
-        self.gridVals = (0,0,0)
+        self.lineVals = (1, 180, 100)
         self.endPoints = (0,0,0,0)
         self.found = False
+        return
+
+    def createHSVMask(self, img):
+        hsv = cv2.cvtcolor(img, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, self.minThresh, self.maxThresh)
+        return mask
+
+    def getMaskList(self, frameList, maskList):
+        Utilities.emptyList(maskList)
+        for frame in frameList:
+            maskList.append( self.createHSVMask(frame) )
         return
 
     def detectGoalLine(self, imgList):
@@ -58,3 +70,11 @@ class LandmarkLib():
         for address in addressList:
             imgList[address + 1] = cv2.line(imgList[address + 1], (xA, yA), (xB, yB), (0,0,255), w)
         return imgList
+
+class Utilities():
+
+    @staticmethod
+    def emptyList(anyList):
+        maxElem = len(anyList)
+        del anyList[0:maxElem]
+        

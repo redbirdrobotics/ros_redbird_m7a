@@ -11,12 +11,15 @@ from cv_bridge import CvBridge, CvBridgeError
 class Red_Localization(object):
     def __init__(self):
         # Create subscriber
-        self._sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
-        #self._sub = rospy.Subscriber('/redbird/mavros', String, self.flightdata_callback)
+        self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
+        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
         #self._sub = rospy.Subscriber('/redbird/localization/landmark'), String, self.landmark_callback)
 
         # Create blank image
         self._image = None
+
+        # Create blank position state
+        self._position_info = None
 
         # Create OpenCV bridge
         self._cv_bridge = CvBridge()
@@ -54,9 +57,8 @@ class Red_Localization(object):
         except CvBridgeError as e:
             print e
 
-    #def flightdata_callback(self, msg):
-        #try:
-            #Get Yaw, Pitch Roll, altitude.
+    def flightdata_callback(self, msg):
+        self._position_info = msg
 
     #def landmark_callback(self, msg):
         #try:
