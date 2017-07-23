@@ -82,15 +82,16 @@ class RedRobot():
         return
 
     @staticmethod
-    def listcvt2meters(xA, yA, h, foundList, camList):
+    def listcvt2meters(quadDataList, foundList, camList):
         if not foundList:
             return
 
         for robot in foundList:
             xAxis = camList[robot.cam].xAxis
-            yAxis = camList[robot.cam].yAxis
-            robot.cvt2meters(xA, yA, h, xAxis, yAxis)
-        return
+            xAxisQ = [x + Qyaw for x in xAxis]
+            yAxis = camList[self.cam].yAxis
+            yAxisQ = [y + Qpitch for y in yAxis]
+            robot.cvt2meters(quadDataList[0], quadDataList[1], quadDataList[2], xAxisQ, yAxisQ)
 
 #_______________________________________________________#
     #LOST NUMBER METHODS
@@ -443,29 +444,19 @@ class Utilities():
 
 class Camera():
 
-    #PORT: USB PORT CAMERA IS ATTACHED TO
+    #ident: Unique identity
     #hRes, vRes: HORIZONTAL AND VERTICAL RESOLUTION
-    #FPS: FRAMES PER SECOND
     #hRange, vRange: HORIZONTAL AND VERTICAL RANGE OF LENS IN DEGREES
     #azimuth: AZIMUTHAL ANGLE IN DEGREES, 0 IS FACING FORWARD RELATIVE TO DRONE ORIENTATION PROGRESSING CLOCKWISE
     #altitude: ALTITUDINAL ANGLE IN DEGREE, 0 IS FACING DOWNWARD RELATIVE TO DRONE ORIENTATION PROGRESSING UP
-    def __init__(self, port, (hRes, vRes), FPS, (hRange, vRange), (azimuth, altitude)):
-        # self.port = port
-        # self.feed = cv2.VideoCapture(port)
-        #ret, self.frame = self.feed.read()
-        #self.hResinit = self.feed.set(cv2.CAP_PROP_FRAME_WIDTH, hRes)
-        #self.vResinit = self.feed.set(cv2.CAP_PROP_FRAME_HEIGHT, vRes)
-        #self.hRes = int(self.feed.get(cv2.CAP_PROP_FRAME_WIDTH))
-        #self.vRes = int(self.feed.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        #self.setFPS = self.feed.set(cv2.CAP_PROP_FPS, FPS)
+    def __init__(self, ident, (hRes, vRes), (hRange, vRange), (azimuth, altitude)):
+        self.ident
         self.lensRange = np.radians(hRange), np.radians(vRange)
         self.orientation = np.radians(azimuth), np.radians(altitude)
         self.xAxis = np.zeros((1, hRes))
         self.yAxis = np.zeros((1, vRes))
-
-        #ROS
-        self.hRes = 1280
-        self.vRes = 720
+        self.hRes = hRes
+        self.vRes = vRes
 
         self.createAxis()
         return
