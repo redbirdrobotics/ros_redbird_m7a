@@ -3,13 +3,55 @@ import rospy
 import cv2
 import numpy as np
 from redbird import *
-#from GreenRobotLib import*
 from sensor_msgs.msg import Image
-#from redbird_m7a_msgs import FlightState.msg
 from cv_bridge import CvBridge, CvBridgeError
 
-class Green_Localization(object):
+class Red_Localization(object):
+
+
     def __init__(self):
+
+        # Create subscriber
+        self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
+        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
+        #self._sub = rospy.Subscriber('/redbird/localization/landmark'), String, self.landmark_callback)
+
+        # Create blank image
+        self._image = None
+
+        # Create blank position state
+        self._position_info = None
+
+        # Create OpenCV bridge
+        self._cv_bridge = CvBridge()
+
+        # Camera Instances
+        self.cam0 = Camera(0, (1280, 720), (130, 90), (0, 45.0))
+        self.cam1 = Camera(1, (1280, 720), (130, 90), (180.0, 45.0))
+        self.camList = [self.cam0]
+
+        # RedRobot Instances
+        self.hulk = RedRobot(0)
+        self.yoshi = RedRobot(1)
+        self.yoda = RedRobot(2)
+        self.arrow = RedRobot(3)
+        self.beastboy = RedRobot(4)
+        self.robotList = [self.hulk, self.yoshi, self.yoda, self.arrow, self.beastboy]
+
+        # THRESHOLD
+        self.greenVals = np.array([[165, 150, 150], [180, 240, 200]])
+
+        # BLOB DETECTOR
+        self.GreenRobotParams = cv2.SimpleBlobDetector_Params()
+        Utilities.getParams(self.GreenRobotParams, 0)
+        self.detector = cv2.SimpleBlobDetector_create(self.GreenRobotParams)
+
+        # LISTS
+        self.foundList = []
+        self.unfoundList = []
+        self.frameList = []
+        self.maskList = []
+        self.dataList = []
 
     def image_callback(self, msg):
         try:
@@ -17,9 +59,18 @@ class Green_Localization(object):
         except CvBridgeError as e:
             print e
 
-    #def flightdata_callback(self, msg):
-        #try:
-            #Get Yaw, Pitch Roll, altitude.
+   def flightdata_callback(self, msg):
+        self.quadX = self._local_position_topic.pose.position.x
+        self.quadY = self._local_position_topic.pose.position.y
+        self.quadH = self._local_position_topic.pose.position.z
+
+        quaternion = (self._local_position_topic.pose.orientation.x, self._local_position_topic.pose.orientation.y, self._local_position_topic.pose.orientation.z)
+        euler = tf.transformation.euler_from_quaternion(quaternion)
+
+        self.quadRoll = euler[0]
+        self.quadPitch = euler[1]
+        self.quadYaw = euler[2]
+        return
 
     #def landmark_callback(self, msg):
         #try:
@@ -34,29 +85,28 @@ class Green_Localization(object):
 
                 print 'working'
 
-                # Function that would get current position of quad
-                GreenRobot.listcvt2meters(0, 0, 1.524, self.foundList, self.camList)
+                # Get Quad Data
+                self.quadData= [self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
+
+                GreenRobot.listcvt2meters(self.quadData, self.foundList, self.camList)
 
                 # Get image
                 self.frameList = [self._image]
 
-                # Replace following function with function that gets image list
-                # Camera.getFrameList(camList, frameList)
-
-                Utilities.getMaskList(self.frameList, self.GreenVals, self.maskList)
+                Utilities.getMaskList(self.frameList, self.greenVals, self.maskList)
 
                 # Get Landmark Node Data
 
                 # Search ROI
-                GreenRobot.ROIsearch(self.foundList, self.maskList, self.detector)
-                GreenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
-                GreenRobot.listFound(self.robotList)
+                greenRobot.ROIsearch(self.foundList, self.maskList, self.detector)
+                greenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                greenRobot.listFound(self.robotList)
 
                 # Search Whole Frame
                 Utilities.blobSearch(self.maskList, self.detector, self.dataList, self.unfoundList)
-                GreenRobot.listUpdate(self.foundList, self.unfoundList, self.dataList, self.camList)
-                GreenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
-                GreenRobot.listFound(self.robotList)
+                greenRobot.listUpdate(self.foundList, self.unfoundList, self.dataList, self.camList)
+                greenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                greenRobot.listFound(self.robotList)
 
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
@@ -65,7 +115,7 @@ class Green_Localization(object):
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
                     break
-
+                    
             except Exception as e:
                 rospy.logwarn("Error: %s", str(e))
                 break
@@ -73,7 +123,7 @@ class Green_Localization(object):
 if __name__ == '__main__':
     try:
         # Setup ROS
-        rospy.init_node('red_localization')
+        rospy.init_node('green_localization')
 
         # Create object
         localization = Green_Localization()

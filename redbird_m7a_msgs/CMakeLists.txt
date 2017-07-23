@@ -56,8 +56,8 @@ add_message_files(
   Map.msg
   FlightInformation.msg
   FlightState.msg
-  Landmark.msg
-  Landmarks.msg
+  Goal.msg
+  Goals.msg
 )
 
 ## Generate services in the 'srv' folder

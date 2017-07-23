@@ -24,11 +24,11 @@ class Red_Localization(object):
         # Create OpenCV bridge
         self._cv_bridge = CvBridge()
 
-        # CAMERAS TO BE REPLACES BY GSTREAMER FUNCTION
-        self.cam0 = Camera(1, (1280, 720), 60, (130, 90), (0, 53.7))
+        # Camera Instances
+        self.cam0 = Camera(1, (1280, 720), (130, 90), (0, 53.7))
         self.camList = [self.cam0]
 
-        # RED ROBOTS
+        # RedRobot Instances
         self.daredevil = RedRobot(0)
         self.deadpool = RedRobot(1)
         self.elmo = RedRobot(2)
@@ -57,8 +57,18 @@ class Red_Localization(object):
         except CvBridgeError as e:
             print e
 
-    def flightdata_callback(self, msg):
-        self._position_info = msg
+   def flightdata_callback(self, msg):
+        self.quadX = self._local_position_topic.pose.position.x
+        self.quadY = self._local_position_topic.pose.position.y
+        self.quadH = self._local_position_topic.pose.position.z
+
+        quaternion = (self._local_position_topic.pose.orientation.x, self._local_position_topic.pose.orientation.y, self._local_position_topic.pose.orientation.z)
+        euler = tf.transformation.euler_from_quaternion(quaternion)
+
+        self.quadRoll = euler[0]
+        self.quadPitch = euler[1]
+        self.quadYaw = euler[2]
+        return
 
     #def landmark_callback(self, msg):
         #try:
@@ -73,14 +83,13 @@ class Red_Localization(object):
 
                 print 'working'
 
-                ###### Function that would get current position of quad
+                # Get Quad Data
+                self.quadData= [self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
+
                 RedRobot.listcvt2meters(0, 0, 1.524, self.foundList, self.camList)
 
                 # Get image
                 self.frameList = [self._image]
-
-                # Replace following function with function that gets image list
-                # Camera.getFrameList(camList, frameList)
 
                 Utilities.getMaskList(self.frameList, self.redVals, self.maskList)
 

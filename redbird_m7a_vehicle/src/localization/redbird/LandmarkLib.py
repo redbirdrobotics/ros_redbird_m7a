@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 
-class LandmarkLib():
-
+class Landmark(object):
     def __init__(self, color, valArray):
         self.color = color
         self.minThresh = valArray[0]
@@ -100,9 +99,9 @@ class LandmarkLib():
         del anyList[0:maxElem]
         return
 
-class Camera():
-
+class Camera(object):
     def __init__(self, ident, (hRes, vRes), (hRange, vRange), (azimuth, altitude)):
+        self.ident = ident
         self.hRes = hRes
         self.vRes = vRes
         self.lensRange = np.radians(hRange), np.radians(vRange)
