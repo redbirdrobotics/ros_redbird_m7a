@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from Utilities import Utilities
 
 class Landmark(object):
     def __init__(self, color, valArray):
@@ -14,7 +15,7 @@ class Landmark(object):
         return
 
     def createHSVMask(self, img):
-        hsv = cv2.cvtcolor(img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.minThresh, self.maxThresh)
         return mask
 
@@ -24,8 +25,8 @@ class Landmark(object):
             maskList.append( self.createHSVMask(frame) )
         return
 
-    def detectGoalLine(self, imgList):
-        rhoArg, thetaArg, minLenArg = self.goalVals
+    def detectGoalLine(self, imgList, camList):
+        rhoArg, thetaArg, minLenArg = self.lineVals
         cam = 0
         for img in imgList:
 
@@ -46,11 +47,15 @@ class Landmark(object):
                     if yN < 0:
                         yN = -yN
                     
+                    hRes = camList[cam].hRes
+                    vRes = camList[cam].vRes
+
                     xA = int(xN + 2000*(-b))
                     yA = int(yN + 2000*(a))
                     xB = int(xN - 2000*(-b))
                     yB = int(yN - 2000*(a))
-                    self.endPoints = (xA, yA, xB, yB)
+
+                    self.scale2Frame(xA, yA, xB, yB, camList)
                     cam += 1
             else:
                 self.found = False
@@ -58,10 +63,35 @@ class Landmark(object):
                 cam += 1
         return
 
+    def scale2Frame(self, xA, yA, xB, yB, camList):
+        hRes = camList[self.cam].hRes
+        vRes = camList[self.cam].vRes
+        slope = float(yB - yA)/(xB - xA)
+        yInt = int(yA - slope*xA)
+
+        if xA < 0:
+            xA = 0
+            yA = yInt
+
+        elif yA < 0:
+            yA = 0
+            xA = int(-yInt/slope)
+
+        if xB > hRes:
+            xB = hRes -1
+            yB = int(slope * xB + yInt)
+
+        elif yB > vRes:
+            yB = vRes
+            xB = int((yB - yInt)/slope)
+
+        self.endPoints = (xA, yA, xB, yB)
+        return
+
     def drawLine(self, img, w):
         xA, yA, xB, yB = self.endPoints
         img = cv2.line(img, (xA, yA), (xB, yB), (0,0,0), w)
-        return img
+        return
 
     
     def remove(self, imgList, w):
@@ -73,7 +103,12 @@ class Landmark(object):
         return imgList
 
     def cvt2meters(self, quadDataList, camList):
-        Qx, Qy, Qh, Qyaw, Qpitch, Qroll
+
+        if self.found == False:
+            return
+
+        #print quadDataList
+        Qx, Qy, Qh, Qyaw, Qpitch, Qroll = quadDataList
         xAxis = camList[self.cam].xAxis
         xAxisQ = [x + Qyaw for x in xAxis]
         yAxis = camList[self.cam].yAxis
@@ -82,8 +117,8 @@ class Landmark(object):
 
         thetaA = xAxisQ[xA]
         phiA = yAxisQ[yA]
-        yDistA = quadDataList[2]*np.tan(phiA)
-        xDistA = quadDataList[2]*np.tan(thetaA)
+        yDistA = Qh*np.tan(phiA)
+        xDistA = Qh*np.tan(thetaA)
 
         thetaB = xAxisQ[xB]
         phiB = yAxisQ[yB]
