@@ -1,17 +1,17 @@
 from Ground_RobotInterface import Ground_Robot_Interface, iterations
 from Sim_Timer import Sim_Timer
 from Obstacle_Robot import Obstacle_Robot
-from time import sleep
 from threading import Thread
 from math import fabs, sqrt, tan
+import rospy
 
 class Target_Robot(Ground_Robot_Interface):
     """description of class"""
 
-    def __init__(self, x, y, id, color, timer): 
+    def __init__(self, x, y, deltax, deltay, id, color, timer): 
         self._timer = timer
 
-        return super(Target_Robot, self).__init__(x, y, id, color)
+        return super(Target_Robot, self).__init__(x, y, deltax, deltay, id, color)
         
     def update_posX(self):
         changeX = self._deltaX * iterations
@@ -50,15 +50,13 @@ class Target_Robot(Ground_Robot_Interface):
 
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
-                    sleep(iterations)
+                    rospy.sleep(iterations)
 
                 if(self.deltaTime == 20):
 
                     self.deltaTIme = 0
 
                     self._timerUp = True
-
-                    super(Target_Robot, self).new_direction()
 
     def oR_check_collisions(self, obstacle_robots = [Obstacle_Robot]):
         #making the obstacle robots an array of Obstacle Robots (arbitrary definition)
@@ -103,7 +101,7 @@ class Target_Robot(Ground_Robot_Interface):
                     if(theta >= min_theta and theta <= max_theta):
                         self.collision = True
 
-                sleep(iterations/2)
+                rospy.sleep(iterations)
 
     def run(self, obstacle_robots):
         self._distanceThread = Thread(target = self.update_movement)
@@ -183,7 +181,3 @@ class Target_Robot(Ground_Robot_Interface):
 
     def get_radius(self):
         return self._radius
-
-    def collision_detection(self, ground_robots):
-
-        return super(Target_Robot, self).run(ground_robots)

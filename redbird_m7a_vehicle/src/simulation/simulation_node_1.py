@@ -2,7 +2,7 @@
 import rospy
 import time
 from redbird_m7a_msgs.msg import Map, GroundRobotPosition
-from simulation import *
+from simulation_1 import *
 
 class Simulation_Node:
     def __init__(self):
@@ -151,7 +151,12 @@ if __name__ == '__main__':
         # Create simulation node object
         sim_n = Simulation_Node()
         
+        rate = rospy.Rate(50)
+
         # Start simulation data publisher
-        sim_n.publish_data()
+        while not rospy.is_shutdown():
+            sim_n.publish_data()
+            rate.sleep()
+
     except rospy.ROSInterruptException:
         pass

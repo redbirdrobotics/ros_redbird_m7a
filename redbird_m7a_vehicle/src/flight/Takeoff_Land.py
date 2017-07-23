@@ -11,7 +11,7 @@ __author__ = "Alex Bennett"
 
 
 class Takeoff_Land(flightsys.Flight, object):
-    NAME = 'takeoff_land_flight'
+    NAME = 'takeoff_land'
     LOG_TAG = 't&l'
 
     def __init__(self):

@@ -1,10 +1,10 @@
 from Sim_Timer import Sim_Timer
 from Target_Robot import Target_Robot
 from Obstacle_Robot import Obstacle_Robot
-from time import sleep
 from threading import Thread
 from Ground_RobotInterface import iterations
 from math import sqrt, pow, tan
+import rospy
 
 class Simulation(object):
     """description of class"""
@@ -29,7 +29,7 @@ class Simulation(object):
         self.target_robots.extend(self.Gtarget_robots)
 
         #Filling the obstacle robot array
-        for robot in range(1, 4):
+        for robot in range(1, 5):
             self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
 
     def run(self):
@@ -47,10 +47,6 @@ class Simulation(object):
             robot.run()
 
         self.threading()
-
-        sleep(10)
-
-        self._timer.quit()
 
     def get_G_Target_robots(self):
         return self.Gtarget_robots
@@ -76,11 +72,14 @@ class Simulation(object):
                     #as long as the two id are not equal
                     if (self.target_robots[min_num]._color == self.target_robots[robot]._color):
 
-                        if not (self.target_robots[min_num]._id == self.target_robots[robots]._id):
+                        if not (self.target_robots[min_num]._id == self.target_robots[robot]._id):
                             self.check_calculations(min_num, robot)
 
                     else:
                         self.check_calculations(min_num, robot)
+
+                min_num +=1
+                rospy.sleep(iterations)
 
     def check_calculations(self, min_num, robot):
         #as long as the boundary flag is raised
@@ -109,14 +108,10 @@ class Simulation(object):
 
                 self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
 
-                min_num += 1
-
-                sleep(iterations/2)
-
     def button_pushed(self, robot, robot1):
-        #arbitrary definition of the two inputs
-        robot = Target_Robot
-        robot1 = Target_Robot
+        # #arbitrary definition of the two inputs
+        # robot = Target_Robot
+        # robot1 = Target_Robot
 
         #finding the distance vectors between each of the robots
         vector_i = robot._x - robot1._x

@@ -1,5 +1,5 @@
 from threading import Thread, Event
-from time import sleep
+import rospy
 
 class Sim_Timer(object):
     """description of class"""
@@ -37,11 +37,10 @@ class Sim_Timer(object):
             while not self._PAUSED.is_set():
 
                 #stopping for 1 second
-                sleep(1)
+                rospy.sleep(1)
 
                 #incrementing the timer by one and printing
                 self.counter += 1
-                print(self.get_current_timer())
 
     def get_current_timer(self):
         return self.counter

@@ -285,22 +285,21 @@ class Controller(object):
         msg.twist.linear.y = 0
         msg.twist.linear.z = 1.5
 
-        alt = self._takeoff_altitude
-
         # "Jump" aggresively
         while self.is_running() and self._mode == Control_Mode.TAKEOFF:
             # Slow down as we approach target
-            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, 0.5 * alt), 0.1):
+            if self._vehicle.get_position_z() > self._takeoff_altitude - 1.5:
                 # Decrease velocity
-                msg.twist.linear.z = 1.0
+                if msg.twist.linear.z > 0.2:
+                    msg.twist.linear.z *= 0.935
 
-            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, 0.75 * alt), 0.1):
-                # Decrease velocity
-                msg.twist.linear.z = 0.75
-
-            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, alt), 0.1):
-                # Decrease velocity
-                msg.twist.linear.z = 0.0
+            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), 0.1):
+                print 'holding for 3 seconds'
+                time = rospy.get_time()
+                while (rospy.get_time() - time < 3) and self.is_running():
+                    msg.twist.linear.z = 0
+                    self._vel_pub.publish(msg)
+                print 'done'
                 break
 
             # Update message header

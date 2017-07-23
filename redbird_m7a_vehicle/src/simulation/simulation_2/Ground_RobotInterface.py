@@ -5,7 +5,7 @@ from threading import Thread
 class Ground_Robot_Interface(object):
     """description of class"""
     global iterations
-    iterations = 1
+    iterations = 1 / 60
 
     def __init__(self, x, y, id, color):
         self._x = x
@@ -20,7 +20,7 @@ class Ground_Robot_Interface(object):
         self._omega = 0
 
         #generating random velocities
-        self._deltaX = ( randint(-33.0, 33.0) ) / float(100.0)
+        self._deltaX = ( randint(-33.0, 33.0) ) / (100.0)
 
         self._deltaY = sqrt( ( (pow(0.33, 2)) - ( pow(self._deltaX, 2) ) ) )
 
@@ -78,8 +78,7 @@ class Ground_Robot_Interface(object):
 
     def new_direction(self):
         #gets new direction when the timer flag is up
-        self._deltaX = randint(-33.0, 33.0) / float(100.0)
-
+        self._deltaX = randint(-33.0, 33.0) / 100.0
         self._deltaY = sqrt( pow(0.33, 2) - pow(self._deltaX, 2))
 
     #def check_collisions(self, ground_robots):
