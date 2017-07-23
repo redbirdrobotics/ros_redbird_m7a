@@ -3,12 +3,14 @@ import numpy as np
 
 class LandmarkLib():
 
-    def __init__(self, valArray):
+    def __init__(self, color, valArray):
+        self.color = color
         self.minThresh = valArray[0]
         self.maxThresh = valArray[1]
         self.cam = None
         self.lineVals = (1, 180, 100)
         self.endPoints = (0,0,0,0)
+        self.mendPoints = (0,0,0,0)
         self.found = False
         return
 
