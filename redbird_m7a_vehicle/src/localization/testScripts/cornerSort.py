@@ -18,6 +18,7 @@ img3 = cv2.imread("C:/Users/Hayden/Desktop/Boundary3.jpg")
 #cam0.create_angleAxis()
 
 #dst = cv2.cornerHarris(gray,5,3,0.1)
+
 def getCorners(img, slate):
 	print img.shape
 	print slate.shape, type(slate)
@@ -61,11 +62,24 @@ tabulaRasa = np.zeros((ypix,xpix,3),np.uint8)
 	
 
 #frame = getCorners(img)
+#Find data type of cor
 
+#ConrnerImg is binary image of corners
 cornerImg = getCorners(img1, tabulaRasa)
-points = np.nonzero(cornerImg)
-eliminate = eliminateFarCorners(points[0], points[1], 2, cornerImg)
-cv2.imshow('pic', eliminate)
+for corners in cornerImg:
+	for corner in corners:
+		if cornerImg.all(corners[0]-corner[0]) < 10 :
+			if abs(corners[1]-corner[1])<10:
+				count += 1
+	if count == 2:
+		print True
+	else:
+		print False
+	 
+
+#points = np.nonzero(cornerImg)
+#eliminate = eliminateFarCorners(points[0], points[1], 2, cornerImg)
+cv2.imshow('pic', cornerImg)
 if cv2.waitKey(0) & 0xff== 27:
 	cv2.destroyAllWindows()
 
