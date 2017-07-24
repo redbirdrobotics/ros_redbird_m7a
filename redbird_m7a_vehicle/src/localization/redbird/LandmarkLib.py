@@ -127,10 +127,8 @@ class Landmark(object):
     def remove(self, imgList, w):
         xA, yA, xB, yB = self.endPoints
         cam = self.cam
-        addressList = [index for index, img in enumerate(imgList) if type(img) == tuple and img[0] == cam]
-        for address in addressList:
-            imgList[address + 1] = cv2.line(imgList[address + 1], (xA, yA), (xB, yB), (0,0,255), w)
-        return imgList
+        imgList[self.cam] = cv2.line(imgList[self.cam], (xA, yA), (xB, yB), (0,0,0), w)
+        return
 
     def cvt2meters(self, quadDataList, camList):
 

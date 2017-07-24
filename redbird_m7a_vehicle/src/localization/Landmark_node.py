@@ -105,6 +105,7 @@ class Landmark_Localization(object):
                 # Populate landmark information
                 if self.greengoal.found == True:
                     greengoal_msg.color = self.greengoal.color
+                    greengoal_msg.cam = self.greengoal.cam
                     greengoal_msg.x_m = [self.greengoal.mendPoints[0], self.greengoal.mendPoints[2]]
                     greengoal_msg.y_m = [self.greengoal.mendPoints[1], self.greengoal.mendPoints[3]]
                     greengoal_msg.x_px = [self.greengoal.endPoints[0], self.greengoal.endPoints[2]]
@@ -112,6 +113,7 @@ class Landmark_Localization(object):
 
                 if self.redgoal.found == True:
                     redgoal_msg.color = self.redgoal.color
+                    redgoal_msg.cam = self. redgoal.cam
                     redgoal_msg.x_m = [self.redgoal.mendPoints[0], self.redgoal.mendPoints[2]]
                     redgoal_msg.y_m = [self.redgoal.mendPoints[1], self.redgoal.mendPoints[3]]
                     redgoal_msg.x_px = [self.redgoal.endPoints[0], self.redgoal.endPoints[2]]
