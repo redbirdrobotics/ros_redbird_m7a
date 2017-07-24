@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-class GreenRobot():
+class GreenRobot(object):
 
     def __init__(self, num):
         self.ident = num
@@ -89,9 +89,9 @@ class GreenRobot():
 
         for robot in foundList:
             xAxis = camList[robot.cam].xAxis
-            xAxisQ = [x + Qyaw for x in xAxis]
-            yAxis = camList[self.cam].yAxis
-            yAxisQ = [y + Qpitch for y in yAxis]
+            xAxisQ = [x + quadDataList[3] for x in xAxis]
+            yAxis = camList[robot.cam].yAxis
+            yAxisQ = [y + quadDataList[4] for y in yAxis]
             robot.cvt2meters(quadDataList[0], quadDataList[1], quadDataList[2], xAxisQ, yAxisQ)
 
 #_______________________________________________________#
@@ -284,7 +284,7 @@ class GreenRobot():
         if not dataList or not unfoundList:
             return
 
-        RedRobot.checkDist(foundList, dataList, 30)
+        GreenRobot.checkDist(foundList, dataList, 30)
 
         if not dataList:
             return

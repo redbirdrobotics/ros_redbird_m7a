@@ -127,9 +127,9 @@ class Landmark_Localization(object):
                 self._goal_pub.publish(goals_msg)
 
                 #Edit & Show Frame ONLY FOR TESTING!!!!
-                self.greengoal.drawLine(self._image, 30)
-                self.redgoal.drawLine(self._image, 30)
-                Camera.showFrame(self._image, 'GoalFrame')
+                # self.greengoal.drawLine(self._image, 30)
+                # self.redgoal.drawLine(self._image, 30)
+                # Camera.showFrame(self._image, 'GoalFrame')
 
                 # Match desired frequency
                 self._rate.sleep()

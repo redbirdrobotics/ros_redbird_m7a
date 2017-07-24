@@ -5,19 +5,19 @@ import numpy as np
 from redbird import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from redbird_m7a_msgs.msg import GreenRobotMap, GroundRobotPosition, Goals
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Header
 
-class Red_Localization(object):
-
-
+class Green_Localization(object):
     def __init__(self):
-
         # Create subscriber
         self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
         self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
-        self._goals_sub = rospy.Subscriber('/redbird/localization/goals'), String, self.goals_callback
+        self._goals_sub = rospy.Subscriber('/redbird/localization/goals', Goals, self.goals_callback)
 
         # Create publisher
-        self._greenrobot_pub = rospy.Publisher('/redbird/localization/greenrobots', greenrobotd, queue_size=10000)
+        self._greenrobot_pub = rospy.Publisher('/redbird/localization/robots/green', GreenRobotMap, queue_size=10000)
 
         # Create running rate
         self._rate = rospy.Rate(10) # 20 Hz
@@ -48,18 +48,18 @@ class Red_Localization(object):
         self.camList = [self.cam0]
 
         # GreenRobot Instances
-        self.hulk = RedRobot(0)
-        self.yoshi = RedRobot(1)
-        self.yoda = RedRobot(2)
-        self.arrow = RedRobot(3)
-        self.beastboy = RedRobot(4)
+        self.hulk = GreenRobot(0)
+        self.yoshi = GreenRobot(1)
+        self.yoda = GreenRobot(2)
+        self.arrow = GreenRobot(3)
+        self.beastboy = GreenRobot(4)
         self.robotList = [self.hulk, self.yoshi, self.yoda, self.arrow, self.beastboy]
 
         # Landmark Instances
         self.greengoal = Landmark(0, np.array([[79, 33, 66],[100, 111, 135]]))
 
         # Threshold values
-        self.greenVals = np.array([[165, 150, 150], [180, 240, 200]])
+        self.greenVals = np.array([[70, 81, 78], [94, 241, 154]])
 
         # Blob Detector
         self.GreenRobotParams = cv2.SimpleBlobDetector_Params()
@@ -79,7 +79,7 @@ class Red_Localization(object):
         except CvBridgeError as e:
             print e
 
-   def flightdata_callback(self, msg):
+    def local_position_callback(self, msg):
         self.quadX = msg.pose.position.x
         self.quadY = msg.pose.position.y
         self.quadH = msg.pose.position.z
@@ -93,23 +93,22 @@ class Red_Localization(object):
         return
 
     def goals_callback(self, msg):
-        self.greengoal.endPoints = (msg.x_px[0], msg.y_px[0], msg.x_px[1], msg.y_px[1])
-        self.greengoal.cam = msg.cam
-                greenrobot_msg.number = robot.num
-                greenrobot_msg.color = robot.color
-                greenrobot_msg.coords_m = robot.mcoords
-                greenrobot_msg.vector = robot.vector
+        for goal in msg.goals:
+            if goal.color == 0:
+                self.greengoal.endPoints = (goal.x_px[0], goal.y_px[0], goal.x_px[1], goal.y_px[1])
+                self.greengoal.cam = goal.cam
+
     def run(self):
         while not rospy.is_shutdown():
-            try:
+            # try:
                 if self._image is None:
-                    continue
                     print 'no frame'
+                    continue
 
                 print 'working'
 
                 # Get Quad Data
-                self.quadData= [self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
+                self.quadData = [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
 
                 GreenRobot.listcvt2meters(self.quadData, self.foundList, self.camList)
 
@@ -119,48 +118,57 @@ class Red_Localization(object):
                 Utilities.getMaskList(self.frameList, self.greenVals, self.maskList)
 
                 # Function to remove landmarks from node data
-                self.greengoal.remove(self.maskList, 30)
+                if self.greengoal.cam is not None:
+                    self.greengoal.remove(self.maskList, 30)
 
                 # Search ROI
-                greenRobot.ROIsearch(self.foundList, self.maskList, self.detector)
-                greenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
-                greenRobot.listFound(self.robotList)
+                GreenRobot.ROIsearch(self.foundList, self.maskList, self.detector)
+                GreenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                GreenRobot.listFound(self.robotList)
 
                 # Search Whole Frame
                 Utilities.blobSearch(self.maskList, self.detector, self.dataList, self.unfoundList)
-                greenRobot.listUpdate(self.foundList, self.unfoundList, self.dataList, self.camList)
-                greenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
-                greenRobot.listFound(self.robotList)
+                GreenRobot.listUpdate(self.foundList, self.unfoundList, self.dataList, self.camList)
+                GreenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
+                GreenRobot.listFound(self.robotList)
 
                 #Create greenrobot Message
-                greenrobot_msg = GroundRobotPosition(header=Header(stamp=rospy.get_rostime())
+                green_robot_msgs = []
 
                 # Populate Robot information
                 for i in range(len(self.robotList)):
-                    greenrobot_msg.GreenRobotPosition[i].id = self.robotList[i].num
-                    greenrobot_msg.GreenRobotPosition[i].x = self.robotList[i].coords[0]
-                    greenrobot_msg.GreenRobotPosition[i].y = self.robotList[i].coords[1]
-                    greenrobot_msg.GreenRobotPosition[i].vec_x = self.robotList[i].vector[0]
-                    greenrobot_msg.GreenRobotPosition[i].vec_y = self.robotList[i].vector[1]
-                    greenrobot_msg.GreenRobotPosition[i].color = 0
+                    green_robot_msgs.append(GroundRobotPosition(header=Header(stamp=rospy.get_rostime())))
+                    green_robot_msgs[i].id = self.robotList[i].ident
+                    green_robot_msgs[i].x = self.robotList[i].mcoords[0]
+                    green_robot_msgs[i].y = self.robotList[i].mcoords[1]
+                    green_robot_msgs[i].vec_x = self.robotList[i].vector[0]
+                    green_robot_msgs[i].vec_y = self.robotList[i].vector[1]
+                    green_robot_msgs[i].color = 0
+                    green_robot_msgs[i].confidence = 1.0
+                    green_robot_msgs[i].out_of_bounds = False
+
+                # Create green robot map
+                green_robot_map_msg = GreenRobotMap(header=Header(stamp=rospy.get_rostime()))   
+                green_robot_map_msg.robots = green_robot_msgs
 
                 # Publish to topic
-                self._greenrobot_pub.publish(greenrobot_msg)
+                self._greenrobot_pub.publish(green_robot_map_msg)
 
                 # Match desired frequency
                 self._rate.sleep()
 
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
+                self.greengoal.drawLine(frame, 30)
 
                 #Show Frame
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
                     break
                     
-            except Exception as e:
-                rospy.logwarn("Error: %s", str(e))
-                break
+            # except Exception as e:
+            #     rospy.logwarn("Error: %s", str(e))
+            #     break
 
 if __name__ == '__main__':
     try:
