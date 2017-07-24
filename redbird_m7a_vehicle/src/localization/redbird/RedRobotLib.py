@@ -89,9 +89,9 @@ class RedRobot():
 
         for robot in foundList:
             xAxis = camList[robot.cam].xAxis
-            xAxisQ = [x + Qyaw for x in xAxis]
-            yAxis = camList[self.cam].yAxis
-            yAxisQ = [y + Qpitch for y in yAxis]
+            xAxisQ = [x + quadDataList[3] for x in xAxis]
+            yAxis = camList[robot.cam].yAxis
+            yAxisQ = [y + quadDataList[4] for y in yAxis]
             robot.cvt2meters(quadDataList[0], quadDataList[1], quadDataList[2], xAxisQ, yAxisQ)
 
 #_______________________________________________________#

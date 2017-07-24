@@ -18,7 +18,7 @@ class Red_Localization(object):
         self._sub = rospy.Subscriber('/redbird/localization/goals', Goals, self.goals_callback)
 
         # Create publisher
-        self._greenrobot_pub = rospy.Publisher('/redbird/localization/robots/green', RedRobotMap, queue_size=10000)
+        self._redrobot_pub = rospy.Publisher('/redbird/localization/robots/red', RedRobotMap, queue_size=10000)
 
         # Create running rate
         self._rate = rospy.Rate(10) # 20 Hz
@@ -142,13 +142,13 @@ class Red_Localization(object):
                     red_robot_msgs[i].y = self.robotList[i].mcoords[1]
                     red_robot_msgs[i].vec_x = self.robotList[i].vector[0]
                     red_robot_msgs[i].vec_y = self.robotList[i].vector[1]
-                    red_robot_msgs[i].color = 0
+                    red_robot_msgs[i].color = 1
                     red_robot_msgs[i].confidence = 1.0
                     red_robot_msgs[i].out_of_bounds = False
 
                 # Create Red Robot Map
-                red_robot_map_msg = RedRobotMap(header=Header(stamp=rospy.get_rospy.get_rostime()))
-                red_robot_map_msg.robot = red_robot_msgs
+                red_robot_map_msg = RedRobotMap(header=Header(stamp=rospy.get_rostime()))
+                red_robot_map_msg.robots = red_robot_msgs
 
                 # Publish to Topic
                 self._redrobot_pub.publish(red_robot_map_msg)
@@ -158,7 +158,7 @@ class Red_Localization(object):
 
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
-                self.greengoal.drawLine(frame, 30)
+                self.redgoal.drawLine(frame, 30)
 
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
