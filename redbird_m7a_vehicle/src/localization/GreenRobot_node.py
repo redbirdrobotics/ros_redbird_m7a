@@ -14,13 +14,16 @@ class Red_Localization(object):
         # Create subscriber
         self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
         self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
-        #self._sub = rospy.Subscriber('/redbird/localization/landmark'), String, self.landmark_callback)
+        self._goals_sub = rospy.Subscriber('/redbird/localization/goals'), String, self.goals_callback
 
         # Create blank image
         self._image = None
 
         # Create blank position state
         self._position_info = None
+
+        # Create blank landmark message
+        self._goals_data = None
 
         # Create OpenCV bridge
         self._cv_bridge = CvBridge()
@@ -30,7 +33,7 @@ class Red_Localization(object):
         self.cam1 = Camera(1, (1280, 720), (130, 90), (180.0, 45.0))
         self.camList = [self.cam0]
 
-        # RedRobot Instances
+        # GreenRobot Instances
         self.hulk = RedRobot(0)
         self.yoshi = RedRobot(1)
         self.yoda = RedRobot(2)
@@ -38,15 +41,18 @@ class Red_Localization(object):
         self.beastboy = RedRobot(4)
         self.robotList = [self.hulk, self.yoshi, self.yoda, self.arrow, self.beastboy]
 
-        # THRESHOLD
+        # Landmark Instances
+        self.greengoal = Landmark(0, np.array([[79, 33, 66],[100, 111, 135]]))
+
+        # Threshold values
         self.greenVals = np.array([[165, 150, 150], [180, 240, 200]])
 
-        # BLOB DETECTOR
+        # Blob Detector
         self.GreenRobotParams = cv2.SimpleBlobDetector_Params()
         Utilities.getParams(self.GreenRobotParams, 0)
         self.detector = cv2.SimpleBlobDetector_create(self.GreenRobotParams)
 
-        # LISTS
+        # Empty Lists
         self.foundList = []
         self.unfoundList = []
         self.frameList = []
@@ -72,9 +78,8 @@ class Red_Localization(object):
         self.quadYaw = euler[2]
         return
 
-    #def landmark_callback(self, msg):
-        #try:
-            #Get Green Goal line endpoints
+    def goals_callback(self, msg):
+        self.endPoints = (self._goals_data.x_px[0], self._goals_data.y_px[0], self._goals_data.x_px[1], self._goals_data.y_px[1])
 
     def run(self):
         while not rospy.is_shutdown():
@@ -97,6 +102,9 @@ class Red_Localization(object):
 
                 # Get Landmark Node Data
 
+                # Function to remove landmarks from node data
+                #self.greengoal.remove(self.maskList, 30)
+
                 # Search ROI
                 greenRobot.ROIsearch(self.foundList, self.maskList, self.detector)
                 greenRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
@@ -111,7 +119,7 @@ class Red_Localization(object):
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
 
-                # Function to remove landmarks from node data
+                #Show Frame
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
                     break

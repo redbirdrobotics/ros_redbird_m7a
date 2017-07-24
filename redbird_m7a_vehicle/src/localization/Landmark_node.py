@@ -3,6 +3,7 @@ import rospy
 import cv2
 import numpy as np
 from redbird import *
+from std_msgs.msg import Header, String
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge, CvBridgeError
@@ -16,7 +17,10 @@ class Landmark_Localization(object):
         self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
 
         # Create publisher
-        self._goal_pub = rospy.Publisher('/redbird/localization/goals', Goals, queue_size=1)
+        self._goal_pub = rospy.Publisher('/redbird/localization/goals', Goals, queue_size=10000)
+
+        # Create running rate
+        self._rate = rospy.Rate(10) # 20 Hz
 
         # Initialize quad information
         self.quadX = 0
@@ -52,7 +56,7 @@ class Landmark_Localization(object):
     def image_callback(self, msg):
         try:
             self._image = self._cv_bridge.imgmsg_to_cv2(msg, "bgr8")
-        except CvbridgeError as e:
+        except CvBridgeError as e:
             print e
 
     def local_position_callback(self, msg):
@@ -69,13 +73,12 @@ class Landmark_Localization(object):
         return
 
     def run(self):
-        print 'starting'
         while not rospy.is_shutdown():
-            try:
+            # try:
                 if self._image is None:
                     continue
 
-                print 'working'
+                # print 'working'
 
                 # Get Frame List
                 frameList = [self._image]
@@ -96,26 +99,27 @@ class Landmark_Localization(object):
                 self.greengoal.cvt2meters(quadData, self.camList)
 
                 # Create two goals (type Goal.msg)
-                goal_msgs = [Goal(), Goal()]
+                greengoal_msg = Goal(header=Header(stamp=rospy.get_rostime()))
+                redgoal_msg = Goal(header=Header(stamp=rospy.get_rostime()))
 
                 # Populate landmark information
                 if self.greengoal.found == True:
-                    goal_msgs[0].color = self.greengoal.color
-                    goal_msgs[0].x_m = [self.greengoal.endPoints[0], self.greengoal.endPoints[2]]
-                    goal_msgs[0].y_m = [self.greengoal.endPoints[1], self.greengoal.endPoints[3]]
-                    goal_msgs[0].x_px = [self.greengoal.mendPoints[0], self.greengoal.mendPoints[2]]
-                    goal_msgs[0].y_px = [self.greengoal.mendPoints[1], self.greengoal.mendPoints[3]]
+                    greengoal_msg.color = self.greengoal.color
+                    greengoal_msg.x_m = [self.greengoal.mendPoints[0], self.greengoal.mendPoints[2]]
+                    greengoal_msg.y_m = [self.greengoal.mendPoints[1], self.greengoal.mendPoints[3]]
+                    greengoal_msg.x_px = [self.greengoal.endPoints[0], self.greengoal.endPoints[2]]
+                    greengoal_msg.y_px = [self.greengoal.endPoints[1], self.greengoal.endPoints[3]]
 
                 if self.redgoal.found == True:
-                    goal_msgs[1].color = self.redgoal.color
-                    goal_msgs[1].x_m = [self.redgoal.endPoints[0], self.redgoal.endPoints[2]]
-                    goal_msgs[1].y_m = [self.redgoal.endPoints[1], self.redgoal.endPoints[3]]
-                    goal_msgs[1].x_px = [self.redgoal.mendPoints[0], self.redgoal.mendPoints[2]]
-                    goal_msgs[1].y_px = [self.redgoal.mendPoints[1], self.redgoal.mendPoints[3]]
+                    redgoal_msg.color = self.redgoal.color
+                    redgoal_msg.x_m = [self.redgoal.mendPoints[0], self.redgoal.mendPoints[2]]
+                    redgoal_msg.y_m = [self.redgoal.mendPoints[1], self.redgoal.mendPoints[3]]
+                    redgoal_msg.x_px = [self.redgoal.endPoints[0], self.redgoal.endPoints[2]]
+                    redgoal_msg.y_px = [self.redgoal.endPoints[1], self.redgoal.endPoints[3]]
 
                 # Create goals message (type Goals.msg)
                 goals_msg = Goals()
-                goals_msg.goals = goal_msgs
+                goals_msg.goals = [greengoal_msg, redgoal_msg]
 
                 # Publish to topic
                 self._goal_pub.publish(goals_msg)
@@ -125,9 +129,12 @@ class Landmark_Localization(object):
                 self.redgoal.drawLine(self._image, 30)
                 Camera.showFrame(self._image, 'GoalFrame')
 
-            except Exception as e:
-                 rospy.logwarn("Error: %s", str(e))
-                 break
+                # Match desired frequency
+                self._rate.sleep()
+
+            # except Exception as e:
+            #      rospy.logwarn("Error: %s", str(e))
+            #      break
 
 
 if __name__ == '__main__':

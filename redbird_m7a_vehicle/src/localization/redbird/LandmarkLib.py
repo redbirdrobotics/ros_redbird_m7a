@@ -68,22 +68,52 @@ class Landmark(object):
         vRes = camList[self.cam].vRes
         slope = float(yB - yA)/(xB - xA)
         yInt = int(yA - slope*xA)
+        print "yint", yInt
+        print "slope", slope
 
-        if xA < 0:
-            xA = 0
-            yA = yInt
-
-        elif yA < 0:
+        if yInt < 0:
+            print 'o0'
             yA = 0
             xA = int(-yInt/slope)
 
-        if xB > hRes:
-            xB = hRes -1
-            yB = int(slope * xB + yInt)
+            yB = 0
+            xB = int(-yInt/slope) 
 
-        elif yB > vRes:
-            yB = vRes
-            xB = int((yB - yInt)/slope)
+        if yInt >= 0:
+
+            if xA < 0:
+                print 'o1'
+                xA = 0
+                yA = yInt
+                if yB > vRes:
+                    yB = vRes - 1
+                    xB = int((yB - yInt)/slope)
+
+            elif yA < 0:
+                print 'o2'
+                yA = 0
+                xA = int(-yInt/slope)
+
+            elif yA > vRes:
+                print 'o3'
+                yA = vRes - 1
+                xA = int((yB - yInt)/slope)
+
+            if xB > hRes:
+                print "o4"
+                xB = hRes -1
+                yB = int(slope * xB + yInt)
+                if yB > vRes:
+                    yB = vRes - 1
+                    xB = int((yB - yInt)/slope)
+
+            elif yB < 0:
+                yB = 0
+                xB = int(-yInt/slope)
+
+            elif yB > vRes:
+                yB = vRes -1
+                xB = int((yB - yInt)/slope)
 
         self.endPoints = (xA, yA, xB, yB)
         return
@@ -114,6 +144,10 @@ class Landmark(object):
         yAxis = camList[self.cam].yAxis
         yAxisQ = [y + Qpitch for y in yAxis]
         xA, yA, xB, yB = self.endPoints
+
+        print "endPoints: ", self.endPoints
+        print "len: xAxis", len(xAxis)
+        print "len: yAxis", len(yAxis)
 
         thetaA = xAxisQ[xA]
         phiA = yAxisQ[yA]
