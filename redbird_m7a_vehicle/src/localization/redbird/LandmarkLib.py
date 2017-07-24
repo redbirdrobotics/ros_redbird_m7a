@@ -126,8 +126,6 @@ class Landmark(object):
     
     def remove(self, imgList, w):
         xA, yA, xB, yB = self.endPoints
-        print self.endPoints
-        print self.endPoints
         cam = self.cam
         imgList[self.cam] = cv2.line(imgList[self.cam], (xA, yA), (xB, yB), (0,0,0), w)
         return

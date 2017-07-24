@@ -58,6 +58,7 @@ add_message_files(
   Goal.msg
   Goals.msg
   GreenRobotMap.msg
+  RedRobotMap.msg
 )
 
 ## Generate services in the 'srv' folder

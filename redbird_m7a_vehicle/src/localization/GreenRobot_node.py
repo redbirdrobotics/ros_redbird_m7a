@@ -45,7 +45,7 @@ class Green_Localization(object):
         # Camera Instances
         self.cam0 = Camera(0, (1280, 720), (130, 90), (0, 45.0))
         self.cam1 = Camera(1, (1280, 720), (130, 90), (180.0, 45.0))
-        self.camList = [self.cam0]
+        self.camList = [self.cam0, self.cam1]
 
         # GreenRobot Instances
         self.hulk = GreenRobot(0)

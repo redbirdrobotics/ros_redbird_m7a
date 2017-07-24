@@ -3,17 +3,33 @@ import rospy
 import cv2
 import numpy as np
 from redbird import *
-#from RedRobotLib import*
 from sensor_msgs.msg import Image
-#from redbird_m7a_msgs import FlightState.msg
 from cv_bridge import CvBridge, CvBridgeError
+from redbird_m7a_msgs.msg import RedRobotMap, GroundRobotPosition, Goals
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Header
+
 
 class Red_Localization(object):
     def __init__(self):
         # Create subscriber
         self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
         self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
-        #self._sub = rospy.Subscriber('/redbird/localization/landmark'), String, self.landmark_callback)
+        self._sub = rospy.Subscriber('/redbird/localization/goals', Goals, self.goals_callback)
+
+        # Create publisher
+        self._greenrobot_pub = rospy.Publisher('/redbird/localization/robots/green', RedRobotMap, queue_size=10000)
+
+        # Create running rate
+        self._rate = rospy.Rate(10) # 20 Hz
+
+        # Initialize Quad Information
+        self.quadX = 0
+        self.quadY = 0
+        self.quadH = 0
+        self.quadRoll = 0
+        self.quadPitch = 0
+        self.quadYaw = 0
 
         # Create blank image
         self._image = None
@@ -25,8 +41,9 @@ class Red_Localization(object):
         self._cv_bridge = CvBridge()
 
         # Camera Instances
-        self.cam0 = Camera(1, (1280, 720), (130, 90), (0, 53.7))
-        self.camList = [self.cam0]
+        self.cam0 = Camera(1, (1280, 720), (130, 90), (0, 45.0))
+        self.cam1 = Camera(1, (1280, 720), (130, 90), (180, 45.0))
+        self.camList = [self.cam0, self.cam1]
 
         # RedRobot Instances
         self.daredevil = RedRobot(0)
@@ -36,15 +53,18 @@ class Red_Localization(object):
         self.flash = RedRobot(4)
         self.robotList = [self.daredevil, self.deadpool, self.elmo, self.hellboy, self.flash]
 
-        # THRESHOLD
+        # Landmark Instances
+        self.redgoal = Landmark(1, np.array([[161, 145, 64], [180, 236, 232]]))
+
+        # Threshold Values
         self.redVals = np.array([[165, 150, 150], [180, 240, 200]])
 
-        # BLOB DETECTOR
+        # Blob Detector
         self.RedRobotParams = cv2.SimpleBlobDetector_Params()
         Utilities.getParams(self.RedRobotParams, 0)
         self.detector = cv2.SimpleBlobDetector_create(self.RedRobotParams)
 
-        # LISTS
+        # Empty Lists
         self.foundList = []
         self.unfoundList = []
         self.frameList = []
@@ -57,12 +77,12 @@ class Red_Localization(object):
         except CvBridgeError as e:
             print e
 
-   def flightdata_callback(self, msg):
-        self.quadX = self._local_position_topic.pose.position.x
-        self.quadY = self._local_position_topic.pose.position.y
-        self.quadH = self._local_position_topic.pose.position.z
+    def local_position_callback(self, msg):
+        self.quadX = msg.pose.position.x
+        self.quadY = msg.pose.position.y
+        self.quadH = msg.pose.position.z
 
-        quaternion = (self._local_position_topic.pose.orientation.x, self._local_position_topic.pose.orientation.y, self._local_position_topic.pose.orientation.z)
+        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z)
         euler = tf.transformation.euler_from_quaternion(quaternion)
 
         self.quadRoll = euler[0]
@@ -70,9 +90,11 @@ class Red_Localization(object):
         self.quadYaw = euler[2]
         return
 
-    #def landmark_callback(self, msg):
-        #try:
-            #Get Red Goal line endpoints
+    def goals_callback(self, msg):
+        for goal in msg.goals:
+            if goal.color == 0:
+                self.redgoal.endPoints = (goal.x_px[0], goal.y_px[0], goal.x_px[1], goal.y_px[1])
+                self.redgoal.cam = goal.cam
 
     def run(self):
         while not rospy.is_shutdown():
@@ -84,16 +106,19 @@ class Red_Localization(object):
                 print 'working'
 
                 # Get Quad Data
-                self.quadData= [self.quadX, self,quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
+                self.quadData= [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
 
-                RedRobot.listcvt2meters(0, 0, 1.524, self.foundList, self.camList)
+                RedRobot.listcvt2meters(self.quadData, self.foundList, self.camList)
 
                 # Get image
                 self.frameList = [self._image]
 
+                # Create Mask
                 Utilities.getMaskList(self.frameList, self.redVals, self.maskList)
 
-                # Get Landmark Node Data
+                # Remove Landmarks From Mask
+                if self.redgoal.cam is not None:
+                    self.redgoal.remove(self.maskList, 30)
 
                 # Search ROI
                 RedRobot.ROIsearch(self.foundList, self.maskList, self.detector)
@@ -106,10 +131,35 @@ class Red_Localization(object):
                 RedRobot.sortFound(self.robotList, self.foundList, self.unfoundList)
                 RedRobot.listFound(self.robotList)
 
+                # Create Redrobot Message
+                red_robot_msgs = []
+
+                # Populate Robot Information
+                for i in range(len(self.robotList)):
+                    red_robot_msgs.append(GroundRobotPosition(header=Header(stamp=rospy.get_rostime())))
+                    red_robot_msgs[i].id = self.robotList[i].ident
+                    red_robot_msgs[i].x = self.robotList[i].mcoords[0]
+                    red_robot_msgs[i].y = self.robotList[i].mcoords[1]
+                    red_robot_msgs[i].vec_x = self.robotList[i].vector[0]
+                    red_robot_msgs[i].vec_y = self.robotList[i].vector[1]
+                    red_robot_msgs[i].color = 0
+                    red_robot_msgs[i].confidence = 1.0
+                    red_robot_msgs[i].out_of_bounds = False
+
+                # Create Red Robot Map
+                red_robot_map_msg = RedRobotMap(header=Header(stamp=rospy.get_rospy.get_rostime()))
+                red_robot_map_msg.robot = red_robot_msgs
+
+                # Publish to Topic
+                self._redrobot_pub.publish(red_robot_map_msg)
+
+                # Match Desired frequency
+                self._rate.sleep()
+
                 # Testing
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
+                self.greengoal.drawLine(frame, 30)
 
-                # Function to remove landmarks from node data
                 esc = Camera.showFrame(frame, 'frame')
                 if esc == True:
                     break
