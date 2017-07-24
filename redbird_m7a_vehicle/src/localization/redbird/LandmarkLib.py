@@ -68,53 +68,45 @@ class Landmark(object):
         vRes = camList[self.cam].vRes
         slope = float(yB - yA)/(xB - xA)
         yInt = int(yA - slope*xA)
+        screenSlope = hRes/vRes
         print "yint", yInt
         print "slope", slope
 
         if yInt < 0:
-            print 'o0'
+            
             yA = 0
             xA = int(-yInt/slope)
 
-            yB = 0
-            xB = int(-yInt/slope) 
+            if (slope*hres) + yInt >= vRes:
+                xB = hRes
+                yB = (slope*hRes) + yInt
 
-        if yInt >= 0:
+            else:
+                xB = (vRes - yInt)/slope
+                yB = vRes
 
-            if xA < 0:
-                print 'o1'
-                xA = 0
-                yA = yInt
-                if yB > vRes:
-                    yB = vRes - 1
-                    xB = int((yB - yInt)/slope)
 
-            elif yA < 0:
-                print 'o2'
-                yA = 0
-                xA = int(-yInt/slope)
+        else:
+            xA = 0
+            yA = yInt
+            if slope >= 0:
+                if (hRes*slope) + yInt > 0:
+                    xB = hRes
+                    yB = (slope*hRes) + yInt
+                else:
+                    xB = (vRes - yInt)/slope
+                    yB = vRes
 
-            elif yA > vRes:
-                print 'o3'
-                yA = vRes - 1
-                xA = int((yB - yInt)/slope)
+            else:
+                if((slope*hRes) + yInt < vRes):
+                    xB = hres
+                    yB = (slope*hRes) + yInt
+                else:
+                    xB = (vRes - yInt)/slope
+                    yB = vRes
 
-            if xB > hRes:
-                print "o4"
-                xB = hRes -1
-                yB = int(slope * xB + yInt)
-                if yB > vRes:
-                    yB = vRes - 1
-                    xB = int((yB - yInt)/slope)
 
-            elif yB < 0:
-                yB = 0
-                xB = int(-yInt/slope)
-
-            elif yB > vRes:
-                yB = vRes -1
-                xB = int((yB - yInt)/slope)
-
+            
         self.endPoints = (xA, yA, xB, yB)
         return
 
