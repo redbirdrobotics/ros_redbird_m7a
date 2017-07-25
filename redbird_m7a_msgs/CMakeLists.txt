@@ -53,9 +53,12 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   GroundRobotPosition.msg
-  Map.msg
   FlightInformation.msg
   FlightState.msg
+  Goal.msg
+  Goals.msg
+  GreenRobotMap.msg
+  RedRobotMap.msg
 )
 
 ## Generate services in the 'srv' folder

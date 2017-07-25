@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
 
-class RedRobot():
+class GreenRobot(object):
 
     def __init__(self, num):
         self.ident = num
-        self.color = 0
+        self.color = 1
         self.found = False
         self.cam = None
         self.camProps = (0,0)
@@ -284,7 +284,7 @@ class RedRobot():
         if not dataList or not unfoundList:
             return
 
-        RedRobot.checkDist(foundList, dataList, 30)
+        GreenRobot.checkDist(foundList, dataList, 30)
 
         if not dataList:
             return
