@@ -5,10 +5,7 @@
 import rospy
 import time
 import flightsys
-from flightsys import Controller, Control_Mode
-from utils import Vehicle, Flight_Controller, Flight_Mode
-from redbird_m7a_msgs.msg import Map, GroundRobotPosition
-
+from redbird_m7a_msgs.msg import *
 
 class Competition(flightsys.Flight, object):
     NAME = 'competition_flight'
@@ -19,44 +16,50 @@ class Competition(flightsys.Flight, object):
         super(Competition, self).__init__(name=self.NAME, log_tag=self.LOG_TAG)
 
         # Initialize variables
-        self._loc_map = Map()
-        self._sim_map = Map()
+        self._redRobotArray_loc = RedRobotMap()
+        self._greenRobotArray_loc = GreenRobotMap()
+        self._redRobotArray_sim = RedRobotMap()
+        self._greenRobotArray_sim = GreenRobotMap()
+        self._goal = Goal()
         self._firstTime = True
         self._numGroundRobots = 10
         self._priorityRobot = None
         self._attempts = 0
         self._successful = False
-        self._centerX = 0
-        self._centerY = 0
-        self._landX = 0
-        self._landY = 0
+        self._homeX = 0.0
+        self._homeY = 0.0
         self._minDroneToRobotDistance = 0.5
         self._lastLandSuccesful = False
         self._startTime = time.time()
 
-        # Initialize vehicle for tracking
-        self._vehicle = Vehicle()
-
-        # Initialize flight controller
-        #??? self._flight_controller = Flight_Controller()
-
         # Create subscribers
-        self._loc_sub = rospy.Subscriber("localization", Map, self.update_loc_map)
-        self._sim_sub = rospy.Subscriber("simulation", Map, self.update_sim_map)
+        self._redRobotSub_loc = rospy.Subscriber("loc", RedRobotMap, self.update_redRobot_loc)
+        self._greenRobotSub_loc = rospy.Subscriber("loc", GreenRobotMap, self.update_greenRobot_loc)
+        self._redRobotSub_sim = rospy.Subscriber("sim", RedRobotMap, self.update_redRobot_sim)
+        self._greenRobotSub_sim = rospy.Subscriber("sim", GreenRobotMap, self.update_greenRobot_sim)
 
-    def getFlightTag(self):
-        return "[flight_node] "
+    def update_redRobot_loc(self, msg):
+        self._redRobotArray_loc = msg
 
-    def update_loc_map(self, data):
-        self._loc_map = data
+    def update_greenRobot_loc(self, msg):
+        self._greenRobotArray_loc = msg
 
-    def update_sim_map(self, data):
-        self._sim_map = data
+    def update_redRobot_sim(self, msg):
+        self._redRobotArray_sim = msg
 
-    def getPriorityRobotByConfidence(self):
+    def update_greenRobot_sim(self, msg):
+        self._greenRobotArray_sim = msg
+
+    def getRobotArrayLoc(self):
+        return self._redRobotArray_loc + self._greenRobotArray_loc
+
+    def getRobotArraySim(self):
+        return self._redRobotArray_sim + self._greenRobotArray_sim
+
+    def getPriorityRobotByLocConfidence(self):
         tempConfidence = -1.0
         tempPriority = None
-        for robot in self._sim_map.target_robots:
+        for robot in self.getRobotArrayLoc():
             if (robot.confidence > tempConfidence and robot.out_of_bounds == False):
                 tempPriority = robot
                 tempConfidence = robot.confidence
@@ -64,21 +67,25 @@ class Competition(flightsys.Flight, object):
 
     def getNumRobotsInBounds(self):
         count = 0
-        for robot in self._sim_map.target_robots:
+        for robot in self.getRobotArrayLoc():
             if (robot.out_of_bounds == False):
                 count+=1
         return count
 
-
     def getDistanceToGroundRobot(self, robot):
-        x = robot.x - self._vehicle.x
-        y = robot.y - self._vehicle.y
+        x = robot.x - self.vehicle.x
+        y = robot.y - self.vehicle.y
         z = x**2 + y**2
         z = z**(1/2.0)
         return z
 
     def priorityRobotOrientedCorrectly(self):
-        print("placeholder")
+        vec_x = self._priorityRobot.vec_x
+        vec_y = self._priorityRobot.vec_y
+        slope = vec_y / vec_x
+        x_m = self._goal.x_m
+        y_m = self._goal.y_m
+
 
     def getDroneNearPriorityRobot(self, x):
         while (self.distanceToGroundRobot(self._priorityRobot) >= x):
@@ -92,8 +99,6 @@ class Competition(flightsys.Flight, object):
     def flyStraightUp(self):
         self.fly_to_point((self.vehicle.get_position_x(), self.vehicle.get_position_y(), 2.5))
 
-    #Make a function that constantly updates the ground robot array because robots leave bounds
-
     def start(self):
         try:
             if not rospy.is_shutdown():
@@ -102,8 +107,8 @@ class Competition(flightsys.Flight, object):
                 if (self._firstTime == True):
 
                     #Set relative center
-                    self._centerX = self.vehicle.get_position_x()
-                    self._centerY = self.vehicle.get_position_y()
+                    self._homeX = self.vehicle.get_position_x()
+                    self._homeY = self.vehicle.get_position_y()
 
                     # Wait a moment
                     self.sleep(2)
@@ -111,18 +116,18 @@ class Competition(flightsys.Flight, object):
                     # Takeoff
                     self.takeoff(2.5)
 
-                    # Fly to point [center]
-                    self.fly_to_point((self._centerX, self._centerY, 2.5))
+                    # Fly to point [home]
+                    self.fly_to_point((self._homeX, self._homeY, 2.5))
 
                     #Finish startup
-                    self.loginfo(self.getFlightTag(self) + "Drone has reached the center.")
+                    self.loginfo("Drone has reached the center.")
                     self._firstTime = False
 
                 #Complete Loop
                 while (self.getNumRobotsInBounds() > 0):
 
                     #Allocate the next priority ground robot, currently finding priority by simulation confidence
-                    self._priorityRobot = self.getPriorityRobotByConfidence()
+                    self._priorityRobot = self.getPriorityRobotByLocConfidence()
 
                     #Fly drone near robot for the first time if still in bounds
                     if (self._priorityRobot.out_of_bounds == False):
@@ -149,7 +154,7 @@ class Competition(flightsys.Flight, object):
 
                                 #Reset attempts and fetch a new priority robot
                                 self._attempts = 0
-                                self._priorityRobot = self.getPriorityRobotByConfidence()
+                                self._priorityRobot = self.getPriorityRobotByLocConfidence()
 
                         #Fly drone near robot again
                         self.getDroneNearPriorityRobot(self._minDroneToRobotDistance)
@@ -159,16 +164,16 @@ class Competition(flightsys.Flight, object):
                     self._attempts = 0
 
                 #Done!
-                self.loginfo(self.getFlightTag() + "There are no more ground robots left.")
+                self.loginfo("There are no more ground robots left.")
 
-                # Fly to point [landing location]
-                self.fly_to_point((self._landX, self._landY, 2.5))
+                # Fly to point [Home] location]
+                self.fly_to_point((self._homeX, self._homeY, 2.5))
 
                 # Land
                 self.land()
 
                 #Complete
-                self.loginfo(self.getFlightTag() + "Successfully Landed.")
+                self.loginfo("Successfully Landed.")
                 return
 
         except KeyboardInterrupt:
