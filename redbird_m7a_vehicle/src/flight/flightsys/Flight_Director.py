@@ -5,6 +5,7 @@
 import rospy
 import threading
 import flightsys
+import copy
 from Queue import Queue
 from std_msgs.msg import Empty, Header
 from redbird_m7a_msgs.msg import FlightState, FlightInformation
@@ -20,14 +21,14 @@ class Flight_Director(object):
 
         # Store parameters
         self.log_tag = "[FD] "
-        self._queue_size = 50
+        self._queue_size = 1
 
         # Flight information
         self._current_flight = None
         self._previous_flight = None
 
         # Create rospy rate
-        self._rate = rospy.Rate(1)
+        self._rate = rospy.Rate(10)
 
         # Log startup
         rospy.loginfo(self.log_tag + "Starting flight director...")
@@ -71,12 +72,6 @@ class Flight_Director(object):
                 current_flight_info = FlightInformation()
                 previous_flight_info = FlightInformation()
 
-                # Add data
-                if self._current_flight is not None and not self._current_flight.shutdown_flag.is_set():
-                    msg.is_flying = True
-                else:
-                    msg.is_flying = False
-
                 # Current flight information
                 if self._current_flight is not None:
                     current_flight_info.name = self._current_flight.name
@@ -96,6 +91,12 @@ class Flight_Director(object):
 
                     # Add to message
                     msg.previous_flight = previous_flight_info
+
+                # Update is_flying tracker
+                if self._current_flight is not None and not self._current_flight.shutdown_flag.is_set() and self._current_flight.start_time > 0:
+                    msg.is_flying = True
+                else:
+                    msg.is_flying = False
 
                 # Publish
                 if not rospy.is_shutdown():
@@ -166,7 +167,7 @@ class Flight_Director(object):
         for _name, _flight in self._available_flights:
             if _name == name:
                 # Store to previous flight
-                self._previous_flight = self._current_flight
+                self._previous_flight = copy.copy(self._current_flight)
 
                 # Store current flight
                 self._current_flight = _flight

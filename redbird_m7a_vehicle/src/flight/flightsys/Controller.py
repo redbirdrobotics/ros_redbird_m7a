@@ -239,11 +239,11 @@ class Controller(object):
         msg = TwistStamped()
         msg.twist.linear.x = 0
         msg.twist.linear.y = 0
-        msg.twist.linear.z = -0.25
+        msg.twist.linear.z = -0.4
 
         while self.is_running() and self._mode == Control_Mode.LAND:
             # Break if the magnitude is below the threshold for the desired amount of time
-            if abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + math.pow(self._vehicle.get_velocity_y(), 2) + math.pow(self._vehicle.get_velocity_z(), 2))) < 0.2:
+            if abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + math.pow(self._vehicle.get_velocity_y(), 2) + math.pow(self._vehicle.get_velocity_z(), 2))) < 0.1:
                 # Check if the number of required successful loops have passed
 
                 # rospy.loginfo("X: " + str(self._vehicle.get_velocity_x()))
@@ -251,7 +251,7 @@ class Controller(object):
                 # rospy.loginfo("Z: " + str(self._vehicle.get_velocity_z()))
                 # rospy.loginfo("Total: " + str(abs(math.sqrt(math.pow(self._vehicle.get_velocity_x(), 2) + math.pow(self._vehicle.get_velocity_y(), 2) + math.pow(self._vehicle.get_velocity_z(), 2)))))
 
-                if loops > 5:
+                if loops > 10:
                     # Disarm
                     self._vehicle.disarm()
                     break
@@ -283,7 +283,7 @@ class Controller(object):
         msg = TwistStamped()
         msg.twist.linear.x = 0
         msg.twist.linear.y = 0
-        msg.twist.linear.z = 1.5
+        msg.twist.linear.z = 2
 
         # "Jump" aggresively
         while self.is_running() and self._mode == Control_Mode.TAKEOFF:
@@ -293,14 +293,13 @@ class Controller(object):
                 if msg.twist.linear.z > 0.2:
                     msg.twist.linear.z *= 0.935
 
-            if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), 0.1):
-                print 'holding for 3 seconds'
-                time = rospy.get_time()
-                while (rospy.get_time() - time < 3) and self.is_running():
-                    msg.twist.linear.z = 0
-                    self._vel_pub.publish(msg)
-                print 'done'
-                break
+            # if utils.is_near((0, 0, self._vehicle.get_position_z()), (0, 0, self._takeoff_altitude), 0.1):
+            #     rospy.logdebug(self._log_tag + "Holding with velocity...")
+            #     time = rospy.get_time()
+            #     while (rospy.get_time() - time < 3) and self.is_running():
+            #         msg.twist.linear.z = 0
+            #         self._vel_pub.publish(msg)
+            #     break
 
             # Update message header
             msg.header = Header(stamp=rospy.get_rostime())

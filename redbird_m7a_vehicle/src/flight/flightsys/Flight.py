@@ -62,15 +62,16 @@ class Flight(object):
             while not self.is_running():
                 pass
 
-            rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight...")
+            # Set start time
+            self.start_time = rospy.get_time()
 
-            self.sleep(1)
+            rospy.loginfo(self.log_tag + "OFFBOARD entered. Starting flight...")
 
             # Arm the vehicle
             self.vehicle.arm()
 
-            # Set start time
-            self.start_time = rospy.get_time()
+            rospy.loginfo(self.log_tag + "Waiting for full FLOW initialization...")
+            self.sleep(10)
 
             # Start flight
             rospy.loginfo(self.log_tag + "Starting flight!")
@@ -163,20 +164,33 @@ class Flight(object):
         # Wait for velocity target to complete
         self.controller.wait_for_mode_change(flightsys.Control_Mode.VELOCITY)
 
-    def takeoff(self, altitude=0.0):
+    def takeoff(self, altitude=2.0):
         # Disallow if poison pill has been set or ROS is shutdown
         if self.shutdown_flag.is_set() or rospy.is_shutdown():
             raise Exception("Flight killed")
 
         # Set takeoff altitude
-        if altitude > 0.0:
-            self.controller.set_takeoff_altitude(altitude)
+        self.controller.set_takeoff_altitude(altitude)
 
         # Switch mode to takeoff
         self.controller.set_mode(flightsys.Control_Mode.TAKEOFF)
 
         # Wait for takeoff to complete
         self.controller.wait_for_mode_change(flightsys.Control_Mode.TAKEOFF)
+
+    def takeoff_opt(self, altitude=2.0):
+        # Disallow if poison pill has been set or ROS is shutdown
+        if self.shutdown_flag.is_set() or rospy.is_shutdown():
+            raise Exception("Flight killed")
+
+        # Set target position
+        self.controller.set_position((self.vehicle.get_position_x(), self.vehicle.get_position_y(), altitude), 0.25)
+
+        # Switch mode to position/takeoff
+        self.controller.set_mode(flightsys.Control_Mode.POSITION)
+
+        # Wait for takeoff to complete
+        self.controller.wait_for_mode_change(flightsys.Control_Mode.POSITION)
 
     def land(self):
         # Disallow if poison pill has been set or ROS is shutdown

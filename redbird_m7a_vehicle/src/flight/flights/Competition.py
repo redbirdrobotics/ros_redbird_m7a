@@ -82,8 +82,8 @@ class Competition(flightsys.Flight, object):
 
     def getDroneNearPriorityRobot(self, x):
         while (self.distanceToGroundRobot(self._priorityRobot) >= x):
-			# Fly to point [priority robot location]
-			self.fly_to_point((self._priorityRobot.x, self._priorityRobot.y, 2.5))
+            # Fly to point [priority robot location]
+            self.fly_to_point((self._priorityRobot.x, self._priorityRobot.y, 2.5))
 
     def landOnGroundRobot(self, x, y):
         print("need a complex landing function here")
@@ -109,10 +109,10 @@ class Competition(flightsys.Flight, object):
                     self.sleep(2)
 
                     # Takeoff
-					self.takeoff(2.5)
+                    self.takeoff(2.5)
 
-					# Fly to point [center]
-					self.fly_to_point((self._centerX, self._centerY, 2.5))
+                    # Fly to point [center]
+                    self.fly_to_point((self._centerX, self._centerY, 2.5))
 
                     #Finish startup
                     self.loginfo(self.getFlightTag(self) + "Drone has reached the center.")
@@ -161,11 +161,11 @@ class Competition(flightsys.Flight, object):
                 #Done!
                 self.loginfo(self.getFlightTag() + "There are no more ground robots left.")
 
-				# Fly to point [landing location]
-				self.fly_to_point((self._landX, self._landY, 2.5))
+                # Fly to point [landing location]
+                self.fly_to_point((self._landX, self._landY, 2.5))
 
                 # Land
-				self.land()
+                self.land()
 
                 #Complete
                 self.loginfo(self.getFlightTag() + "Successfully Landed.")

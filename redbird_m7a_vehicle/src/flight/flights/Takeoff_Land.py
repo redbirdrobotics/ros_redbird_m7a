@@ -21,10 +21,18 @@ class Takeoff_Land(flightsys.Flight, object):
     def flight(self):
         # Takeoff
         self.loginfo("Taking off!")
-        self.takeoff(2.0)
+        self.takeoff_opt(1.5)
 
         # Hold
         self.loginfo("Altitude goal met! Holding for 5 seconds...")
+        self.sleep(5.0)
+
+        # Move higher
+        self.loginfo("Going higher!")
+        self.fly_to_point((self.vehicle.get_position_x(), self.vehicle.get_position_y(), 3.0))
+
+        # Wait
+        self.loginfo("Holding")
         self.sleep(5.0)
 
         # Land
