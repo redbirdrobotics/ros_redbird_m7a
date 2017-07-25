@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import rospy
 import time
-from redbird_m7a_msgs.msg import Map, GroundRobotPosition
-from simulation_2 import *
+from redbird_m7a_msgs.msg import *
+from simulation_no_loc import *
 
 class Simulation_Node:
     def __init__(self):
