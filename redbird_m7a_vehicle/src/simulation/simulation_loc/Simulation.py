@@ -12,7 +12,7 @@ class Simulation(object):
     def __init__(self):
         self._timer = Sim_Timer()
 
-        #creating the main array of both the ground and obstacle robots with arbitrary values
+        #creating the main array of both the ground and obstacle robots with arbitrary values 
         self.Rtarget_robots = []
         self.Gtarget_robots = []
         self.Wobstacle_robots = []
@@ -20,20 +20,20 @@ class Simulation(object):
 
         #Filling the target robot array with arbitrary values
         for robot in range(1, 5):
-            self.Rtarget_robots.append(Target_Robot(0, 0, robot, 0, self._timer))
+            self.Rtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 0, self._timer))
 
         for robot in range(1, 5):
-            self.Gtarget_robots.append(Target_Robot(0, 0, robot, 1, self._timer))
+            self.Gtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer))
 
         self.target_robots.extend(self.Rtarget_robots)
         self.target_robots.extend(self.Gtarget_robots)
 
-        #Filling the obstacle robot array
-        for robot in range(1, 5):
-            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, robot, 2, self._timer))
+        #Filling the obstacle robot array 
+        for robot in range(1, 4):
+            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
 
     def run(self):
-        #Running the timer (controls all threads)
+        #Running the timer (controls all threads) 
         self._timer.run()
 
         #Runs all threads in the target robot array
@@ -48,11 +48,11 @@ class Simulation(object):
 
         self.threading()
 
-    def get_G_Target_robots(self):
-        return self.Gtarget_robots
-
     def get_R_Target_robots(self):
         return self.Rtarget_robots
+
+    def get_G_Target_robots(self):
+        return self.Gtarget_robots
 
     def get_Obstacle_Robots(self):
         return self.Wobstacle_robots
@@ -72,15 +72,17 @@ class Simulation(object):
                     #as long as the two id are not equal
                     if (self.target_robots[min_num]._color == self.target_robots[robot]._color):
 
-                        if not (self.target_robots[min_num]._id == self.target_robots[robot]._id):
+                        if not (self.target_robots[min_num]._id == self.target_robots[robots]._id):
                             self.check_calculations(min_num, robot)
 
                     else:
                         self.check_calculations(min_num, robot)
 
-                min_num +=1
-                rospy.sleep(iterations)
+                
+                min_num += 1
 
+                rospy.sleep(iterations)
+        
     def check_calculations(self, min_num, robot):
         #as long as the boundary flag is raised
         if(self.target_robots[min_num]._boundary):
@@ -109,9 +111,9 @@ class Simulation(object):
                 self.button_pushed(self.target_robots[min_num], self.target_robots[robot])
 
     def button_pushed(self, robot, robot1):
-        # #arbitrary definition of the two inputs
-        # robot = Target_Robot
-        # robot1 = Target_Robot
+        #arbitrary definition of the two inputs
+        robot = Target_Robot
+        robot1 = Target_Robot
 
         #finding the distance vectors between each of the robots
         vector_i = robot._x - robot1._x

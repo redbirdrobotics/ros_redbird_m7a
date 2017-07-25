@@ -44,8 +44,8 @@ class Target_Robot(Ground_Robot_Interface):
                         self.collision = False
 
                     else:
-
                         self.update_posX() 
+
                         self.update_posY()
 
                     self.deltaTime = self._timer.get_current_timer() - self.start_timer
@@ -181,3 +181,11 @@ class Target_Robot(Ground_Robot_Interface):
 
     def get_radius(self):
         return self._radius
+
+    def get_future_coor(self, time):
+        deltaX = self._deltaX * time
+        deltaY = self._deltaY * time
+
+        current_pos = ((self._x + deltaX), (self._y + deltaY))
+
+        return current_pos

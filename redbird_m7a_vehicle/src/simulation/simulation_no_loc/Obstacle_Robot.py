@@ -16,7 +16,7 @@ class Obstacle_Robot(Ground_Robot_Interface):
         self.radius = 1.5 #m
 
         #finding the delta angle of travel
-        self._omega = ( ( (sqrt( ( pow(self._deltaX, 2) + pow(self._deltaY, 2) ) ) ) / self.radius) * iterations)
+        self._omega = ( ( (0.33) / self.radius) * iterations)
 
     def update_posX(self):
         #finding the change in x of travel
