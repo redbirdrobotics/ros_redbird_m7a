@@ -100,10 +100,14 @@ class Red_Localization(object):
         while not rospy.is_shutdown():
             try:
                 if self._image is None:
+                    rospy.logdebug('[rr] no frame')
                     continue
+<<<<<<< HEAD
                     print 'no frame'
 
                 #print 'working'
+=======
+>>>>>>> 3fbb72c16a899f0ce2a7323a3c2840fec6af883e
 
                 # Get Quad Data
                 self.quadData= [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]

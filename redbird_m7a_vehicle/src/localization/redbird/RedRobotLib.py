@@ -65,7 +65,7 @@ class RedRobot():
     @staticmethod
     def listFound(objList):
         for robot in objList:
-            print 'Robot', robot.ident, robot.found
+            #print 'Robot', robot.ident, robot.found
         return 
 
 #_______________________________________________________#

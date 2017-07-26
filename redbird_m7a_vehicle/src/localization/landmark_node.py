@@ -76,13 +76,11 @@ class Landmark_Localization(object):
         while not rospy.is_shutdown():
             # try:
                 if self._image is None:
+                    rospy.logdebug('[lm] no frame')
                     continue
-
-                # print 'working'
 
                 # Get Frame List
                 frameList = [self._image]
-
                 
                 # Get Quad Data
                 quadData = [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
