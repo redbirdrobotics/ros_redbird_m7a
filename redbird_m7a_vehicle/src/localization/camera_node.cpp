@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     image_transport::Publisher pub = it.advertise("/redbird/localization/camera/image", 10000);
 
     // Create capture pipeline
-    const char* capture_pipe = "v4l2src device=/dev/video2 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)I420 ! videoconvert ! appsink";
+    const char* capture_pipe = "v4l2src device=/dev/video0 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)I420 ! videoconvert ! appsink";
     cv::VideoCapture cap(capture_pipe);
 
     // Create rate

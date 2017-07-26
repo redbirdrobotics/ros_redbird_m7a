@@ -7,7 +7,7 @@ import time
 import flightsys
 import random
 from flightsys import Controller, Control_Mode
-from redbird_m7a_msgs.msg import Map, GroundRobotPosition
+from redbird_m7a_msgs.msg import *
 
 __author__ = "Jonah Largen, Alex Bennett"
 

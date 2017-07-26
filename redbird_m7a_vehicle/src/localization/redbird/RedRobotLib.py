@@ -66,7 +66,8 @@ class RedRobot():
     def listFound(objList):
         for robot in objList:
             #print 'Robot', robot.ident, robot.found
-        return 
+            pass
+        return
 
 #_______________________________________________________#
     #COORDINATE CONVERSION
