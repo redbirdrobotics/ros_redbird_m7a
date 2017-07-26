@@ -108,7 +108,7 @@ class Target_Robot(Ground_Robot_Interface):
     def run(self, obstacle_robots):
         self._distanceThread = Thread(target = self.update_movement)
 
-        self._or_collision_thread = Thread(target = self.oR_check_collisions, args = (obstacle_robots,))
+        # self._or_collision_thread = Thread(target = self.oR_check_collisions, args = (obstacle_robots,))
 
         start_time = self._timer.get_current_timer()
         current_time = 0
@@ -116,19 +116,17 @@ class Target_Robot(Ground_Robot_Interface):
         try:
             self._distanceThread.start()
 
-            print("Update movement thread started")
-
         except:
 
             print("Thread failed!")
 
-        try:
-            self._or_collision_thread.start()
+        # try:
+        #     self._or_collision_thread.start()
 
-            print("Obstacle Robot collision detection started")
+        #     print("Obstacle Robot collision detection started")
 
-        except:
-            print("Thread failed!")
+        # except:
+        #     print("Thread failed!")
     
     def change_X_data(self, x):
         self._x = x

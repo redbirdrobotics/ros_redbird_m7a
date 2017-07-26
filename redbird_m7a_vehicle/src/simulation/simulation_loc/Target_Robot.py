@@ -114,11 +114,9 @@ class Target_Robot(Ground_Robot_Interface):
         try:
             self._distanceThread.start()
 
-            print("Update movement thread started")
-
         except:
 
-            print("Thread failed!")
+            rospy.loginfo("Thread failed!")
 
         #try:
         #    self._or_collision_thread.start()

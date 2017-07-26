@@ -73,16 +73,16 @@ class Simulation(object):
     def get_G_Target_robots(self):
         return self.Gtarget_robots
 
-    def set_Obstacle_robots(self, length):
-        del self.Wobstacle_robots[:]
+    # def set_Obstacle_robots(self, length):
+    #     del self.Wobstacle_robots[:]
 
-        for robot in xrange(length):
-            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
+    #     for robot in xrange(length):
+    #         self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
 
-            self.Wobstacle_robots[robot].run()
+    #         self.Wobstacle_robots[robot].run()
 
-    def get_Obstacle_robots(self):
-        return self.Wobstacle_robots
+    # def get_Obstacle_robots(self):
+    #     return self.Wobstacle_robots
 
     def check_collision(self):
         #Only allowing for the PAUSED flag to be false

@@ -23,10 +23,9 @@ class Sim_Timer(object):
         try:
             #starting the timer thread
             Sim_timerthread.start()
-            print("Thread started for timer")
 
         except:
-            print("Thread has failed")
+            rospy.loginfo("Timing thread has failed")
 
     def update_time(self):
 
