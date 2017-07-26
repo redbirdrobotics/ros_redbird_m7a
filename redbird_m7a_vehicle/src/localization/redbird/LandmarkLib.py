@@ -40,10 +40,10 @@ class Landmark(object):
                     b = np.sin(theta)
                     xN = a*rho
                     yN = b*rho
-                  
+                
                     if xN < 0:
                         xN = -xN
-                  
+                
                     if yN < 0:
                         yN = -yN
                     
@@ -64,58 +64,93 @@ class Landmark(object):
         return
 
     def scale2Frame(self, xA, yA, xB, yB, camList):
+
+        if xA == 0 and yA == 0 and xB == 0 and yB == 0:
+            return
+
+        if xA == xB or yA == yB:
+            return
+
         hRes = camList[self.cam].hRes
         vRes = camList[self.cam].vRes
         slope = float(yB - yA)/(xB - xA)
-        yInt = int(yA - slope*xA)
+        resSlope = float(vRes)/hRes
+        yInt = int(yA - (slope * xA)) 
+        xInt = int((-yInt)/(slope))
+        print 'pre endpoints',  xA, yA, xB, yB
         print "yint", yInt
+        print "xInt", xInt
         print "slope", slope
 
-        if yInt < 0:
-            print 'o0'
-            yA = 0
-            xA = int(-yInt/slope)
 
-            yB = 0
-            xB = int(-yInt/slope) 
+    
 
-        if yInt >= 0:
 
-            if xA < 0:
-                print 'o1'
-                xA = 0
-                yA = yInt
-                if yB > vRes:
-                    yB = vRes - 1
-                    xB = int((yB - yInt)/slope)
+        if yInt < 0 :
+            print 'enters top'
+            sxA = max(xInt, 0)
+            syA = 0
 
-            elif yA < 0:
-                print 'o2'
-                yA = 0
-                xA = int(-yInt/slope)
+            if (hRes * slope + yInt) < vRes:
+                print 'exits right'
+                sxB = hRes -1
+                syB = int(hRes * slope + yInt)
 
-            elif yA > vRes:
-                print 'o3'
-                yA = vRes - 1
-                xA = int((yB - yInt)/slope)
+            elif (hRes * slope + yInt) > vRes:
+                print 'exits bottom'
+                sxB = int((vRes - yInt)/slope)
+                syB = vRes -1
 
-            if xB > hRes:
-                print "o4"
-                xB = hRes -1
-                yB = int(slope * xB + yInt)
-                if yB > vRes:
-                    yB = vRes - 1
-                    xB = int((yB - yInt)/slope)
+            else:
+                print 'unaccounted'
 
-            elif yB < 0:
-                yB = 0
-                xB = int(-yInt/slope)
 
-            elif yB > vRes:
-                yB = vRes -1
-                xB = int((yB - yInt)/slope)
+        elif yInt >= 0 and yInt < vRes:
+            print 'enters left'
+            sxA = 0
+            syA = yInt
 
-        self.endPoints = (xA, yA, xB, yB)
+            if (hRes * slope + yInt) < 0:
+                print 'exits top'
+                sxB = max(xInt, 0)
+                syB = 0
+
+            elif (hRes * slope + yInt) > 0 and (hRes * slope + yInt) < vRes:
+                print 'exits right'
+                sxB = hRes -1
+                syB = int(slope * hRes + yInt)
+
+            elif (hRes * slope + yInt) > vRes:
+                print 'exits bottom'
+                sxB = int((vRes - yInt)/slope)
+                syB = vRes -1
+
+            else:
+                print 'unaccounted'
+
+        elif yInt > hRes:
+            print 'enters top'
+            sxA = int((vRes - yInt)/slope)
+            syA = vRes -1
+
+            if (hRes * slope + yInt) > 0:
+                print 'exits right'
+                sxB = hRes -1
+                syB = int(hRes * slope + yInt)
+
+            elif (hRes * slope + yInt) < 0:
+                print 'exits top'
+                sxB = xInt -1
+                syB = 0
+
+            else: 
+                print 'unaccounted'
+
+        else:
+            self.endPoints = (0,0,0,0)
+            return
+
+        self.endPoints = (sxA, syA, sxB, syB)
         return
 
     def drawLine(self, img, w):
@@ -123,7 +158,6 @@ class Landmark(object):
         img = cv2.line(img, (xA, yA), (xB, yB), (0,0,0), w)
         return
 
-    
     def remove(self, imgList, w):
         xA, yA, xB, yB = self.endPoints
         cam = self.cam
@@ -137,15 +171,19 @@ class Landmark(object):
 
         #print quadDataList
         Qx, Qy, Qh, Qyaw, Qpitch, Qroll = quadDataList
+        print quadDataList
         xAxis = camList[self.cam].xAxis
         xAxisQ = [x + Qyaw for x in xAxis]
         yAxis = camList[self.cam].yAxis
         yAxisQ = [y + Qpitch for y in yAxis]
         xA, yA, xB, yB = self.endPoints
 
+        # if xA < len(xAxis): xA = 0
+        # if yA > len(yAxis): yA = len(yAxis)
+        # if xB < len(xAxis): xB = 0
+        # if yB > len(yAxis): yB = len(yAxis)
+
         print "endPoints: ", self.endPoints
-        print "len: xAxis", len(xAxis)
-        print "len: yAxis", len(yAxis)
 
         thetaA = xAxisQ[xA]
         phiA = yAxisQ[yA]
