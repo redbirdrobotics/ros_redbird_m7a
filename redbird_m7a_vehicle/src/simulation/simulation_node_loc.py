@@ -102,6 +102,7 @@ class Simulation_Node:
                 robot_msg.color = sim_robot._color
 
                 break
+                
 
         self.obstaclerobotmap.ground_robots = self.obstacle_robot_msgs
 
