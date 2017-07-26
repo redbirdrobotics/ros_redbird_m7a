@@ -25,40 +25,41 @@ class Target_Robot(Ground_Robot_Interface):
      
     def update_movement(self):
 
-        #adds the ability to pause and resume timer
-        while not (self._timer._quit.is_set()):
+        while not rospy.is_shutdown():
+            #adds the ability to pause and resume timer
+            while not (self._timer._quit.is_set()):
 
-            #while the paused flag is not raised
-            while not (self._timer._PAUSED.is_set()):
-                self.start_timer = self._timer.get_current_timer()
+                #while the paused flag is not raised
+                while not (self._timer._PAUSED.is_set()):
+                    self.start_timer = self._timer.get_current_timer()
 
-                #as long as the time elapsed is less than 20
-                while self.deltaTime < 20:
+                    #as long as the time elapsed is less than 20
+                    while self.deltaTime < 20:
 
-                    if(self.collision == True):
-                        
-                        self._deltaX = self._deltaX * -1
+                        if(self.collision == True):
+                            
+                            self._deltaX = self._deltaX * -1
 
-                        self._deltaY = self._deltaY * -1 
+                            self._deltaY = self._deltaY * -1 
 
-                        self.collision = False
+                            self.collision = False
 
-                    else:
+                        else:
 
-                        self.update_posX() 
-                        self.update_posY()
+                            self.update_posX() 
+                            self.update_posY()
 
-                    self.deltaTime = self._timer.get_current_timer() - self.start_timer
+                        self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
-                    rospy.sleep(iterations)
+                        rospy.sleep(iterations)
 
-                if(self.deltaTime == 20):
+                    if(self.deltaTime == 20):
 
-                    self.deltaTIme = 0
+                        self.deltaTIme = 0
 
-                    self._timerUp = True
+                        self._timerUp = True
 
-                    super(Target_Robot, self).new_direction()
+                        super(Target_Robot, self).new_direction()
 
     def oR_check_collisions(self, obstacle_robots = [Obstacle_Robot]):
         #making the obstacle robots an array of Obstacle Robots (arbitrary definition)
