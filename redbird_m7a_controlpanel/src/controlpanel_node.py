@@ -630,9 +630,12 @@ class FlightStatePanel(wx.Panel):
  
     def updateBattery(self, msg):
         # Updates Battery State
-        wx.CallAfter(self.liveBatteryState.SetLabel, str("{:.2f}".format(msg.percentage * 100.0)) + " %") #=======================
-        wx.CallAfter(self.liveBatteryVoltage.SetLabel, str("{:.2f}".format(msg.voltage)) + " V") #=======================    
-        wx.CallAfter(self.liveBatteryCurrent.SetLabel, str("{:.2f}".format(msg.current)) + " A") #=======================        
+        try:
+            wx.CallAfter(self.liveBatteryState.SetLabel, str("{:.2f}".format(msg.percentage * 100.0)) + " %") #=======================
+            wx.CallAfter(self.liveBatteryVoltage.SetLabel, str("{:.2f}".format(msg.voltage)) + " V") #=======================    
+            wx.CallAfter(self.liveBatteryCurrent.SetLabel, str("{:.2f}".format(msg.current)) + " A") #=======================
+        except:
+            pass        
 
 class RosLoggerPanel(wx.Panel):
     def __init__(self, parent):
