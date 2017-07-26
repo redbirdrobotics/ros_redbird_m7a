@@ -13,7 +13,7 @@ class Green_Localization(object):
     def __init__(self):
         # Create subscriber
         self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
-        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
+        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.msg)
         self._goals_sub = rospy.Subscriber('/redbird/localization/goals', Goals, self.goals_callback)
 
         # Create publisher
