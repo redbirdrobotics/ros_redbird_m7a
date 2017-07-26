@@ -59,13 +59,13 @@ class GreenRobot(object):
                 else:
                     iU += 1
 
-        print 'found:', len(foundList), 'unfound', len(unfoundList)
+        #print 'found:', len(foundList), 'unfound', len(unfoundList)
         return
 
     @staticmethod
     def listFound(objList):
         for robot in objList:
-            print 'Robot', robot.ident, robot.found
+            #print 'Robot', robot.ident, robot.found
         return 
 
 #_______________________________________________________#
@@ -73,7 +73,7 @@ class GreenRobot(object):
 #---------------------------------------------------#
 
     def cvt2meters(self, xA, yA, height, xAxis, yAxis):
-        print 'Robot', self.ident, 'is at', self.coords
+        #print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]
@@ -177,7 +177,7 @@ class GreenRobot(object):
                 bX = int(keypoints[0].pt[0] + rX)
                 bY = int(keypoints[0].pt[1] + rY)
                 bR = int(keypoints[0].size/2)
-                print 'Robot', robot.ident, 'found in ROI', bX, bY
+                #print 'Robot', robot.ident, 'found in ROI', bX, bY
 
                 if bR < 35:
                     bR += 35
@@ -186,13 +186,13 @@ class GreenRobot(object):
                 imgList[robot.cam] = cv2.circle(imgList[robot.cam], (bX, bY), bR, (0,0,0), -1)
 
             else:
-                print 'Robot', robot.ident, 'not found in ROI'
+                #print 'Robot', robot.ident, 'not found in ROI'
                 lost = robot.incLostNum(5)
                 if lost == True:
-                    print 'lost'
+                    #print 'lost'
                     robot.wipeRobot()
                 else:
-                    print 'missing for', robot.lostNum
+                    #print 'missing for', robot.lostNum
                     robot.selfUpdate(0,0,0)
         return
 
@@ -248,7 +248,7 @@ class GreenRobot(object):
             newW = min(abs(int(rW + scvX)), hRes)
             pointList = np.array([[rX, rY],[rW, rH],[newX, newY],[newW, newH]])
             bX, bY, bW, bH = cv2.boundingRect(pointList)
-            print 'boundingrect', bX, bY, bW, bH
+            #print 'boundingrect', bX, bY, bW, bH
             self.ROI = (bY, bY+bH, bX, bX+bW)
 
         else:
@@ -299,7 +299,7 @@ class GreenRobot(object):
         for i in range(maxData):
 
             cam, x, y, r, vX, vY = dataList[i]
-            print 'Updating unfoundRobot', i, 'With', x,y
+            #print 'Updating unfoundRobot', i, 'With', x,y
 
             #Update Found Status
             unfoundList[i].found = True

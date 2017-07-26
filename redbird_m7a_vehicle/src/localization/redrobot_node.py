@@ -103,7 +103,7 @@ class Red_Localization(object):
                     continue
                     print 'no frame'
 
-                print 'working'
+                #print 'working'
 
                 # Get Quad Data
                 self.quadData= [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
