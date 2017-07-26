@@ -31,31 +31,32 @@ class Obstacle_Robot(Ground_Robot_Interface):
         self._y = self._y + self._deltaY
 
     def update_movement(self):
-        #only allwing the code to work if the timer is not paused
-        while not (self._timer._PAUSED.is_set()):
-            #as long as the change in time is no less than 20 than the code will work
-            self.start_timer = self._timer.get_current_timer()
+        while not rospy.is_shutdown():
+            #only allwing the code to work if the timer is not paused
+            while not (self._timer._PAUSED.is_set()):
+                #as long as the change in time is no less than 20 than the code will work
+                self.start_timer = self._timer.get_current_timer()
 
-            while self.deltaTime <= 20:
-                #starting the timer
+                while self.deltaTime <= 20:
+                    #starting the timer
 
-                #setting the currrent position and printing
-                self.current_pos = (self._x, self._y , self._id)
+                    #setting the currrent position and printing
+                    self.current_pos = (self._x, self._y , self._id)
 
-                print self.current_pos
+                    print self.current_pos
 
-                self.update_posX()
-                self.update_posY()
+                    self.update_posX()
+                    self.update_posY()
 
-                #making sure the angle is doubled
-                self._omega = self._omega * 2 
+                    #making sure the angle is doubled
+                    self._omega = self._omega * 2 
 
-                self.deltaTime = self._timer.get_current_timer() - self.start_timer
+                    self.deltaTime = self._timer.get_current_timer() - self.start_timer
 
-                sleep(iterations)
-            
-            #resetting the timer
-            self.deltaTime = 0
+                    sleep(iterations)
+                
+                #resetting the timer
+                self.deltaTime = 0
 
     def run(self):
         #creating the thread and making the target update movement

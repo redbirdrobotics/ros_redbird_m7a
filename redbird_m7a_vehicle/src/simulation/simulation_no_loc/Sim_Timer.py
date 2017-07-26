@@ -23,24 +23,24 @@ class Sim_Timer(object):
         try:
             #starting the timer thread
             Sim_timerthread.start()
-            print("Thread started for timer")
 
         except:
-            print("Thread has failed")
+            rospy.loginfo("Thread has failed")
 
     def update_time(self):
 
-        #allows the program to be paused and resumed
-        while not (self._quit.is_set()):
+        while not rospy.is_shutdown():
+            #allows the program to be paused and resumed
+            while not (self._quit.is_set()):
 
-            #only allowing for the flag to be false 
-            while not self._PAUSED.is_set():
+                #only allowing for the flag to be false 
+                while not self._PAUSED.is_set():
 
-                #stopping for 1 second
-                rospy.sleep(1)
+                    #stopping for 1 second
+                    rospy.sleep(1)
 
-                #incrementing the timer by one and printing
-                self.counter += 1
+                    #incrementing the timer by one and printing
+                    self.counter += 1
 
     def get_current_timer(self):
         return self.counter

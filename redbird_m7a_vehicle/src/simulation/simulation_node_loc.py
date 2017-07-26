@@ -115,7 +115,7 @@ class Simulation_Node:
 
         self.green_robot_publish(len(msg))
 
-        self._ready = True
+        self._ready = True 
 
     # def update_obstacle_robot_map(self, msg):
 
