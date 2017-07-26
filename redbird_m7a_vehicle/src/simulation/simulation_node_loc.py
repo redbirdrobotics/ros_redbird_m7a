@@ -13,12 +13,12 @@ class Simulation_Node:
         # Create map listener
         self.red_loc_sub = rospy.Subscriber('localization', RedRobotMap, self.update_red_robot_map)
         self.green_loc_sub = rospy.Subscriber('localization', GreenRobotMap, self.update_green_robot_map)
-        self.obstacle_loc_sub = rospy.Subscriber('localization', ObstacleRobotMap, self.update_obstacle_robot_map)
+        #self.obstacle_loc_sub = rospy.Subscriber('localization', ObstacleRobotMap, self.update_obstacle_robot_map)
 
         # Create publisher
         self._red_pub = rospy.Publisher('/redbird/simulation/robots/red', RedRobotMap, queue_size=1)
         self._green_pub = rospy.Publisher('/redbird/simulation/robots/green', GreenRobotMap, queue_size=1)
-        self._obstacle_pub = rospy.Publisher('/redbird/simulation/robots/obstacle', ObstacleRobotMap, queue_size=1)
+        #self._obstacle_pub = rospy.Publisher('/redbird/simulation/robots/obstacle', ObstacleRobotMap, queue_size=1)
 
         #create service
         self._getting_coordinates_srv = rospy.service('/redbird/simulation/get_future_coords', GetFutureCoords, self.get_future_coords_handler)
@@ -43,12 +43,12 @@ class Simulation_Node:
         # Creating maps
         self.redrobotmap = RedRobotMap()
         self.greenrobotmap = GreenRobotMap()
-        self.obstaclerobotmap = ObstacleRobotMap()
+        #self.obstaclerobotmap = ObstacleRobotMap()
         
         # Create target robot list
         self.red_robot_msgs = []
         self.green_robot_msgs = []
-        self.obstacle_robot_msgs = []
+        #self.obstacle_robot_msgs = []
 
     def red_robot_publish(self, length):
         for robot in xrange(length):
@@ -88,28 +88,7 @@ class Simulation_Node:
         self.greenrobotmap.ground_robots = self.green_robot_msgs
 
         self._green_pub.publish(self.redrobotmap)
-
-    def obstacle_robot_publish(self, length):
-        for robot in xrange(length):
-            self.obstacle_robot_msgs.append(Ground_Robot_Position())
-
-        self._sim.set_Obstacle_robots(length)
-
-        for robot_msg in self.obstacle_robot_msgs:
-            for sim_robot in self._sim.get_Obstacle_robots():
-                robot_msg.id = sim_robot._id
-                robot_msg.x = sim_robot._x
-                robot_msg.y = sim_robot._y
-                robot_msg.vec_x = sim_robot._deltaX
-                robot_msg.vec_y = sim_robot._deltaY
-                robot_msg.color = sim_robot._color
-
-                break
-                
-
-        self.obstaclerobotmap.ground_robots = self.obstacle_robot_msgs
-
-        self._obstacle_pub.publish(self.redrobotmap)
+ 
 
     def update_red_robot_map(self, msg):
         # Loop through all robots in the localization topic
@@ -136,19 +115,21 @@ class Simulation_Node:
 
         self.green_robot_publish(len(msg))
 
-    def update_obstacle_robot_map(self, msg):
-
-        self._sim.set_Obstacle_robots(len(msg))
-
-        for lRobot in msg.ground_robots:
-            for sRobot in self._sim.get_Obstacle_robots():
-                if sRobot._id == lRobot.id:
-                    sRobot.check_error(lRobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
-
-        self.obstacle_robot_publish(len(msg))
-
-        # Data has been updated, set ready flag
         self._ready = True
+
+    # def update_obstacle_robot_map(self, msg):
+
+    #     self._sim.set_Obstacle_robots(len(msg))
+
+    #     for lRobot in msg.ground_robots:
+    #         for sRobot in self._sim.get_Obstacle_robots():
+    #             if sRobot._id == lRobot.id:
+    #                 sRobot.check_error(lRobot.x, lRobot.y, lRobot.vec_x, lRobot.vec_y)
+
+    #     self.obstacle_robot_publish(len(msg))
+
+    #     # Data has been updated, set ready flag
+    #     
 
     def get_future_coords_handler(self, req):
         
