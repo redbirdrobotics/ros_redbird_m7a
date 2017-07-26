@@ -18,43 +18,70 @@ class Simulation(object):
         self.Wobstacle_robots = []
         self.target_robots = []
 
-        #Filling the target robot array with arbitrary values
-        for robot in range(1, 5):
-            self.Rtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 0, self._timer))
+        # #Filling the target robot array with arbitrary values
+        # for robot in range(1, 5):
+        #     self.Rtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 0, self._timer))
 
-        for robot in range(1, 5):
-            self.Gtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer))
+        # for robot in range(1, 5):
+        #     self.Gtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer))
 
-        self.target_robots.extend(self.Rtarget_robots)
-        self.target_robots.extend(self.Gtarget_robots)
+        # self.target_robots.extend(self.Rtarget_robots)
+        # self.target_robots.extend(self.Gtarget_robots)
 
-        #Filling the obstacle robot array 
-        for robot in range(1, 4):
-            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
+        # #Filling the obstacle robot array 
+        # for robot in range(1, 4):
+        #     self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
 
     def run(self):
         #Running the timer (controls all threads) 
         self._timer.run()
 
-        #Runs all threads in the target robot array
-        for arduino in self.target_robots:
-            print 'initing all of the ground robots'
-            arduino.run(self.Wobstacle_robots)
+        # #Runs all threads in the target robot array
+        # for arduino in self.target_robots:
+        #     print 'initing all of the ground robots'
+        #     arduino.run(self.Wobstacle_robots)
 
-        #Runs all threads in the obstacle robot array
-        for robot in self.Wobstacle_robots:
-            print 'initing the obstacle robots'
-            robot.run()
+        # #Runs all threads in the obstacle robot array
+        # for robot in self.Wobstacle_robots:
+        #     print 'initing the obstacle robots'
+        #     robot.run()
 
-        self.threading()
+        # self.threading()
+
+    def set_R_Target_robots(self, length):
+        #clearing the array
+        del self.Rtarget_robots[:]
+
+        #filling the robot arrays
+        for robot in xrange(length):
+            self.Rtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 0, self._timer))
+
+            self.Rtarget_robots[robot].run()
 
     def get_R_Target_robots(self):
+        #returning the list
         return self.Rtarget_robots
+
+    def set_G_Target_robots(self, length):
+        del self.Gtarget_robots[:]
+
+        for robot in xrange(length):
+            self.Gtarget_robots.append(Target_Robot(0, 0, 0, 0, robot, 1, self._timer)) 
+
+            self.Gtarget_robots[robot].run()
 
     def get_G_Target_robots(self):
         return self.Gtarget_robots
 
-    def get_Obstacle_Robots(self):
+    def set_Obstacle_robots(self, length):
+        del self.Wobstacle_robots[:]
+
+        for robot in xrange(length):
+            self.Wobstacle_robots.append(Obstacle_Robot(0, 0, 0, 0, robot, 2, self._timer))
+
+            self.Wobstacle_robots[robot].run()
+
+    def get_Obstacle_robots(self):
         return self.Wobstacle_robots
 
     def check_collision(self):
@@ -151,15 +178,15 @@ class Simulation(object):
         if(theta >= min2_theta and theta <= max2_theta):
             robot1.collision = True
 
-    def threading(self):
-        #starting and initializing the thread
+    # def threading(self):
+    #     #starting and initializing the thread
 
-        self._collision_thread = Thread(target = self.check_collision)
+    #     self._collision_thread = Thread(target = self.check_collision)
 
-        try:
-            self._collision_thread.start()
+    #     try:
+    #         self._collision_thread.start()
 
-            print 'Thread started'
+    #         print 'Thread started'
 
-        except:
-            print 'Thread not started'
+    #     except:
+    #         print 'Thread not started'

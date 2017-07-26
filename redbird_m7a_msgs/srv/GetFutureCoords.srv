@@ -1,5 +1,6 @@
 # Request
 uint8 id
+uint8 color
 float64 time
 ---
 # Response

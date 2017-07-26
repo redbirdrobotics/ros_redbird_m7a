@@ -103,10 +103,10 @@ class Target_Robot(Ground_Robot_Interface):
 
                 rospy.sleep(iterations)
 
-    def run(self, obstacle_robots):
+    def run(self):
         self._distanceThread = Thread(target = self.update_movement)
 
-        self._or_collision_thread = Thread(target = self.oR_check_collisions, args = (obstacle_robots,))
+        #self._or_collision_thread = Thread(target = self.oR_check_collisions, args = (obstacle_robots,))
 
         start_time = self._timer.get_current_timer()
         current_time = 0
@@ -120,13 +120,13 @@ class Target_Robot(Ground_Robot_Interface):
 
             print("Thread failed!")
 
-        try:
-            self._or_collision_thread.start()
+        #try:
+        #    self._or_collision_thread.start()
 
-            print("Obstacle Robot collision detection started")
+        #    print("Obstacle Robot collision detection started")
 
-        except:
-            print("Thread failed!")
+        #except:
+        #    print("Thread failed!")
     
     def change_X_data(self, x):
         self._x = x
@@ -182,7 +182,7 @@ class Target_Robot(Ground_Robot_Interface):
     def get_radius(self):
         return self._radius
 
-    def get_future_coor(self, time):
+    def get_future_coord(self, time):
         deltaX = self._deltaX * time
         deltaY = self._deltaY * time
 

@@ -111,3 +111,11 @@ class Obstacle_Robot(Ground_Robot_Interface):
 
         if not (pErrorVY<= 0.001):
             self.change_VY_data(velocityY)
+
+    def get_future_coord(self, time):
+        deltaX = self._deltaX * time
+        deltaY = self._deltaY * time
+
+        current_pos = ((self._x + deltaX), (self._y + deltaY))
+
+        return current_pos
