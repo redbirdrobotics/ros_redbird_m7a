@@ -47,7 +47,7 @@ class Landmark_Localization(object):
         # Landmark Instances
         self.greengoal = Landmark(0, np.array([[79, 33, 66],[100, 111, 135]]))
         self.redgoal = Landmark(1, np.array([[161,145,64],[180,236,232]]))
-        self.landmarkList = [self.redgoal, self.greengoal]
+        self.landmarkList = [self.greengoal, self.redgoal]
 
         # Lists
         self.redMaskList = []
@@ -83,6 +83,7 @@ class Landmark_Localization(object):
                 # Get Frame List
                 frameList = [self._image]
 
+                
                 # Get Quad Data
                 quadData = [self.quadX, self.quadY, self.quadH, self.quadYaw, self.quadPitch, self.quadRoll]
 
@@ -98,6 +99,7 @@ class Landmark_Localization(object):
                 self.redgoal.cvt2meters(quadData, self.camList)
                 self.greengoal.cvt2meters(quadData, self.camList)
 
+                
                 # Create two goals (type Goal.msg)
                 greengoal_msg = Goal(header=Header(stamp=rospy.get_rostime()))
                 redgoal_msg = Goal(header=Header(stamp=rospy.get_rostime()))
@@ -127,9 +129,9 @@ class Landmark_Localization(object):
                 self._goal_pub.publish(goals_msg)
 
                 #Edit & Show Frame ONLY FOR TESTING!!!!
-                # self.greengoal.drawLine(self._image, 30)
-                # self.redgoal.drawLine(self._image, 30)
-                # Camera.showFrame(self._image, 'GoalFrame')
+                self.greengoal.drawLine(self._image, 30)
+                self.redgoal.drawLine(self._image, 30)
+                Camera.showFrame(self._image, 'GoalFrame')
 
                 # Match desired frequency
                 self._rate.sleep()
