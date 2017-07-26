@@ -1,12 +1,13 @@
 #!/usr/bin/python
 import rospy
 import cv2
+import tf
 import numpy as np
 from redbird import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from redbird_m7a_msgs.msg import RedRobotMap, GroundRobotPosition, Goals
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Pose
 from std_msgs.msg import Header
 
 
@@ -21,7 +22,7 @@ class Red_Localization(object):
         self._redrobot_pub = rospy.Publisher('/redbird/localization/robots/red', RedRobotMap, queue_size=10000)
 
         # Create running rate
-        self._rate = rospy.Rate(10) # 20 Hz
+        self._rate = rospy.Rate(10) # 10 Hz
 
         # Initialize Quad Information
         self.quadX = 0
@@ -71,6 +72,8 @@ class Red_Localization(object):
         self.maskList = []
         self.dataList = []
 
+        rospy.sleep(2)
+
     def image_callback(self, msg):
         try:
             self._image = self._cv_bridge.imgmsg_to_cv2(msg, "bgr8")
@@ -82,8 +85,8 @@ class Red_Localization(object):
         self.quadY = msg.pose.position.y
         self.quadH = msg.pose.position.z
 
-        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z)
-        euler = tf.transformation.euler_from_quaternion(quaternion)
+        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
 
         self.quadRoll = euler[0]
         self.quadPitch = euler[1]
@@ -158,12 +161,12 @@ class Red_Localization(object):
                 frame = Utilities.circleFound(self.frameList[0], self.foundList)
                 self.redgoal.drawLine(frame, 30)
 
-                esc = Camera.showFrame(frame, 'frame')
-                if esc == True:
-                    break
+                # esc = Camera.showFrame(frame, 'frame')
+                # if esc == True:
+                #     break
                     
             except Exception as e:
-                rospy.logwarn("Error: %s", str(e))
+                rospy.logwarn("[rr] Error: %s", str(e))
                 break
 
 if __name__ == '__main__':

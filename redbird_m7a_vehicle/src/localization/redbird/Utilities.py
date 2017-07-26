@@ -1,3 +1,4 @@
+import rospy
 import cv2
 import numpy as np
 
@@ -88,7 +89,7 @@ class Utilities():
     def blobSearch(maskList, detector, dataList, unfoundList):
 
         if not unfoundList:
-            print 'skip blob search no unfound'
+            # print 'skip blob search no unfound'
             return
 
         Utilities.emptyList(dataList)
@@ -103,7 +104,7 @@ class Utilities():
 
                 if cam > (len(maskList) - 1):
                     detect = False
-                    print 'No blobs detected'
+                    # print 'No blobs detected'
                     return
 
             else:
@@ -113,7 +114,7 @@ class Utilities():
 
                 if r<35:
                     r+= 35
-                print'Found Blob at ', x,y,r
+                # print'Found Blob at ', x,y,r
                 dataList.append([cam,x,y,r,0,0])
                 maskList[cam] = cv2.circle(maskList[cam], (x,y), r, (0,0,0), -1)
         return

@@ -55,16 +55,17 @@ class Robot():
 
     @staticmethod
     def printAllData(objList):
-        for robot in objList:
-            print robot.allData
-        return
+        pass
+        # for robot in objList:
+        #     print robot.allData
+        # return
 
 #_______________________________________________________#
     #COORDINATE CONVERSION
 #---------------------------------------------------#
 
     def coordConvert(self, xN, yN, xAxis, yAxis, height):
-        print 'Robot', self.ident, 'is at', self.coords
+        # print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
         theta = xAxis[x]
         phi = yAxis[y]

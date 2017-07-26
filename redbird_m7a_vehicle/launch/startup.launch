@@ -1,38 +1,42 @@
 <launch>
-  <!-- Master Machine -->
-  <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" />
+    <!-- Master Machine -->
+    <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" />
 
-  <!-- Ground Machine -->
-  <!-- <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="false" env-loader="~/catkin_ws/devel/env.sh" /> -->
+    <!-- Ground Machine -->
+    <!-- <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="false" env-loader="~/catkin_ws/devel/env.sh" /> -->
 
-  <!-- Hande MAVROS launch -->
+    <!-- Hande MAVROS launch -->
   <arg name="fcu_url" default="/dev/ttyUSB0:921600" />
-  <arg name="gcs_url" default="" />
-  <arg name="tgt_system" default="1" />
-  <arg name="tgt_component" default="1" />
-  <arg name="log_output" default="screen" />
+    <arg name="gcs_url" default="" />
+    <arg name="tgt_system" default="1" />
+    <arg name="tgt_component" default="1" />
+    <arg name="log_output" default="screen" />
 
-  <include file="$(find mavros)/launch/node.launch">
-    <arg name="pluginlists_yaml" value="$(find mavros)/launch/px4_pluginlists.yaml" />
-    <arg name="config_yaml" value="$(find mavros)/launch/px4_config.yaml" />
-    <arg name="fcu_url" value="$(arg fcu_url)" />
-    <arg name="gcs_url" value="$(arg gcs_url)" />
-    <arg name="tgt_system" value="$(arg tgt_system)" />
-    <arg name="tgt_component" value="$(arg tgt_component)" />
-    <arg name="log_output" value="$(arg log_output)" />
-  </include>
+    <include file="$(find mavros)/launch/node.launch">
+        <arg name="pluginlists_yaml" value="$(find mavros)/launch/px4_pluginlists.yaml" />
+        <arg name="config_yaml" value="$(find mavros)/launch/px4_config.yaml" />
+        <arg name="fcu_url" value="$(arg fcu_url)" />
+        <arg name="gcs_url" value="$(arg gcs_url)" />
+        <arg name="tgt_system" value="$(arg tgt_system)" />
+        <arg name="tgt_component" value="$(arg tgt_component)" />
+        <arg name="log_output" value="$(arg log_output)" />
+    </include>
 
-  <group ns="redbird">
-    <!-- Control Panel -->
-    <!-- <node machine="redbird-pi" name="rcp" pkg="redbird_m7a_controlpanel" type="controlpanel_node.py" /> -->
+    <group ns="redbird">
+        <!-- Control Panel -->
+        <!-- <node machine="redbird-pi" name="rcp" pkg="redbird_m7a_controlpanel" type="controlpanel_node.py" /> -->
 
-    <!-- Localization -->
-    <!-- <node name="localization" pkg="redbird_m7a_vehicle" type="localization_node.py" output="screen" /> -->
+        <!-- Localization -->
+        <node name="cameras" pkg="redbird_m7a_vehicle" type="camera_node" output="screen" />
+        <node name="landmarks" pkg="redbird_m7a_vehicle" type="landmark_node.py" output="screen" />
+        <node name="green_robots" pkg="redbird_m7a_vehicle" type="greenrobot_node.py" output="screen" />
+        <node name="red_robots" pkg="redbird_m7a_vehicle" type="redrobot_node.py" output="screen" />
 
-    <!-- Simulation -->
-    <!-- <node name="simulation" pkg="redbird_m7a_vehicle" type="simulation_node.py" output="screen" /> -->
+        <!-- Simulation -->
+        <node name="simulation" pkg="redbird_m7a_vehicle" type="simulation_node_no_loc.py" output="screen" />
 
-    <!-- Flight -->
-    <!-- <node name="flight" pkg="redbird_m7a_vehicle" type="flight_director_node.py" output="screen" /> -->
-  </group>
+        <!-- Flight Director -->
+        <node name="flight" pkg="redbird_m7a_vehicle" type="flight_director_node.py" output="screen" />
+    </group>
+
 </launch>

@@ -79,7 +79,3 @@ class Camera(object):
         #Y AXIS
         self.yAxis = np.linspace((vRangeMid + al), (-vRangeMid + al), vRes)
         return
-
-
-
-

@@ -1,11 +1,12 @@
 #!/usr/bin/python
 import rospy
 import cv2
+import tf
 import numpy as np
 from redbird import *
 from std_msgs.msg import Header, String
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Pose
 from cv_bridge import CvBridge, CvBridgeError
 from redbird_m7a_msgs.msg import Goal, Goals
 
@@ -64,8 +65,8 @@ class Landmark_Localization(object):
         self.quadY = msg.pose.position.y
         self.quadH = msg.pose.position.z
 
-        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z)
-        euler = tf.transformation.euler_from_quaternion(quaternion)
+        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
 
         self.quadRoll = euler[0]
         self.quadPitch = euler[1]
@@ -74,7 +75,7 @@ class Landmark_Localization(object):
 
     def run(self):
         while not rospy.is_shutdown():
-            # try:
+            try:
                 if self._image is None:
                     rospy.logdebug('[lm] no frame')
                     continue
@@ -127,16 +128,15 @@ class Landmark_Localization(object):
                 self._goal_pub.publish(goals_msg)
 
                 #Edit & Show Frame ONLY FOR TESTING!!!!
-                self.greengoal.drawLine(self._image, 30)
-                self.redgoal.drawLine(self._image, 30)
-                Camera.showFrame(self._image, 'GoalFrame')
+                # self.greengoal.drawLine(self._image, 30)
+                # self.redgoal.drawLine(self._image, 30)
+                # Camera.showFrame(self._image, 'GoalFrame')
 
                 # Match desired frequency
                 self._rate.sleep()
-
-            # except Exception as e:
-            #      rospy.logwarn("Error: %s", str(e))
-            #      break
+            except Exception as e:
+                 rospy.logwarn("[lm] Error: %s", str(e))
+                 break
 
 
 if __name__ == '__main__':

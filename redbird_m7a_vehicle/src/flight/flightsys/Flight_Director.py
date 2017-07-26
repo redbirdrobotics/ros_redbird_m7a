@@ -55,7 +55,7 @@ class Flight_Director(object):
             # Allow thread to start
             rospy.sleep(1)
         except Exception as e:
-            rospy.logerr("Unable to start flight state monitor thread: %s" % e)
+            rospy.logerr(self.log_tag + "Unable to start flight state monitor thread: %s" % e)
 
         # Log service ready
         rospy.loginfo(self.log_tag + "Flight services ready")

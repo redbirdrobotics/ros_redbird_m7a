@@ -1,3 +1,4 @@
+import rospy
 import cv2
 import numpy as np
 
@@ -58,16 +59,15 @@ class RedRobot():
                     iU += 1
                 else:
                     iU += 1
-
-        rospy.logdebug("[RR] Found: % Unfound %" % (len(foundList, len(unfoundList))))
         return
 
     @staticmethod
     def listFound(objList):
-        for robot in objList:
-            #print 'Robot', robot.ident, robot.found
-            pass
-        return
+        pass
+        # for robot in objList:
+        #     #print 'Robot', robot.ident, robot.found
+        #     pass
+        # return
 
 #_______________________________________________________#
     #COORDINATE CONVERSION

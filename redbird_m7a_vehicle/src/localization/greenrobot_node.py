@@ -1,26 +1,28 @@
 #!/usr/bin/python
 import rospy
 import cv2
+import tf
 import numpy as np
 from redbird import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from redbird_m7a_msgs.msg import GreenRobotMap, GroundRobotPosition, Goals
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Pose
 from std_msgs.msg import Header
+
 
 class Green_Localization(object):
     def __init__(self):
         # Create subscriber
         self._camera_sub = rospy.Subscriber('/redbird/localization/camera/image', Image, self.image_callback)
-        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.msg)
+        self._position_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.local_position_callback)
         self._goals_sub = rospy.Subscriber('/redbird/localization/goals', Goals, self.goals_callback)
 
         # Create publisher
         self._greenrobot_pub = rospy.Publisher('/redbird/localization/robots/green', GreenRobotMap, queue_size=10000)
 
         # Create running rate
-        self._rate = rospy.Rate(10) # 20 Hz
+        self._rate = rospy.Rate(10) # 10 Hz
 
         # Initialize quad information
         self.quadX = 0
@@ -35,9 +37,6 @@ class Green_Localization(object):
 
         # Create blank position state
         self._position_info = None
-
-        # Create blank landmark message
-        self._goals_data = None
 
         # Create OpenCV bridge
         self._cv_bridge = CvBridge()
@@ -73,6 +72,8 @@ class Green_Localization(object):
         self.maskList = []
         self.dataList = []
 
+        rospy.sleep(2)
+
     def image_callback(self, msg):
         try:
             self._image = self._cv_bridge.imgmsg_to_cv2(msg, "bgr8")
@@ -84,13 +85,12 @@ class Green_Localization(object):
         self.quadY = msg.pose.position.y
         self.quadH = msg.pose.position.z
 
-        quaternion = (self._local_position_topic.pose.orientation.x, self._local_position_topic.pose.orientation.y, self._local_position_topic.pose.orientation.z)
-        euler = tf.transformation.euler_from_quaternion(quaternion)
+        quaternion = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
 
         self.quadRoll = euler[0]
         self.quadPitch = euler[1]
         self.quadYaw = euler[2]
-        return
 
     def goals_callback(self, msg):
         for goal in msg.goals:
@@ -100,7 +100,7 @@ class Green_Localization(object):
 
     def run(self):
         while not rospy.is_shutdown():
-            # try:
+            try:
                 if self._image is None:
                     rospy.logdebug('[gr] no frame')
                     continue
@@ -160,13 +160,13 @@ class Green_Localization(object):
                 self.greengoal.drawLine(frame, 30)
 
                 #Show Frame
-                esc = Camera.showFrame(frame, 'frame')
-                if esc == True:
-                    break
-                    
-            # except Exception as e:
-            #     rospy.logwarn("Error: %s", str(e))
-            #     break
+                # esc = Camera.showFrame(frame, 'frame')
+                # if esc == True:
+                #     break
+
+            except Exception as e:
+                rospy.logwarn("[gr] Error: %s", str(e))
+                break
 
 if __name__ == '__main__':
     try:

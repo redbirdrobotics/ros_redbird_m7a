@@ -58,16 +58,15 @@ class GreenRobot(object):
                     iU += 1
                 else:
                     iU += 1
-
-        #print 'found:', len(foundList), 'unfound', len(unfoundList)
         return
 
     @staticmethod
     def listFound(objList):
-        for robot in objList:
-            #print 'Robot', robot.ident, robot.found
-            pass
-        return
+        pass
+        # for robot in objList:
+        #     #print 'Robot', robot.ident, robot.found
+        #     pass
+        # return
 
 #_______________________________________________________#
     #COORDINATE CONVERSION
@@ -76,8 +75,8 @@ class GreenRobot(object):
     def cvt2meters(self, xA, yA, height, xAxis, yAxis):
         #print 'Robot', self.ident, 'is at', self.coords
         x, y = self.coords
-        theta = xAxis[x]
-        phi = yAxis[y]
+        theta = xAxis[y]
+        phi = yAxis[x]
         yDist = height*np.tan(phi)
         xDist = height*np.tan(theta)
         self.mcoords = (xDist + xA, yDist + yA)

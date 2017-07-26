@@ -2,8 +2,8 @@
 
 """Flight.py: This is a parent class from which all flights inherit and are built from."""
 
-import threading
 import rospy
+import threading
 from enum import Enum
 import flightsys
 

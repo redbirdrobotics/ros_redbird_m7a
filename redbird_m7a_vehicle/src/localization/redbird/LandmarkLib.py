@@ -99,8 +99,8 @@ class Landmark(object):
                 syB = vRes -1
 
             else:
+                pass
                 #print 'unaccounted'
-
 
         elif yInt >= 0 and yInt < vRes:
             #print 'enters left'
@@ -123,6 +123,7 @@ class Landmark(object):
                 syB = vRes -1
 
             else:
+                pass
                 #print 'unaccounted'
 
         elif yInt > hRes:
@@ -141,6 +142,7 @@ class Landmark(object):
                 syB = 0
 
             else: 
+                pass
                 #print 'unaccounted'
 
         else:
@@ -157,11 +159,6 @@ class Landmark(object):
 
     def remove(self, imgList, w):
         xA, yA, xB, yB = self.endPoints
-<<<<<<< HEAD
-=======
-        #print self.endPoints
-        #print self.endPoints
->>>>>>> landmark_dev
         cam = self.cam
         imgList[self.cam] = cv2.line(imgList[self.cam], (xA, yA), (xB, yB), (0,0,0), w)
         return
