@@ -39,6 +39,7 @@ class Controller(object):
         self._takeoff_altitude = 2.0
         self._target_velocity = (0.0, 0.0, 0.0)
         self._target_position = (0.0, 0.0, 0.0)
+        self._target_position = None
         self._allowed_error = 0.25
         self._mode = Control_Mode.INITIAL
         self._previous_mode = Control_Mode.INITIAL
@@ -114,7 +115,7 @@ class Controller(object):
         rospy.logdebug(self._log_tag + "Target velocity set to %0.2f, %0.2f, %0.2f m/s" % self._target_velocity)
         if self._travel_time > 0: rospy.logdebug(self._log_tag + "Travel time set to %0.2f sec" % self._travel_time)
 
-    def set_position(self, pos, allowed_error=0.25):
+    def set_position(self, pos, orient=None, allowed_error=0.25):
         """Sets the desired position for the vehicle.
 
         The position is in the form of a tuple representing the X, Y, and Z coordinates (in m).
@@ -133,6 +134,7 @@ class Controller(object):
 
         # Set the position setpoint
         self._target_position = pos
+        self._target_orientation = orient
         self._allowed_error = allowed_error
 
         # Log info
@@ -323,6 +325,18 @@ class Controller(object):
         msg.pose.position.x = self._target_position[0]
         msg.pose.position.y = self._target_position[1]
         msg.pose.position.z = self._target_position[2]
+
+        # Set orientation
+        if self._target_orientation is None:
+            msg.pose.orientation.x = self._vehicle.get_orientation_x()
+            msg.pose.orientation.y = self._vehicle.get_orientation_y()
+            msg.pose.orientation.z = self._vehicle.get_orientation_z()
+            msg.pose.orientation.w = self._vehicle.get_orientation_w()
+        else:
+            msg.pose.orientation.x = self._target_orientation[0]
+            msg.pose.orientation.y = self._target_orientation[1]
+            msg.pose.orientation.z = self._target_orientation[2]
+            msg.pose.orientation.w = self._target_orientation[3]
 
         while self.is_running() and self._mode == Control_Mode.POSITION:
             # Set header
