@@ -20,6 +20,9 @@ class Simulation_Node:
         self._green_pub = rospy.Publisher('/redbird/simulation/robots/green', GreenRobotMap, queue_size=1)
         self._obstacle_pub = rospy.Publisher('/redbird/simulation/robots/obstacle', ObstacleRobotMap, queue_size=1)
 
+        #create service
+        self._getting_coordinates_srv = rospy.service('/redbird/simulation/get_future_coords', GetFutureCoords, self.get_future_coords_handler)
+
         # Create simulation object 
         self._sim = Simulation()
 
@@ -146,6 +149,26 @@ class Simulation_Node:
 
         # Data has been updated, set ready flag
         self._ready = True
+
+    def get_future_coords_handler(self, req):
+        
+        if(req.color = 0):
+            for robot in self._sim.get_R_Target_robots():
+                if(req.id == robot._id):
+                    current_pos = robot.get_future_coord(req.time)
+
+        elif(req.color == 1):
+            for robot in self._sim.get_G_Target_robots():
+                if(req.id == robot._id):
+                    current_pos = robot.get_future_coord(req.time)
+
+        else:
+            for robot in self._sim.get_Obstacle_robots():
+                if(req.id == robot._id):
+                    current_pos = robot.get_future_coord(req.time)
+
+        return GetFutureCoords(x = current_pos[0], y = current_pos[1])
+
 
 if __name__ == '__main__':
     try:

@@ -67,6 +67,7 @@ add_service_files(
   StartFlight.srv
   KillFlight.srv
   GetFlights.srv
+  GetFutureCoords.srv
 )
 
 ## Generate actions in the 'action' folder
