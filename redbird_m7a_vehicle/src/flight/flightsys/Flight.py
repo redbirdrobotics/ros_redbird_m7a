@@ -184,7 +184,7 @@ class Flight(object):
             raise Exception("Flight killed")
 
         # Set target position
-        self.controller.set_position((self.vehicle.get_position_x(), self.vehicle.get_position_y(), altitude), 0.25)
+        self.controller.set_position((self.vehicle.get_position_x(), self.vehicle.get_position_y(), altitude), None, 0.25)
 
         # Switch mode to position/takeoff
         self.controller.set_mode(flightsys.Control_Mode.POSITION)
