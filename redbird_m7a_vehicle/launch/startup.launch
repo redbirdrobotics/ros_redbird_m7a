@@ -1,6 +1,6 @@
 <launch>
     <!-- Master Machine -->
-    <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" />
+    <!-- <machine name="redbird-vehicle" address="192.168.0.121" user="redbird" default="true" /> -->
 
     <!-- Ground Machine -->
     <!-- <machine name="redbird-pi" address="192.168.0.120" user="redbird" default="false" env-loader="~/catkin_ws/devel/env.sh" /> -->
